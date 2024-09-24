@@ -1,0 +1,13 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     '/Users/danielefedeli/Desktop/metodi_numerici/modulo0'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _func_on_glob, symObjAddr: 0x0, symBinAddr: 0x100000B40, symSize: 0x20 }
+  - { offsetInCU: 0x4D, offset: 0x4D, size: 0x8, addend: 0x0, symName: _globint, symBinAddr: 0x100002000, symSize: 0x0 }
+  - { offsetInCU: 0x5D, offset: 0x5D, size: 0x8, addend: 0x0, symName: _func_on_glob, symObjAddr: 0x0, symBinAddr: 0x100000B40, symSize: 0x20 }
+  - { offsetInCU: 0x72, offset: 0x72, size: 0x8, addend: 0x0, symName: _product, symObjAddr: 0x20, symBinAddr: 0x100000B60, symSize: 0x20 }
+  - { offsetInCU: 0xB6, offset: 0xB6, size: 0x8, addend: 0x0, symName: _swap1, symObjAddr: 0x40, symBinAddr: 0x100000B80, symSize: 0x50 }
+  - { offsetInCU: 0xF6, offset: 0xF6, size: 0x8, addend: 0x0, symName: _swap2, symObjAddr: 0x90, symBinAddr: 0x100000BD0, symSize: 0x60 }
+  - { offsetInCU: 0x136, offset: 0x136, size: 0x8, addend: 0x0, symName: _factorial, symObjAddr: 0xF0, symBinAddr: 0x100000C30, symSize: 0x50 }
+  - { offsetInCU: 0x15E, offset: 0x15E, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x140, symBinAddr: 0x100000C80, symSize: 0x1EB }
+...
