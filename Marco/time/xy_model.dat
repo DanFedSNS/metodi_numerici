@@ -18,3 +18,5 @@ time = 0.03 min, beta = 1.000000, L = 4, iterations = 10000, iter_bet_meas = 1, 
 time = 0.03 min, beta = 3.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
 
 time = 0.04 min, beta = 3.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.06 min, beta = 3.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
