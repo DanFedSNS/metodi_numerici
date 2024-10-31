@@ -1,0 +1,20 @@
+
+time = 0.31 min, beta = 47.000000, L = 10, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.31 min, beta = 4700.000000, L = 10, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.36 min, beta = 4700.000000, L = 10, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.31 min, beta = 47.000000, L = 10, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.10 min, beta = 47.000000, L = 4, iterations = 100000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.03 min, beta = 47.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.03 min, beta = 1.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.03 min, beta = 1.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.03 min, beta = 3.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.04 min, beta = 3.000000, L = 4, iterations = 10000, iter_bet_meas = 1, num_measures = 10000
