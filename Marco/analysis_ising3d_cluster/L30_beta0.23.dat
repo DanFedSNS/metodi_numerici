@@ -1,0 +1,7 @@
+beta = 0.230000, L = 30, iterations = 100000, iter_bet_meas = 10, num_measures = 10000
+specific_heat = 0.098376
+susceptibility = 2.666774
+magn_abs_avg = 0.545552
+energy_avg = -0.318604
+binder_cum = 1.005689
+  

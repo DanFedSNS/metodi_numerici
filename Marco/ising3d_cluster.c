@@ -11,12 +11,11 @@
 #define pi 3.14159265358979323846
 #define tau 6.28318530717958647692
 #define pos(rx, ry, rz, L) (rx * L * L + ry * L + rz)
-//each spin is an angle theta with components (cos theta, sin theta)
 
 
-int L = 10;
+int L = 30;
 const int D = 3;
-double beta = 0.46;
+double beta = 0.23;
 int lattice_size;
 
 double min(double x, double y) {
@@ -61,7 +60,7 @@ void nearest(int rx, int ry, int rz, int resx[2 * D], int resy[2 * D], int resz[
     resz[5] = (rz + 1) % L;      // Back neighbor in z
 }
 
-int update(double *restrict reticolo, int lattice_size){
+int update(int *restrict reticolo, int lattice_size, double prob){
     bool *restrict reticolo_aus = (bool*) malloc(lattice_size * sizeof(bool));     //reticolo_aus[x][y][z] = reticolo_aus[x * L^2 + y * L + z]
     int *restrict clusterx = (int*) malloc(lattice_size * sizeof(int));
     int *restrict clustery = (int*) malloc(lattice_size * sizeof(int));
@@ -75,12 +74,10 @@ int update(double *restrict reticolo, int lattice_size){
     int nnew = 1;
     int lc = 1;
 
-    double theta_refl = myrand() * tau;
     int rx = (int)((double)L * myrand());
     int ry = (int)((double)L * myrand());
     int rz = (int)((double)L * myrand());
 
-    reticolo[pos(rx, ry, rz, L)] = 2 * theta_refl - reticolo[pos(rx, ry, rz, L)];
     clusterx[0] = rx;
     clustery[0] = ry;
     clusterz[0] = rz;
@@ -91,11 +88,7 @@ int update(double *restrict reticolo, int lattice_size){
         for (int p = nold; p < nnew; p++){
             nearest(clusterx[p], clustery[p], clusterz[p], nnx, nny, nnz);  //nn of cluster[p]
             for (int i = 0; i < 2*D; i++){
-                double prob = 1 - exp(min(0.0, 2* beta * (dot_angle(reticolo[pos(clusterx[p], clustery[p], clusterz[p], L)], theta_refl) * dot_angle(reticolo[pos(nnx[i], nny[i], nnz[i], L)], theta_refl))));
-
-                if (reticolo_aus[pos(nnx[i], nny[i], nnz[i], L)] == false && myrand() < prob){
-                    reticolo[pos(nnx[i], nny[i], nnz[i], L)] = 2 * theta_refl - reticolo[pos(nnx[i], nny[i], nnz[i], L)];
-                    
+                if (reticolo_aus[pos(nnx[i], nny[i], nnz[i], L)] == false && reticolo[pos(nnx[i], nny[i], nnz[i], L)] == reticolo[pos(clusterx[p], clustery[p], clusterz[p], L)] && myrand() < prob){                    
                     clusterx[lc] = nnx[i];
                     clustery[lc] = nny[i];
                     clusterz[lc] = nnz[i];
@@ -110,6 +103,10 @@ int update(double *restrict reticolo, int lattice_size){
         nnew = lc;
     }
 
+    for (int i = 0; i < lc; i++){
+        reticolo[pos(clusterx[i], clustery[i], clusterz[i], L)] *= -1;
+    }
+
     free(reticolo_aus);
     free(clusterx);
     free(clustery);
@@ -118,17 +115,16 @@ int update(double *restrict reticolo, int lattice_size){
     return lc;
 }
 
-double magn(double *restrict reticolo, int lattice_size){
-    double somma_spin[] = {0.0, 0.0};
+double magn(int *restrict reticolo, int lattice_size){
+    int somma_spin = 0;
     for (int i=0; i < lattice_size;  i++){
-        somma_spin[0] += cos(reticolo[i]);
-        somma_spin[1] += sin(reticolo[i]);
+            somma_spin += reticolo[i];
     }
     
-    return norma(somma_spin) / (double) lattice_size;
+    return (double) somma_spin / (double) lattice_size;
 }
 
-double energy(double *restrict reticolo, int lattice_size){    //DA CONTROLLARE
+double energy(int *restrict reticolo, int lattice_size){    //DA CONTROLLARE
     double sum = 0.0;
 
     for (int rx = 0; rx < L; rx++) {
@@ -136,15 +132,15 @@ double energy(double *restrict reticolo, int lattice_size){    //DA CONTROLLARE
             for (int rz = 0; rz < L; rz++) {
                 // Interactions in the x-direction
                 int rx_next = (rx + 1) % L;
-                sum += -dot_angle(reticolo[pos(rx, ry, rz, L)], reticolo[pos(rx_next, ry, rz, L)]);
+                sum += -reticolo[pos(rx, ry, rz, L)] * reticolo[pos(rx_next, ry, rz, L)];
 
                 // Interactions in the y-direction
                 int ry_next = (ry + 1) % L;
-                sum += -dot_angle(reticolo[pos(rx, ry, rz, L)], reticolo[pos(rx, ry_next, rz, L)]);
+                sum += -reticolo[pos(rx, ry, rz, L)] * reticolo[pos(rx, ry_next, rz, L)];
 
                 // Interactions in the z-direction
                 int rz_next = (rz + 1) % L;
-                sum += -dot_angle(reticolo[pos(rx, ry, rz, L)], reticolo[pos(rx, ry, rz_next, L)]);
+                sum += -reticolo[pos(rx, ry, rz, L)] * reticolo[pos(rx, ry, rz_next, L)];
             }
         }
     }
@@ -152,17 +148,17 @@ double energy(double *restrict reticolo, int lattice_size){    //DA CONTROLLARE
     return sum * beta / (double) lattice_size;
 }
 
-void initialize_lattice(double *restrict lattice, int lattice_size){
+void initialize_lattice(int *restrict lattice, int lattice_size){
     for (int i=0; i < lattice_size;  i++){    
-        lattice[i] = myrand() * tau;
+        lattice[i] = 1;
     }
 } 
     
-void termalizzazione(double *restrict lattice, int iterations, int lattice_size){
+void termalizzazione(int *restrict lattice, int iterations, int lattice_size, double prob){
     printf("\nAggiornamenti sulla termalizzazione:\n");
     int lunghezza_cluster_media = 0;
     for (int i=0; i < iterations; i++){  //termalizzazione
-        lunghezza_cluster_media += update(lattice, lattice_size); 
+        lunghezza_cluster_media += update(lattice, lattice_size, prob); 
         
         if (i % 1000 == 0){
             printf("\33[2K\r");
@@ -173,18 +169,18 @@ void termalizzazione(double *restrict lattice, int iterations, int lattice_size)
     printf("\nlunghezza media cluster = %f", (double)lunghezza_cluster_media / iterations);
 }
 
-void presa_misure(double *restrict lattice, int lattice_size, int num_measures, int iter_bet_meas, FILE *restrict fp, FILE *restrict fp_config, bool save_config){
+void presa_misure(int *restrict lattice, int lattice_size, int num_measures, int iter_bet_meas, FILE *restrict fp, FILE *restrict fp_config, bool save_config, double prob){
     printf("\nAggiornamenti sulle misure:\n");
     for (int j=0; j < num_measures; j++){    // presa misure
         for (int i=0; i < iter_bet_meas; i++){
-            update(lattice, lattice_size);
+            update(lattice, lattice_size, prob);
         }
 
         fprintf(fp, "%f, %f\n", magn(lattice, lattice_size), energy(lattice, lattice_size));    //questo rallenta molto
         
         if (save_config == true){
             for (int a=0; a < lattice_size; a++){
-                fprintf(fp_config, "%f, ", lattice[a]);
+                fprintf(fp_config, "%d, ", lattice[a]);
             }       
             fseek(fp_config, -2, SEEK_CUR); //rimuove ", " finali
             fprintf(fp_config, "\n");
@@ -201,7 +197,8 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
     clock_t begin = clock();
 
     lattice_size = pow(L, D);
-    double *restrict lattice = (double *) malloc(lattice_size * sizeof(double));
+    int *restrict lattice = (int *) malloc(lattice_size * sizeof(int));
+    double prob = 1 -  exp(- 2 * beta);
 
     initialize_lattice(lattice, lattice_size);
     
@@ -218,9 +215,9 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
         fprintf(fp_config, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);
     }
 
-    termalizzazione(lattice, iterations, lattice_size);
+    termalizzazione(lattice, iterations, lattice_size, prob);
     
-    presa_misure(lattice, lattice_size, num_measures, iter_bet_meas, fp, fp_config, save_config);
+    presa_misure(lattice, lattice_size, num_measures, iter_bet_meas, fp, fp_config, save_config, prob);
 
     free(lattice);
 
@@ -244,8 +241,8 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
 
 
 int main(void){
-    int iterations = 1e6;
-    int iter_bet_meas = 1;    //iterations between two measures
+    int iterations = 1e5;
+    int iter_bet_meas = 10;    //iterations between two measures
     int num_measures = 1e4;
     bool save_config = false;
 

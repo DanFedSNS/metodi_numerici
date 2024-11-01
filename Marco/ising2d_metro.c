@@ -145,15 +145,15 @@ void metropolis(){
     
     initialize_lattice(lattice);
     
-    char datafile[40], datafile_config[40]; // file name
+    char datafile[50], datafile_config[50]; // file name
     FILE *fp, *fp_config; // pointer to file
 
-    sprintf(datafile, "./ising2d/L%d_beta%.2f.dat", L, beta); // file name initialized with a string
+    sprintf(datafile, "./ising2d_metro/L%d_beta%.2f.dat", L, beta); // file name initialized with a string
     fp = fopen(datafile, "w");
     fprintf(fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);    
     
     if (save_config == true){
-        sprintf(datafile_config, "./config/ising2d_L%d_beta%.2f.dat", L, beta);
+        sprintf(datafile_config, "./config/ising2d_metro_L%d_beta%.2f.dat", L, beta);
         fp_config = fopen(datafile_config, "w");
         fprintf(fp_config, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);
     }
@@ -172,7 +172,7 @@ void metropolis(){
     printf("\nHa impiegato %.3f secondi\n", time_spent);
 
 
-    char datafile_time[] = "./time/ising2d";
+    char datafile_time[] = "./time/ising2d_metro";
     FILE *fp_time;
 
     fp_time = fopen(datafile_time, "a");

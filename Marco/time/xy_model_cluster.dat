@@ -50,3 +50,5 @@ time = 0.18 min, beta = 0.440000, L = 10, iterations = 1000000, iter_bet_meas = 
 time = 0.19 min, beta = 0.460000, L = 10, iterations = 1000000, iter_bet_meas = 1, num_measures = 10000
 
 time = 0.19 min, beta = 0.460000, L = 10, iterations = 1000000, iter_bet_meas = 1, num_measures = 10000
+
+time = 0.30 min, beta = 0.460000, L = 10, iterations = 1000000, iter_bet_meas = 1, num_measures = 10000

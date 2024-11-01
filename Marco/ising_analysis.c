@@ -7,8 +7,8 @@
 #include "./include/get_array.h"
 #include<omp.h>
 
-int D = 2;
-char modello[] = "ising2d";
+int D = 3;
+char modello[] = "ising3d_cluster";
 
 double autocorr(double *x, double x_avg, double x_std, int n, int len_x){   //funzione di autocorrelazione
     double res = 0;
@@ -230,11 +230,11 @@ int main(void){
         }
     }
     */
-    /*
-    int L = 20;
-    double beta = 0.43;
+    
+    int L = 30;
+    double beta = 0.23;
     analysis(L, beta);
-    */
+    
     return EXIT_SUCCESS;
 
 }
