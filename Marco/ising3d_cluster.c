@@ -13,26 +13,11 @@
 #define pos(rx, ry, rz, L) (rx * L * L + ry * L + rz)
 
 
-int L = 30;
+int L = 10;
 const int D = 3;
 double beta = 0.23;
 int lattice_size;
-
-double min(double x, double y) {
-    return (x < y) ? x : y;
-}
-
-double dot(double *restrict a, double *restrict b){
-    return a[0] * b[0] + a[1] * b[1];
-}
-
-double dot_angle(double theta, double phi){
-    return cos(theta - phi);
-}
-
-double norma(double *restrict a){
-    return sqrt(pow(a[0], 2) + pow(a[1], 2));
-}
+char modello[] = "ising3d_cluster";
 
 void nearest(int rx, int ry, int rz, int resx[2 * D], int resy[2 * D], int resz[2 * D]) { 
     // Neighbors in the x-direction
@@ -152,8 +137,8 @@ void initialize_lattice(int *restrict lattice, int lattice_size){
     for (int i=0; i < lattice_size;  i++){    
         lattice[i] = 1;
     }
-} 
-    
+}  
+
 void termalizzazione(int *restrict lattice, int iterations, int lattice_size, double prob){
     printf("\nAggiornamenti sulla termalizzazione:\n");
     int lunghezza_cluster_media = 0;
@@ -202,18 +187,9 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
 
     initialize_lattice(lattice, lattice_size);
     
-    char datafile[40], datafile_config[50]; // file name
-    FILE *fp, *fp_config; // pointer to file
+    FILE *fp, *fp_config; //pointer to file
 
-    sprintf(datafile, "./ising3d_cluster/L%d_beta%.2f.dat", L, beta); // file name initialized with a string
-    fp = fopen(datafile, "w");
-    fprintf(fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);    
-    
-    if (save_config == true){
-        sprintf(datafile_config, "./config/ising3d_cluster_L%d_beta%.2f.dat", L, beta);
-        fp_config = fopen(datafile_config, "w");
-        fprintf(fp_config, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);
-    }
+    init_file(modello, L, beta, &fp, iterations, iter_bet_meas, num_measures, save_config, &fp_config);
 
     termalizzazione(lattice, iterations, lattice_size, prob);
     
@@ -221,22 +197,13 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
 
     free(lattice);
 
-    fclose(fp);
-    if (save_config == true){
-        fclose(fp_config);    
-    }
+    close_file(&fp, save_config, &fp_config);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("\nHa impiegato %.3f secondi\n", time_spent);
 
-
-    char datafile_time[] = "./time/ising3d_cluster.dat";
-    FILE *fp_time;
-
-    fp_time = fopen(datafile_time, "a");
-    fprintf(fp_time, "\ntime = %.2f min, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", time_spent/60, beta, L, iterations, iter_bet_meas, num_measures);    
-    fclose(fp_time);
+    save_time_spent(beta, L, modello, time_spent, iterations, iter_bet_meas, num_measures);
 }
 
 

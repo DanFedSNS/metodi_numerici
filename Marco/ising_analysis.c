@@ -8,7 +8,7 @@
 #include<omp.h>
 
 int D = 3;
-char modello[] = "ising3d_cluster";
+char modello[] = "ising2d_metro";
 
 double autocorr(double *x, double x_avg, double x_std, int n, int len_x){   //funzione di autocorrelazione
     double res = 0;

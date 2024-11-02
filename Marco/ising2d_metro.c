@@ -8,15 +8,16 @@
 #include "./include/get_array.h"
 #include <omp.h>
 
-int L = 30;
+int L = 40;
 const int D = 2;
-double beta = .43;
+double beta = .41;
 int lattice_size;
 double p[5];     //pk = exp(-2beta k)
 int iterations = 2e5;
 int iter_bet_meas = 1;    //iterations between two measures
 int num_measures = 2e5;
 bool save_config = false;
+char modello[] = "ising2d_metro";
 
 void nearest(int rx, int ry, int resx[2*D], int resy[2*D]){  //restituisce i nearest neighbours di r
     resx[0] = (rx - 1 + L) % L;     //+ L serve a evitare negativi
@@ -145,44 +146,26 @@ void metropolis(){
     
     initialize_lattice(lattice);
     
-    char datafile[50], datafile_config[50]; // file name
     FILE *fp, *fp_config; // pointer to file
 
-    sprintf(datafile, "./ising2d_metro/L%d_beta%.2f.dat", L, beta); // file name initialized with a string
-    fp = fopen(datafile, "w");
-    fprintf(fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);    
-    
-    if (save_config == true){
-        sprintf(datafile_config, "./config/ising2d_metro_L%d_beta%.2f.dat", L, beta);
-        fp_config = fopen(datafile_config, "w");
-        fprintf(fp_config, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);
-    }
+    init_file(modello, L, beta, &fp, iterations, iter_bet_meas, num_measures, save_config, &fp_config);
     
     termalizzazione(lattice, iterations, lattice_size);
     
     presa_misure(lattice, lattice_size, num_measures, iter_bet_meas, fp, save_config, fp_config);
     
-    fclose(fp);
-    if (save_config == true){
-        fclose(fp_config);    
-    }
+    close_file(&fp, save_config, &fp_config);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("\nHa impiegato %.3f secondi\n", time_spent);
 
-
-    char datafile_time[] = "./time/ising2d_metro";
-    FILE *fp_time;
-
-    fp_time = fopen(datafile_time, "a");
-    fprintf(fp_time, "\ntime = %.2f min, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", time_spent/60, beta, L, iterations, iter_bet_meas, num_measures);    
-    fclose(fp_time);
+    save_time_spent(beta, L, modello, time_spent, iterations, iter_bet_meas, num_measures);
 }
 
 
 int main(void){
-    const unsigned long int seed1=(unsigned long int) time(NULL);
+    /*const unsigned long int seed1=(unsigned long int) time(NULL);
     const unsigned long int seed2=seed1+127;
     myrand_init(seed1, seed2);
 
@@ -199,7 +182,7 @@ int main(void){
 
     get_array_from_txt_int(datafile_Larray, L_array);
     get_array_from_txt_double(datafile_betaarray, beta_array);
-
+    */
     //omp_set_num_threads(2);
     //#pragma omp parallel for collapse(2)  bisogna passare  beta e L come input
     /*for (int i = 0; i < num_beta; i++){
@@ -211,6 +194,6 @@ int main(void){
         }
     }
     */
-    
+    metropolis();
     return EXIT_SUCCESS;
 }

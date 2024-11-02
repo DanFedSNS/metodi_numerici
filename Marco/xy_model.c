@@ -17,8 +17,8 @@ int L = 4;
 const int D = 3;
 double beta = 3;
 int lattice_size;
-
 double metro_or_micro = .15;
+char modello[] = "xy_model";
 
 double dot(double *a, double *b){
     return a[0] * b[0] + a[1] * b[1];
@@ -216,40 +216,21 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
 
     initialize_lattice(lattice);
     
-    char datafile[40], datafile_config[50]; // file name
     FILE *fp, *fp_config; // pointer to file
 
-    sprintf(datafile, "./xy_model/L%d_beta%.2f.dat", L, beta); // file name initialized with a string
-    fp = fopen(datafile, "w");
-    fprintf(fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);    
-    
-    if (save_config == true){
-        sprintf(datafile_config, "./config/xy_model_L%d_beta%.2f.dat", L, beta);
-        fp_config = fopen(datafile_config, "w");
-        fprintf(fp_config, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);
-    }
+    init_file(modello, L, beta, &fp, iterations, iter_bet_meas, num_measures, save_config, &fp_config);
 
     termalizzazione(lattice, iterations);
     
     presa_misure(lattice, num_measures, iter_bet_meas, fp, fp_config, save_config);
 
-
-    fclose(fp);
-    if (save_config == true){
-        fclose(fp_config);    
-    }
+    close_file(&fp, save_config, &fp_config);
 
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("\nHa impiegato %.3f secondi\n", time_spent);
 
-
-    char datafile_time[] = "./time/xy_model.dat";
-    FILE *fp_time;
-
-    fp_time = fopen(datafile_time, "a");
-    fprintf(fp_time, "\ntime = %.2f min, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", time_spent/60, beta, L, iterations, iter_bet_meas, num_measures);    
-    fclose(fp_time);
+    save_time_spent(beta, L, modello, time_spent, iterations, iter_bet_meas, num_measures);
 }
 
 
