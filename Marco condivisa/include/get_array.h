@@ -16,11 +16,26 @@ void get_array_from_txt_int(const char *datafile, int *array);
 // Assumes the array is large enough to hold all doubles in the file.
 void get_array_from_txt_double(const char *datafile, double *array);
 
+
 void save_time_spent(double beta, int L, char *modello, double time_spent, int iterations, int iter_bet_meas, int num_measures);
 
 void init_file(char *modello, int L, double beta, FILE **fp, int iterations, int iter_bet_meas, int num_measures, bool save_config, FILE **fp_config);
 
 void close_file(FILE **fp, bool save_config, FILE **fp_config);
 
+
+void nearest_sq(int rx, int ry, int *resx, int *resy, int L);  //nn reticolo quadrato
+
+void nearest_tri(int rx, int ry, int *resx, int *resy, int L);  //nn reticolo triangolare
+
+void nearest_cu(int rx, int ry, int rz, int *resx, int *resy, int *resz, int L);  // nn reticolo cubico 
+
+void initialize_lattice_ising(int *restrict lattice, int lattice_size);
+
+double magn_ising(int *restrict reticolo, int lattice_size);
+
+double energy_sq(int *restrict reticolo, int lattice_size, int L, double beta);
+
+double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta);
 
 #endif

@@ -7,29 +7,16 @@
 #include "./include/random.h"
 #include "./include/get_array.h"
 #include <omp.h>
-
-#define pi 3.14159265358979323846
-#define tau 6.28318530717958647692
 #define pos(rx, ry, L) (rx * L + ry)
-
 
 int L = 40;
 const int D = 2;
-double beta = .44;
+int q;
+double beta = .32;
 int lattice_size;
-char modello[] = "ising2d_cluster";
-
-void nearest(int rx, int ry, int resx[2*D], int resy[2*D]){  //restituisce i nearest neighbours di r
-    resx[0] = (rx - 1 + L) % L;     //+ L serve a evitare negativi
-    resx[1] = (rx + 1) % L;
-    resx[2] = rx;
-    resx[3] = rx;
-
-    resy[0] = ry;
-    resy[1] = ry;
-    resy[2] = (ry - 1 + L) % L;
-    resy[3] = (ry + 1) % L;
-}
+void (*nearest)(int, int, int *, int *, int);
+double (*energy)(int *restrict, int, int, double);
+char modello[] = "ising2d_tri_cluster";
 
 int update(int *restrict reticolo, int lattice_size, double prob){
     bool *restrict reticolo_aus = (bool*) malloc(lattice_size * sizeof(bool));     //reticolo_aus[x][y][z] = reticolo_aus[x * L^2 + y * L + z]
@@ -51,11 +38,11 @@ int update(int *restrict reticolo, int lattice_size, double prob){
     clustery[0] = ry;
     reticolo_aus[pos(rx, ry, L)] = true;
 
-    int nnx[2*D], nny[2*D];
+    int nnx[q], nny[q];
     while (nold < nnew){
         for (int p = nold; p < nnew; p++){
-            nearest(clusterx[p], clustery[p], nnx, nny);  //nn of cluster[p]
-            for (int i = 0; i < 2*D; i++){
+            nearest(clusterx[p], clustery[p], nnx, nny, L);  //nn of cluster[p]
+            for (int i = 0; i < q; i++){
                 if (reticolo_aus[pos(nnx[i], nny[i], L)] == false && reticolo[pos(nnx[i], nny[i], L)] == reticolo[pos(clusterx[p], clustery[p], L)] && myrand() < prob){                    
                     clusterx[lc] = nnx[i];
                     clustery[lc] = nny[i];
@@ -81,39 +68,6 @@ int update(int *restrict reticolo, int lattice_size, double prob){
     return lc;
 }
 
-double magn(int *restrict reticolo, int lattice_size){
-    int somma_spin = 0;
-    for (int i=0; i < lattice_size;  i++){
-            somma_spin += reticolo[i];
-    }
-    
-    return (double) somma_spin / (double) lattice_size;
-}
-
-double energy(int *restrict reticolo, int lattice_size){    //DA CONTROLLARE
-    double sum = 0.0;
-
-    for (int rx = 0; rx < L; rx++) {
-        for (int ry = 0; ry < L; ry++) {
-            // Interactions in the x-direction
-            int rx_next = (rx + 1) % L;
-            sum += -reticolo[pos(rx, ry, L)] * reticolo[pos(rx_next, ry, L)];
-
-            // Interactions in the y-direction
-            int ry_next = (ry + 1) % L;
-            sum += -reticolo[pos(rx, ry, L)] * reticolo[pos(rx, ry_next, L)];
-        }
-    }
-
-    return sum * beta / (double) lattice_size;
-}
-
-void initialize_lattice(int *restrict lattice, int lattice_size){
-    for (int i=0; i < lattice_size;  i++){    
-        lattice[i] = pow(-1, (int)(myrand()*2));
-    }
-}  
-
 void termalizzazione(int *restrict lattice, int iterations, int lattice_size, double prob){
     printf("\nAggiornamenti sulla termalizzazione:\n");
     int lunghezza_cluster_media = 0;
@@ -136,7 +90,7 @@ void presa_misure(int *restrict lattice, int lattice_size, int num_measures, int
             update(lattice, lattice_size, prob);
         }
 
-        fprintf(fp, "%f, %f\n", magn(lattice, lattice_size), energy(lattice, lattice_size));    //questo rallenta molto
+        fprintf(fp, "%f, %f\n", magn_ising(lattice, lattice_size), energy(lattice, lattice_size, L, beta));    //questo rallenta molto
         
         if (save_config == true){
             for (int a=0; a < lattice_size; a++){
@@ -156,11 +110,11 @@ void presa_misure(int *restrict lattice, int lattice_size, int num_measures, int
 void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_config){
     clock_t begin = clock();
 
-    lattice_size = pow(L, D);
+    lattice_size = L*L;
     int *restrict lattice = (int *) malloc(lattice_size * sizeof(int));
     double prob = 1 -  exp(- 2 * beta);
 
-    initialize_lattice(lattice, lattice_size);
+    initialize_lattice_ising(lattice, lattice_size);
     
     FILE *fp, *fp_config; //pointer to file
 
@@ -187,6 +141,20 @@ int main(void){
     int iter_bet_meas = 1;    //iterations between two measures
     int num_measures = 1e4;
     bool save_config = false;
+
+    if (strcmp(modello, "ising2d_cluster") == 0){
+        nearest = nearest_sq;
+        energy = energy_sq;
+        q = 4;
+    }
+    else if (strcmp(modello, "ising2d_tri_cluster") == 0){
+        nearest = nearest_tri;
+        energy = energy_tri;
+        q = 6;
+    } else {
+        printf("\nIl nome del modello è sbagliato, il programma è stato interrotto.");
+        exit(1);
+    }
 
     const unsigned long int seed1=(unsigned long int) time(NULL);
     const unsigned long int seed2=seed1+127;

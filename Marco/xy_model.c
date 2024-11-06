@@ -32,39 +32,13 @@ double norma(double *a){
     return sqrt(pow(a[0], 2) + pow(a[1], 2));
 }
 
-void nearest(int rx, int ry, int rz, int resx[2 * D], int resy[2 * D], int resz[2 * D]) { 
-    // Neighbors in the x-direction
-    resx[0] = (rx - 1 + L) % L;  // Left neighbor in x
-    resx[1] = (rx + 1) % L;      // Right neighbor in x
-    resx[2] = rx;                // No change for y-direction neighbor
-    resx[3] = rx;                // No change for y-direction neighbor
-    resx[4] = rx;                // No change for z-direction neighbor
-    resx[5] = rx;                // No change for z-direction neighbor
-
-    // Neighbors in the y-direction
-    resy[0] = ry;                // No change for x-direction neighbor
-    resy[1] = ry;                // No change for x-direction neighbor
-    resy[2] = (ry - 1 + L) % L;  // Down neighbor in y
-    resy[3] = (ry + 1) % L;      // Up neighbor in y
-    resy[4] = ry;                // No change for z-direction neighbor
-    resy[5] = ry;                // No change for z-direction neighbor
-
-    // Neighbors in the z-direction
-    resz[0] = rz;                // No change for x-direction neighbor
-    resz[1] = rz;                // No change for x-direction neighbor
-    resz[2] = rz;                // No change for y-direction neighbor
-    resz[3] = rz;                // No change for y-direction neighbor
-    resz[4] = (rz - 1 + L) % L;  // Front neighbor in z
-    resz[5] = (rz + 1) % L;      // Back neighbor in z
-}
-
 void update_metro(double reticolo[L][L][L]){
     int rx = (int)((double)L * myrand());
     int ry = (int)((double)L * myrand());
     int rz = (int)((double)L * myrand());
 
     int nnx[2*D], nny[2*D], nnz[2*D];
-    nearest(rx, ry, rz, nnx, nny, nnz);
+    nearest_cu(rx, ry, rz, nnx, nny, nnz, L);
 
     double new_spin = myrand() * tau;
     double deltaE = 0; //beta * (E' - E)
@@ -91,7 +65,7 @@ void update_micro(double reticolo[L][L][L]){
     int rz = (int)((double)L * myrand());
 
     int nnx[2*D], nny[2*D], nnz[2*D];
-    nearest(rx, ry, rz, nnx, nny, nnz);
+    nearest_cu(rx, ry, rz, nnx, nny, nnz, L);
 
     double Sr[] = {0.0, 0.0};
     for (int i = 0; i < 2*D; i++){

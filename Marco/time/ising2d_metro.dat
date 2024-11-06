@@ -66,3 +66,5 @@ L = 40, beta = 0.410000, time = 1.282567 min
 time = 1.27 min, beta = 0.410000, L = 40, iterations = 200000, iter_bet_meas = 1, num_measures = 200000
 
 time = 1.24 min, beta = 0.410000, L = 40, iterations = 200000, iter_bet_meas = 1, num_measures = 200000
+
+time = 0.86 min, beta = 0.760000, L = 40, iterations = 200000, iter_bet_meas = 1, num_measures = 200000

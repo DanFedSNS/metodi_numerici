@@ -7,94 +7,49 @@
 #include "./include/random.h"
 #include "./include/get_array.h"
 #include <omp.h>
+#define pos(rx, ry, L) (rx * L + ry)
 
 int L;
 const int D = 2;
+int q;  //nearest neighbours number
 double beta;
 int lattice_size;
-double p[5];     //pk = exp(-2beta k)
-int iterations = 2e5;
+double p[7];     //pk = exp(-2beta k)
+int iterations = 1e5;
 int iter_bet_meas = 1;    //iterations between two measures
-int num_measures = 2e5;
+int num_measures = 1e4;
 bool save_config = false;
-char modello[] = "ising2d_metro";
+void (*nearest)(int, int, int *, int *, int);
+double (*energy)(int *restrict, int, int, double);
+char modello[] = "ising2d_tri_metro";   //ising2d_tri_metro or ising2d_metro
 
-void nearest(int rx, int ry, int resx[2*D], int resy[2*D]){  //restituisce i nearest neighbours di r
-    resx[0] = (rx - 1 + L) % L;     //+ L serve a evitare negativi
-    resx[1] = (rx + 1) % L;
-    resx[2] = rx;
-    resx[3] = rx;
-
-    resy[0] = ry;
-    resy[1] = ry;
-    resy[2] = (ry - 1 + L) % L;
-    resy[3] = (ry + 1) % L;
-}
-
-void update(int reticolo[L][L]){
+void update(int *restrict reticolo){
     int rx = (int)((double)L * myrand());
     int ry = (int)((double)L * myrand());
 
-    int nnx[2*D], nny[2*D];
-    nearest(rx, ry, nnx, nny);
+    int nnx[q], nny[q];
+    nearest(rx, ry, nnx, nny, L);
 
     int Sr = 0;
-    for (int i=0; i<2*D; i++){
-        Sr += reticolo[nnx[i]][nny[i]];
+    for (int i=0; i<q; i++){
+        Sr += reticolo[pos(nnx[i], nny[i], L)];
     }
 
-    int k = reticolo[rx][ry] * Sr;
+    int k = reticolo[pos(rx, ry, L)] * Sr;
 
     if (k <= 0){
-        reticolo[rx][ry] *= -1;
+        reticolo[pos(rx, ry, L)] *= -1;
     }
 
     else {
         double w = myrand();
         if (w <= p[k]){
-            reticolo[rx][ry] *= -1;
+            reticolo[pos(rx, ry, L)] *= -1;
         }
     }
-
 }
 
-double magn(int reticolo[L][L]){
-    int somma_spin = 0;
-    for (int i=0; i < L;  i++){
-        for (int j=0; j < L; j++){
-            somma_spin += reticolo[i][j];
-        }
-    }
-    
-    return (double) somma_spin / (double) lattice_size;
-}
-
-double energy(int reticolo[L][L]){
-  int tmp, sum;
-
-  sum=0;
-  for(int rx=0; rx<L; rx++){
-     for(int ry=0; ry<L; ry++){
-        tmp = (rx + 1) % L;
-        sum += -reticolo[rx][ry] * reticolo[tmp][ry];
-       
-        tmp = (ry + 1) % L;
-        sum += -reticolo[rx][ry] * reticolo[rx][tmp];
-        }
-     }
-
-  return (double) sum / (double) (lattice_size);
-}
-
-void initialize_lattice(int lattice[L][L]){
-    for (int i=0; i < L;  i++){
-        for (int j=0; j < L; j++){
-            lattice[i][j] = 1;
-        } 
-    }
-}
-
-void termalizzazione(int lattice[L][L], int iterations, int lattice_size){
+void termalizzazione(int *restrict lattice, int iterations, int lattice_size){
     printf("\nAggiornamenti sulla termalizzazione:\n");
     for (int i=0; i < iterations * lattice_size; i++){  //termalizzazione
         update(lattice);
@@ -107,21 +62,19 @@ void termalizzazione(int lattice[L][L], int iterations, int lattice_size){
     
 }
 
-void presa_misure(int lattice[L][L], int lattice_size, int num_measures, int iter_bet_meas, FILE *fp, bool save_config, FILE *fp_config){
+void presa_misure(int *restrict lattice, int lattice_size, int num_measures, int iter_bet_meas, FILE *fp, bool save_config, FILE *fp_config){
     printf("\nAggiornamenti sulle misure:\n");
     for (int j=0; j < num_measures; j++){    // presa misure
         for (int i=0; i < iter_bet_meas * lattice_size; i++){
             update(lattice);
         }
 
-        fprintf(fp, "%f, %f\n", magn(lattice), energy(lattice));
+        fprintf(fp, "%f, %f\n", magn_ising(lattice, lattice_size), energy(lattice, lattice_size, L, beta));
         
         if (save_config == true){
-            for (int a=0; a < L; a++){
-                for (int b=0; b < L; b++){
-                    fprintf(fp_config, "%d, ", lattice[a][b]);
-                }
-            }       
+            for (int a=0; a < lattice_size; a++){
+                fprintf(fp_config, "%d, ", lattice[a]);
+            }           
             fseek(fp_config, -2, SEEK_CUR); //rimuove ", " finali
             fprintf(fp_config, "\n");
         }
@@ -137,14 +90,14 @@ void presa_misure(int lattice[L][L], int lattice_size, int num_measures, int ite
 void montecarlo(){
     clock_t begin = clock();
 
-    int lattice[L][L];
     lattice_size = L*L;
-
-    for (int k=0; k <= 2*D; k++){    //p[0] non verrà utilizzato mai, ma è comodo perché torna con k = sr * Sr
+    int *restrict lattice = (int *) malloc(lattice_size * sizeof(int));
+    
+    for (int k=0; k <= q; k++){    //p[0] non verrà utilizzato mai, ma è comodo perché torna con k = sr * Sr
         p[k] = exp(- 2.0 * beta * ((double) k)); 
     }
     
-    initialize_lattice(lattice);
+    initialize_lattice_ising(lattice, lattice_size);
     
     FILE *fp, *fp_config; // pointer to file
 
@@ -154,6 +107,8 @@ void montecarlo(){
     
     presa_misure(lattice, lattice_size, num_measures, iter_bet_meas, fp, save_config, fp_config);
     
+    free(lattice);
+
     close_file(&fp, save_config, &fp_config);
 
     clock_t end = clock();
@@ -165,6 +120,20 @@ void montecarlo(){
 
 
 int main(void){
+    if (strcmp(modello, "ising2d_metro") == 0){
+        nearest = nearest_sq;
+        energy = energy_sq;
+        q = 4;
+    }
+    else if (strcmp(modello, "ising2d_tri_metro") == 0){
+        nearest = nearest_tri;
+        energy = energy_tri;
+        q = 6;
+    } else {
+        printf("\nIl nome del modello è sbagliato, il programma è stato interrotto.");
+        exit(1);
+    }
+
     const unsigned long int seed1=(unsigned long int) time(NULL);
     const unsigned long int seed2=seed1+127;
     myrand_init(seed1, seed2);
@@ -185,8 +154,8 @@ int main(void){
     get_array_from_txt_double(datafile_betaarray, beta_array);
     */
 
-    int L_array[] = {30};
-    double beta_array[] = {0.42};
+    int L_array[] = {40};
+    double beta_array[] = {.4};
 
     int num_L = sizeof(L_array) / sizeof(int);
     int num_beta = sizeof(beta_array) / sizeof(double);

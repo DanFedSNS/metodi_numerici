@@ -8,7 +8,7 @@
 int L = 100; // Replace with your desired dimension size
 
 void first(){
-    double a = cos(1.23);
+    double a = 2.0;
 }
 
 void second(){
@@ -17,8 +17,6 @@ void second(){
 }
 
 void time_func(void (*func)(void), int rep, int caso){
-    double time_spent;
-
     clock_t begin = clock();
     
     for (int j = 0; j < rep; j++){
@@ -27,7 +25,7 @@ void time_func(void (*func)(void), int rep, int caso){
 
     clock_t end = clock();
     
-    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("\nCaso %d ha impiegato %.3f secondi\n", caso, time_spent);
 }
 
@@ -36,8 +34,12 @@ int main(void){
     
     time_func(first, ripetizioni, 1);
     time_func(second, ripetizioni, 2);
-
-    clock_t begin = clock();
     
+    clock_t begin = clock();
+    for (int j = 0; j < ripetizioni; j++){
+    }
     clock_t end = clock();  
+
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("\nCaso %d ha impiegato %.3f secondi\n", 2, time_spent);
 }

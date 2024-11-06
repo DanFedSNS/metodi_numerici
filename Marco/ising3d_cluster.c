@@ -19,32 +19,6 @@ double beta = 0.23;
 int lattice_size;
 char modello[] = "ising3d_cluster";
 
-void nearest(int rx, int ry, int rz, int resx[2 * D], int resy[2 * D], int resz[2 * D]) { 
-    // Neighbors in the x-direction
-    resx[0] = (rx - 1 + L) % L;  // Left neighbor in x
-    resx[1] = (rx + 1) % L;      // Right neighbor in x
-    resx[2] = rx;                // No change for y-direction neighbor
-    resx[3] = rx;                // No change for y-direction neighbor
-    resx[4] = rx;                // No change for z-direction neighbor
-    resx[5] = rx;                // No change for z-direction neighbor
-
-    // Neighbors in the y-direction
-    resy[0] = ry;                // No change for x-direction neighbor
-    resy[1] = ry;                // No change for x-direction neighbor
-    resy[2] = (ry - 1 + L) % L;  // Down neighbor in y
-    resy[3] = (ry + 1) % L;      // Up neighbor in y
-    resy[4] = ry;                // No change for z-direction neighbor
-    resy[5] = ry;                // No change for z-direction neighbor
-
-    // Neighbors in the z-direction
-    resz[0] = rz;                // No change for x-direction neighbor
-    resz[1] = rz;                // No change for x-direction neighbor
-    resz[2] = rz;                // No change for y-direction neighbor
-    resz[3] = rz;                // No change for y-direction neighbor
-    resz[4] = (rz - 1 + L) % L;  // Front neighbor in z
-    resz[5] = (rz + 1) % L;      // Back neighbor in z
-}
-
 int update(int *restrict reticolo, int lattice_size, double prob){
     bool *restrict reticolo_aus = (bool*) malloc(lattice_size * sizeof(bool));     //reticolo_aus[x][y][z] = reticolo_aus[x * L^2 + y * L + z]
     int *restrict clusterx = (int*) malloc(lattice_size * sizeof(int));
@@ -71,7 +45,7 @@ int update(int *restrict reticolo, int lattice_size, double prob){
     int nnx[2*D], nny[2*D], nnz[2*D];
     while (nold < nnew){
         for (int p = nold; p < nnew; p++){
-            nearest(clusterx[p], clustery[p], clusterz[p], nnx, nny, nnz);  //nn of cluster[p]
+            nearest_cu(clusterx[p], clustery[p], clusterz[p], nnx, nny, nnz, L);  //nn of cluster[p]
             for (int i = 0; i < 2*D; i++){
                 if (reticolo_aus[pos(nnx[i], nny[i], nnz[i], L)] == false && reticolo[pos(nnx[i], nny[i], nnz[i], L)] == reticolo[pos(clusterx[p], clustery[p], clusterz[p], L)] && myrand() < prob){                    
                     clusterx[lc] = nnx[i];

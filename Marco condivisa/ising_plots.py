@@ -1,18 +1,26 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import ast 
+from scipy.optimize import curve_fit
 
 modello = "ising2d_metro"
 L_array = np.loadtxt("L_array.txt", dtype = int)
 beta_array = np.loadtxt("beta_array.txt", dtype = float)
+
+def beta_pc_fun(L, betac, b, invnu):
+    return betac + b * L ** (-invnu)
+
+def chi_max_fun(L, c0, c1, gon):    #gon = gamma/nu
+    return c0 + c1 * L ** gon
 
 specific_heat_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 susceptibility_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 magn_abs_avg_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 energy_avg_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 binder_cum_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
-sigma_energy_bin_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
-sigma_magn_bin_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
+sigma_energy_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
+sigma_magn_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
+sigma_susceptibility_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
+sigma_sp_heat_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 autocorrelation_energy_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 autocorrelation_magn_dict = {(L, beta): 0 for L in L_array for beta in beta_array}
 
@@ -34,7 +42,14 @@ for L in L_array:
                 locals()[f"{key}_dict"][(L, beta)] = val[0]
             else:
                 locals()[f"{key}_dict"][(L, beta)] = val
-            
+
+
+beta_pc = {L: beta_array[np.argmax([susceptibility_dict[(L, beta)] for beta in beta_array])] for L in L_array}
+"""params, covariance = curve_fit(beta_pc_fun, L_array, list(beta_pc.values()), p0 = [0.44, 1, 1.00])
+betac, b, invnu = params
+print(params)
+"""
+
 fig, ax = plt.subplots(ncols = 2, nrows = 2)
 for L in L_array:
     ax[0,0].set_title("<|m|>")

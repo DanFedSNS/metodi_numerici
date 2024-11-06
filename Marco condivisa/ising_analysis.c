@@ -6,8 +6,9 @@
 #include<time.h>
 #include "./include/get_array.h"
 #include<omp.h>
+#define scarto(x, y) ((y - x) / x)
 
-int D = 3;
+const int D = 2;
 char modello[] = "ising2d_metro";
 
 double autocorr(double *x, double x_avg, double x_std, int n, int len_x){   //funzione di autocorrelazione
@@ -19,7 +20,7 @@ double autocorr(double *x, double x_avg, double x_std, int n, int len_x){   //fu
     return res;
 }
 
-double average(double *x, int len_x){   //calcola la media di x
+double average(double *x, int len_x){   // <x>  -->  calcola la media di x
     double res = 0;
     for (int i = 0; i < len_x; i++){
         res += x[i];
@@ -28,37 +29,22 @@ double average(double *x, int len_x){   //calcola la media di x
     return res / len_x;
 }
 
-double abs_average(double *x, int len_x){   //<|x|>
+double var(double *x, double x_avg, int len_x){  // <x^2> - <x>^2   --> varianza scorrelata
     double res = 0;
     for (int i = 0; i < len_x; i++){
-        res += fabs(x[i]);
+        res += pow(x[i] - x_avg, 2);
     }
 
-    return res / len_x;
+    return res / (len_x - 1);
 }
 
-double sd(double *x, double x_avg, int len_x){  //deviazione standard di x scorrelata
+double sd(double *x, double x_avg, int len_x){  // sqrt(<x^2> - <x>^2)   --> deviazione standard scorrelata
     double res = 0;
     for (int i = 0; i < len_x; i++){
         res += pow(x[i] - x_avg, 2);
     }
 
     return sqrt(res / (len_x - 1));
-}
-
-double chi(double *x, int len_x){  //<x^2> - <|x|>^2
-    double res = 0;
-    double abs_avg = 0;
-
-    for (int i = 0; i < len_x; i++){
-        res += pow(x[i], 2);
-        abs_avg += fabs(x[i]);
-    }
-
-    res /= len_x;
-    abs_avg /= len_x;
-    
-    return res - pow(abs_avg, 2);
 }
 
 double U(double *x, int len_x){
@@ -83,8 +69,10 @@ void raggruppa(double *x, double *binned_x, int len_x, int k_bin){  //prende x e
     }
 }
 
-void binning(double *x, double *sigma_vals, int len_x, int bin_min, int bin_max){     //sigma_vals conterrà i valori di std(F(k))
+double binning(double *x, int len_x, int bin_min, int bin_max){   
     double x_avg = average(x, len_x);    // la calcolo una sola volta
+    double *sigma_vals = (double *) malloc((bin_max + 1) * sizeof(double));
+    double tolleranza_binning = .1;
 
     for (int k = bin_min; k <= bin_max; k++){
         int len_val_bin = len_x / k;    //quanti bin lunghi k ci sono
@@ -95,11 +83,28 @@ void binning(double *x, double *sigma_vals, int len_x, int bin_min, int bin_max)
         
         free(valori_nei_bin);
     }
+
+    double sigma_fin = 0.0; //sigma extracted from binning
+    int values_considered;
+    for (int k = bin_max; k > bin_min; k--){
+        if (scarto(sigma_vals[k], sigma_vals[bin_max]) > tolleranza_binning){
+            values_considered = bin_max - k;
+            //printf("\nstopped at k = %d, bin_max = %d\n", k, bin_max);
+            break;
+        }
+        
+        sigma_fin += sigma_vals[k];
+    }
+
+    free(sigma_vals);
+
+    return sigma_fin / values_considered;
 }
 
 void analysis(int L, double beta){
     clock_t begin = clock();
     
+    int lattice_size = (int) pow(L, D);
     char datafile[50]; // file name
     FILE *fp; // pointer to file
     sprintf(datafile, "./%s/L%d_beta%.2f.dat", modello, L, beta);
@@ -123,32 +128,38 @@ void analysis(int L, double beta){
         exit(EXIT_FAILURE); 
     }
 
-    
     for (int i = 0; i < num_measures; i++){
         fscanf(fp, "%lf, %lf", &magn[i], &energy[i]);
+        magn[i] = fabs(magn[i]);
     }
 
     fclose(fp);
     
     double energy_avg = average(energy, num_measures);
-    double energy_sd = sd(energy, energy_avg, num_measures);
-    double magn_abs_avg = abs_average(magn, num_measures);
-    double magn_sd = sd(magn, magn_abs_avg, num_measures);
+    double magn_abs_avg = average(magn, num_measures);
     double binder_cum = U(magn, num_measures);
 
-    double specific_heat = pow(beta, 2) * pow(L,D) * pow(energy_sd, 2);
-    double susceptibility = beta * pow(L,D) * chi(magn, num_measures);
-    /*
-    //binning-blocking
+    double specific_heat = pow(beta, 2) * lattice_size * var(energy, energy_avg, num_measures);
+    double susceptibility = beta * lattice_size * var(magn, magn_abs_avg, num_measures);
+    
+    
+    double * restrict chi_arr = malloc(num_measures * sizeof(double));
+    double * restrict sp_heat_arr = malloc(num_measures * sizeof(double));
+    for (int i = 0; i < num_measures; i++){
+        chi_arr[i] = beta * lattice_size * pow(magn[i] - magn_abs_avg, 2);
+        sp_heat_arr[i] = pow(beta, 2) * lattice_size * pow(energy[i] - energy_avg, 2);
+    }
+    
     int bin_max = num_measures / 50;
     int bin_min = 3;
-    int bin_num = bin_max - bin_min + 1;
-    double * restrict sigma_magn_binned = malloc(bin_num * sizeof(double));
-    double * restrict sigma_energy_binned = malloc(bin_num * sizeof(double));
-    
-    binning(magn, sigma_magn_binned, num_measures, bin_min, bin_max);
-    binning(energy, sigma_energy_binned, num_measures, bin_min, bin_max);
-    */
+    double sigma_magn = binning(magn, num_measures, bin_min, bin_max);
+    double sigma_energy = binning(energy, num_measures, bin_min, bin_max);
+    double sigma_susceptibility = binning(chi_arr, num_measures, bin_min, bin_max);
+    double sigma_sp_heat = binning(sp_heat_arr, num_measures, bin_min, bin_max);
+
+
+    free(chi_arr);
+    free(sp_heat_arr);
 
     //output data to file
     char datafile_o[50]; // file name
@@ -162,25 +173,16 @@ void analysis(int L, double beta){
     fprintf(fp, "magn_abs_avg = %lf\n", magn_abs_avg);
     fprintf(fp, "energy_avg = %lf\n", energy_avg);
     fprintf(fp, "binder_cum = %lf\n", binder_cum);
+    fprintf(fp, "sigma_magn = %lf\n", sigma_magn);
+    fprintf(fp, "sigma_energy = %lf\n", sigma_energy);
     
-    /*
-    fprintf(fp, "sigma_energy_bin = ");
-    for (int i = 0; i < bin_num; i++){
-        fprintf(fp, "%lf, ", sigma_energy_binned[i]);
-    }
-    fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
+    fprintf(fp, "sigma_susceptibility = %lf\n", sigma_susceptibility);
+    fprintf(fp, "sigma_sp_heat = %lf\n", sigma_sp_heat);
     
     
-    fprintf(fp, "\nsigma_magn_bin = ");
-    for (int i = 0; i < bin_num; i++){
-        fprintf(fp, "%lf, ", sigma_magn_binned[i]);
-    }
-    fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
-    
-    free(sigma_energy_binned);
-    free(sigma_magn_binned);
-    
-    //Autocorrelation function  INUTILE SCRIVERE TUTTI QUESTI DATI, NE BASTA 1 OGNI e.g. 10
+    /*//Autocorrelation function
+    double energy_sd = sd(energy, energy_avg, num_measures);
+    double magn_sd = sd(magn, magn_abs_avg, num_measures);
     int max_autocorr = num_measures / 10;
     fprintf(fp, "\nautocorrelation_energy = ");
     for (int n = 0; n < max_autocorr; n++){
@@ -195,7 +197,7 @@ void analysis(int L, double beta){
     fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
     */
 
-    fprintf(fp, "  ");  //la riga sopra sposta solo il cursore, se non sovrascrivi ", " rimane
+    fprintf(fp, "\n");  //la riga sopra sposta solo il cursore, se non sovrascrivi ", " rimane
     
     fclose(fp);
     free(magn);
@@ -231,10 +233,19 @@ int main(void){
     }
     */
     
-    int L = 30;
-    double beta = 0.23;
-    analysis(L, beta);
+    int L_array[] = {40};   //{40, 60, 80, 100, 120, 140, 160, 180};
+    double beta_array[] = {.41};    //{.41, .42, .43, .44, .45, .46, .47};
+
+    int num_L = sizeof(L_array) / sizeof(int);
+    int num_beta = sizeof(beta_array) / sizeof(double);
+
+    //omp_set_num_threads(2);
+    #pragma omp parallel for collapse(2)  //bisogna passare  beta e L come input
+    for (int i = 0; i < num_beta; i++){
+        for (int j = 0; j < num_L; j++){
+            analysis(L_array[j], beta_array[i]);
+        }
+    }
     
     return EXIT_SUCCESS;
-
 }

@@ -78,3 +78,113 @@ void close_file(FILE **fp, bool save_config, FILE **fp_config){
     }
 }
 
+void nearest_sq(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo quadrato
+    resx[0] = (rx - 1 + L) % L;     //+ L serve a evitare negativi
+    resx[1] = (rx + 1) % L;
+    resx[2] = rx;
+    resx[3] = rx;
+
+    resy[0] = ry;
+    resy[1] = ry;
+    resy[2] = (ry - 1 + L) % L;
+    resy[3] = (ry + 1) % L;
+}
+
+void nearest_tri(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo esagonale
+    resx[0] = (rx - 1 + L) % L;     //+ L serve a evitare negativi
+    resx[1] = (rx + 1) % L;
+    resx[2] = rx;
+    resx[3] = rx;
+    resx[4] = (rx - 1 + L) % L;
+    resx[5] = (rx + 1) % L;
+
+    resy[0] = ry;
+    resy[1] = ry;
+    resy[2] = (ry - 1 + L) % L;
+    resy[3] = (ry + 1) % L;
+    resy[4] = (ry - 1 + L) % L;
+    resy[5] = (ry + 1) % L;
+}
+
+void nearest_cu(int rx, int ry, int rz, int *resx, int *resy, int *resz, int L){  // nn reticolo cubico 
+    // Neighbors in the x-direction
+    resx[0] = (rx - 1 + L) % L;  // Left neighbor in x
+    resx[1] = (rx + 1) % L;      // Right neighbor in x
+    resx[2] = rx;                // No change for y-direction neighbor
+    resx[3] = rx;                // No change for y-direction neighbor
+    resx[4] = rx;                // No change for z-direction neighbor
+    resx[5] = rx;                // No change for z-direction neighbor
+
+    // Neighbors in the y-direction
+    resy[0] = ry;                // No change for x-direction neighbor
+    resy[1] = ry;                // No change for x-direction neighbor
+    resy[2] = (ry - 1 + L) % L;  // Down neighbor in y
+    resy[3] = (ry + 1) % L;      // Up neighbor in y
+    resy[4] = ry;                // No change for z-direction neighbor
+    resy[5] = ry;                // No change for z-direction neighbor
+
+    // Neighbors in the z-direction
+    resz[0] = rz;                // No change for x-direction neighbor
+    resz[1] = rz;                // No change for x-direction neighbor
+    resz[2] = rz;                // No change for y-direction neighbor
+    resz[3] = rz;                // No change for y-direction neighbor
+    resz[4] = (rz - 1 + L) % L;  // Front neighbor in z
+    resz[5] = (rz + 1) % L;      // Back neighbor in z
+}
+
+void initialize_lattice_ising(int *restrict lattice, int lattice_size){
+    for (int i=0; i < lattice_size;  i++){    
+        lattice[i] = 1;
+    }
+}
+
+double magn_ising(int *restrict reticolo, int lattice_size){
+    int somma_spin = 0;
+    for (int i=0; i < lattice_size;  i++){
+            somma_spin += reticolo[i];
+    }
+    
+    return (double) somma_spin / (double) lattice_size;
+}
+
+double energy_sq(int *restrict reticolo, int lattice_size, int L, double beta){
+    #define pos_en(rx, ry, L) (rx * L + ry)     //ho cambiato nome per evitare problemi con pos
+    double sum = 0.0;
+    int rx_next, ry_next;
+    
+    for (int rx = 0; rx < L; rx++) {
+        for (int ry = 0; ry < L; ry++) {
+            // Interactions in the x-direction
+            rx_next = (rx + 1) % L;
+            sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx_next, ry, L)];
+
+            // Interactions in the y-direction
+            ry_next = (ry + 1) % L;
+            sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx, ry_next, L)];
+        }
+    }
+
+    return sum * beta / (double) lattice_size;
+} 
+
+double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta){
+    #define pos_en(rx, ry, L) (rx * L + ry)     //ho cambiato nome per evitare problemi con pos
+    double sum = 0.0;
+    int rx_next, ry_next;
+    
+    for (int rx = 0; rx < L; rx++) {
+        for (int ry = 0; ry < L; ry++) {
+            // Interactions in the x-direction
+            rx_next = (rx + 1) % L;
+            sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx_next, ry, L)];
+
+            // Interactions in the y-direction
+            ry_next = (ry + 1) % L;
+            sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx, ry_next, L)];
+
+            sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx_next, ry_next, L)];
+        }
+    }
+
+    return sum * beta / (double) lattice_size;
+} 
