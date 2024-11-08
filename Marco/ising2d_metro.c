@@ -21,7 +21,7 @@ int num_measures = 1e4;
 bool save_config = false;
 void (*nearest)(int, int, int *, int *, int);
 double (*energy)(int *restrict, int, int, double);
-char modello[] = "ising2d_tri_metro";   //ising2d_tri_metro or ising2d_metro
+char modello[] = "ising2d_sq_metro";   //ising2d_tri_metro or ising2d_sq_metro or ising2d_hex_metro 
 
 void update(int *restrict reticolo){
     int rx = (int)((double)L * myrand());
@@ -120,19 +120,7 @@ void montecarlo(){
 
 
 int main(void){
-    if (strcmp(modello, "ising2d_metro") == 0){
-        nearest = nearest_sq;
-        energy = energy_sq;
-        q = 4;
-    }
-    else if (strcmp(modello, "ising2d_tri_metro") == 0){
-        nearest = nearest_tri;
-        energy = energy_tri;
-        q = 6;
-    } else {
-        printf("\nIl nome del modello è sbagliato, il programma è stato interrotto.");
-        exit(1);
-    }
+    choose_geometry(modello, &nearest, &energy, &q);
 
     const unsigned long int seed1=(unsigned long int) time(NULL);
     const unsigned long int seed2=seed1+127;
@@ -155,13 +143,13 @@ int main(void){
     */
 
     int L_array[] = {40};
-    double beta_array[] = {.4};
+    double beta_array[] = {1};
 
     int num_L = sizeof(L_array) / sizeof(int);
     int num_beta = sizeof(beta_array) / sizeof(double);
 
     //omp_set_num_threads(2);
-    //#pragma omp parallel for collapse(2)  bisogna passare  beta e L come input
+    //#pragma omp parallel for collapse(2)  //bisogna passare beta e L come input
     for (int i = 0; i < num_beta; i++){
         for (int j = 0; j < num_L; j++){
             beta = beta_array[i];

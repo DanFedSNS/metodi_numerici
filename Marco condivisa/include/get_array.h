@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Function to count the number of lines in a file.
 // Returns the number of lines or -1 if there's an error.
@@ -28,6 +30,8 @@ void nearest_sq(int rx, int ry, int *resx, int *resy, int L);  //nn reticolo qua
 
 void nearest_tri(int rx, int ry, int *resx, int *resy, int L);  //nn reticolo triangolare
 
+void nearest_hex(int rx, int ry, int *resx, int *resy, int L);  //nn reticolo esagonale (grafene)
+
 void nearest_cu(int rx, int ry, int rz, int *resx, int *resy, int *resz, int L);  // nn reticolo cubico 
 
 void initialize_lattice_ising(int *restrict lattice, int lattice_size);
@@ -37,5 +41,9 @@ double magn_ising(int *restrict reticolo, int lattice_size);
 double energy_sq(int *restrict reticolo, int lattice_size, int L, double beta);
 
 double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta);
+
+double energy_hex(int *restrict reticolo, int lattice_size, int L, double beta);
+
+void choose_geometry(char *modello, void (**nearest)(int, int, int *, int *, int), double (**energy)(int *restrict, int, int, double), int *q);
 
 #endif

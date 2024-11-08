@@ -9,14 +9,14 @@
 #include <omp.h>
 #define pos(rx, ry, L) (rx * L + ry)
 
-int L = 40;
+int L;
 const int D = 2;
 int q;
-double beta = .32;
+double beta;
 int lattice_size;
 void (*nearest)(int, int, int *, int *, int);
 double (*energy)(int *restrict, int, int, double);
-char modello[] = "ising2d_tri_cluster";
+char modello[] = "ising2d_hex_cluster"; //ising2d_tri_cluster or ising2d_sq_cluster or ising2d_hex_cluster 
 
 int update(int *restrict reticolo, int lattice_size, double prob){
     bool *restrict reticolo_aus = (bool*) malloc(lattice_size * sizeof(bool));     //reticolo_aus[x][y][z] = reticolo_aus[x * L^2 + y * L + z]
@@ -142,52 +142,29 @@ int main(void){
     int num_measures = 1e4;
     bool save_config = false;
 
-    if (strcmp(modello, "ising2d_cluster") == 0){
-        nearest = nearest_sq;
-        energy = energy_sq;
-        q = 4;
-    }
-    else if (strcmp(modello, "ising2d_tri_cluster") == 0){
-        nearest = nearest_tri;
-        energy = energy_tri;
-        q = 6;
-    } else {
-        printf("\nIl nome del modello è sbagliato, il programma è stato interrotto.");
-        exit(1);
-    }
+    choose_geometry(modello, &nearest, &energy, &q);
 
     const unsigned long int seed1=(unsigned long int) time(NULL);
     const unsigned long int seed2=seed1+127;
     myrand_init(seed1, seed2);
+    
+    
+    int L_array[] = {40};
+    double beta_array[] = {.67, 1};
 
-    /*
-    //scegli i valori di beta e L (ed eventualmente degli altri parametri)
-    const char *datafile_Larray, *datafile_betaarray;
-    datafile_Larray = "L_array.txt";
-    datafile_betaarray = "beta_array.txt";
-
-    int num_L = count_lines(datafile_Larray);
-    int num_beta = count_lines(datafile_betaarray);
-
-    int L_array[num_L];
-    double beta_array[num_beta];
-
-    get_array_from_txt_int(datafile_Larray, L_array);
-    get_array_from_txt_double(datafile_betaarray, beta_array);
+    int num_L = sizeof(L_array) / sizeof(int);
+    int num_beta = sizeof(beta_array) / sizeof(double);
 
     //omp_set_num_threads(2);
-    //#pragma omp parallel for collapse(2)  bisogna passare  beta e L come input
+    //#pragma omp parallel for collapse(2)  //bisogna passare beta e L come input
     for (int i = 0; i < num_beta; i++){
-        beta = beta_array[i];
         for (int j = 0; j < num_L; j++){
+            beta = beta_array[i];
             L = L_array[j];
 
-            montecarlo();
+            montecarlo(iterations, iter_bet_meas, num_measures, save_config);
         }
     }
-    */
-
-    montecarlo(iterations, iter_bet_meas, num_measures, save_config);
 
     return EXIT_SUCCESS;
 }

@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "../include/get_array.h"
 
 int count_lines(const char *filename) {
@@ -106,6 +108,20 @@ void nearest_tri(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo es
     resy[5] = (ry + 1) % L;
 }
 
+void nearest_hex(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo quadrato
+    resx[0] = rx;     //+ L serve a evitare negativi
+    resx[1] = rx;   //stessa cella
+    if ((rx + ry) % 2 == 0){
+        resx[2] = (rx + 1) % L;
+    } else {
+        resx[2] = (rx - 1 + L) % L;
+    }
+
+    resy[0] = (ry + 1) % L;
+    resy[1] = (ry - 1 + L) % L;
+    resy[2] = ry;
+}
+
 void nearest_cu(int rx, int ry, int rz, int *resx, int *resy, int *resz, int L){  // nn reticolo cubico 
     // Neighbors in the x-direction
     resx[0] = (rx - 1 + L) % L;  // Left neighbor in x
@@ -188,3 +204,46 @@ double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta){
 
     return sum * beta / (double) lattice_size;
 } 
+
+double energy_hex(int *restrict reticolo, int lattice_size, int L, double beta){
+    #define pos_en(rx, ry, L) (rx * L + ry)     //ho cambiato nome per evitare problemi con pos
+    double sum = 0.0;
+    int rx_next, ry_next;
+    
+    for (int rx = 0; rx < L; rx++) {
+        for (int ry = 0; ry < L; ry++) {        
+            ry_next = (ry + 1) % L;
+            sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx, ry_next, L)];
+
+            if ((rx + ry) % 2 == 0){
+                rx_next = (rx + 1) % L;
+                sum += -reticolo[pos_en(rx, ry, L)] * reticolo[pos_en(rx_next, ry, L)];
+            }
+        }
+    }
+
+    return sum * beta / (double) lattice_size;
+}
+
+void choose_geometry(char *modello, void (**nearest)(int, int, int *, int *, int), double (**energy)(int *restrict, int, int, double), int *q){
+    if (strncmp(modello, "ising2d_sq", strlen("ising2d_sq")) == 0){
+        *nearest = nearest_sq;
+        *energy = energy_sq;
+        *q = 4;
+    }
+    else if (strncmp(modello, "ising2d_tri", strlen("ising2d_tri")) == 0){
+        *nearest = nearest_tri;
+        *energy = energy_tri;
+        *q = 6;
+    }
+    else if (strncmp(modello, "ising2d_hex", strlen("ising2d_hex")) == 0){
+        *nearest = nearest_hex;
+        *energy = energy_hex;
+        *q = 3;
+    }
+    else {
+        printf("\nIl nome del modello è sbagliato, il programma è stato interrotto.");
+        exit(1);
+    }
+}
+
