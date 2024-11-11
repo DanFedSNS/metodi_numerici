@@ -61,13 +61,13 @@ void save_time_spent(double beta, int L, char *modello, double time_spent, int i
 void init_file(char *modello, int L, double beta, FILE **fp, int iterations, int iter_bet_meas, int num_measures, bool save_config, FILE **fp_config){
     char datafile[50]; // file name
     
-    sprintf(datafile, "./%s/L%d_beta%.3f.dat", modello, L, beta); // file name initialized with a string
+    sprintf(datafile, "./%s/L%d_beta%.4f.dat", modello, L, beta); // file name initialized with a string
     *fp = fopen(datafile, "w");
     fprintf(*fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);    
     
     if (save_config == true){
         char datafile_config[50];
-        sprintf(datafile_config, "./config/%s_L%d_beta%.3f.dat", modello, L, beta);
+        sprintf(datafile_config, "./config/%s_L%d_beta%.4f.dat", modello, L, beta);
         *fp_config = fopen(datafile_config, "w");
         fprintf(*fp_config, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, iterations, iter_bet_meas, num_measures);
     }
@@ -92,7 +92,7 @@ void nearest_sq(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo qua
     resy[3] = (ry + 1) % L;
 }
 
-void nearest_tri(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo triangolare
+void nearest_tri(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo esagonale
     resx[0] = (rx - 1 + L) % L;     //+ L serve a evitare negativi
     resx[1] = (rx + 1) % L;
     resx[2] = rx;
@@ -108,7 +108,7 @@ void nearest_tri(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo tr
     resy[5] = (ry + 1) % L;
 }
 
-void nearest_hex(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo esaagonale (grafene)
+void nearest_hex(int rx, int ry, int *resx, int *resy, int L){  //nn reticolo quadrato
     resx[0] = rx;     //+ L serve a evitare negativi
     resx[1] = rx;   //stessa cella
     if ((rx + ry) % 2 == 0){
@@ -247,3 +247,16 @@ void choose_geometry(char *modello, void (**nearest)(int, int, int *, int *, int
     }
 }
 
+void linspace(double *arr, double start, double stop, int num){     //include start e stop, genera num elementi
+    double delta = (stop - start) / (num - 1);
+    for (int i = 0; i < num; i++){
+        arr[i] = start + i * delta;
+    }
+}
+
+void arange_int(int *arr, int start, int stop, int num){
+    int delta = (stop - start) / (num - 1);
+    for (int i = 0; i < num; i++){
+        arr[i] = start + i * delta;
+    }
+}

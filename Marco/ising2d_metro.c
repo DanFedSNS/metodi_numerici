@@ -142,11 +142,13 @@ int main(void){
     get_array_from_txt_double(datafile_betaarray, beta_array);
     */
 
-    int L_array[] = {40};
-    double beta_array[] = {1};
+    int num_L = 3;
+    int num_beta = 2;
+    int L_array[num_L];
+    double beta_array[num_beta];
 
-    int num_L = sizeof(L_array) / sizeof(int);
-    int num_beta = sizeof(beta_array) / sizeof(double);
+    arange_int(L_array, 4, 6, num_L);
+    linspace(beta_array, 1.43, 1.44, num_beta);
 
     //omp_set_num_threads(2);
     //#pragma omp parallel for collapse(2)  //bisogna passare beta e L come input

@@ -46,4 +46,8 @@ double energy_hex(int *restrict reticolo, int lattice_size, int L, double beta);
 
 void choose_geometry(char *modello, void (**nearest)(int, int, int *, int *, int), double (**energy)(int *restrict, int, int, double), int *q);
 
+void linspace(double *arr, double start, double stop, int num);
+
+void arange_int(int *arr, int start, int stop, int num);
+
 #endif

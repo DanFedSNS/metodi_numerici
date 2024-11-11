@@ -107,7 +107,7 @@ void analysis(int L, double beta){
     int lattice_size = (int) pow(L, D);
     char datafile[50]; // file name
     FILE *fp; // pointer to file
-    sprintf(datafile, "./%s/L%d_beta%.2f.dat", modello, L, beta);
+    sprintf(datafile, "./%s/L%d_beta%.4f.dat", modello, L, beta);
     fp = fopen(datafile, "r");
 
     if(fp==NULL){
@@ -163,7 +163,7 @@ void analysis(int L, double beta){
 
     //output data to file
     char datafile_o[50]; // file name
-    sprintf(datafile_o, "./analysis_%s/L%d_beta%.2f.dat", modello, L, beta); // file name initialized with a string
+    sprintf(datafile_o, "./analysis_%s/L%d_beta%.4f.dat", modello, L, beta); // file name initialized with a string
 
     fp = fopen(datafile_o, "w");
     

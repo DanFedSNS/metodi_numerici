@@ -18,6 +18,7 @@ void get_array_from_txt_int(const char *datafile, int *array);
 // Assumes the array is large enough to hold all doubles in the file.
 void get_array_from_txt_double(const char *datafile, double *array);
 
+
 void save_time_spent(double beta, int L, char *modello, double time_spent, int iterations, int iter_bet_meas, int num_measures);
 
 void init_file(char *modello, int L, double beta, FILE **fp, int iterations, int iter_bet_meas, int num_measures, bool save_config, FILE **fp_config);
@@ -44,5 +45,9 @@ double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta);
 double energy_hex(int *restrict reticolo, int lattice_size, int L, double beta);
 
 void choose_geometry(char *modello, void (**nearest)(int, int, int *, int *, int), double (**energy)(int *restrict, int, int, double), int *q);
+
+void linspace(double *arr, double start, double stop, int num);
+
+void arange_int(int *arr, int start, int stop, int num);
 
 #endif
