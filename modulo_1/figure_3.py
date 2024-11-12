@@ -2,37 +2,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Array di valori L da considerare
-L_array = np.linspace(10, 30, 3, dtype=int)
+L_array = np.linspace(10, 30, 5, dtype=int)
 
 # Lista dei modelli
-models = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
+algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
 
-# Colormap per curve di colore differenti
-colors = plt.get_cmap('tab10')  # Colormap
+# Stili per i modelli
+styles = ['o', 's']
+colors = ['blue', 'red']
 
-# Crea il layout per i subplot (3 righe e 1 colonna)
-fig, ax = plt.subplots(3, 1, figsize=(10, 12))
+# Creazione della figura
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 
-for model_index, model in enumerate(models):
-    # Subplot per ogni modello (ogni modello avrà il suo subplot)
+beta_fixed = 0.275
+
+for algo_index, algo in enumerate(algos):
     for i, L in enumerate(L_array):
-        filepath = f'./analysis_{model}/L{L}.dat'
+        filepath = f'./analysis_{algo}/L{L}.dat'
 
         data = np.loadtxt(filepath, delimiter=",")
         
         beta = data[:, 0]  
-        specific_heat = data[:, 1]  # Calore specifico
-        susceptibility = data[:, 2]  # Suscettività
-        magn_abs_avg = data[:, 3]  # Magnetizzazione assoluta media
-        energy_avg = data[:, 4]  # Energia media
+        sigma_m = data[:, 6] 
 
-        # Scegliamo di plottare la suscettività per ogni modello
-        ax[model_index].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='-')
-        ax[model_index].set_title(f"Suscettività - Modello {model.split('_')[2].upper()}")
-        ax[model_index].set_xlabel("Beta")
-        ax[model_index].set_ylabel("Suscettività")
-        ax[model_index].legend()
+        # Trova l'indice del valore di beta più vicino a beta_fixed
+        beta_index = (np.abs(beta - beta_fixed)).argmin()
 
-# Adjust the layout and save the figure
+        # Plotta la suscettività per ogni modello al variare di L
+        ax.plot(L, sigma_m[beta_index], styles[algo_index], color=colors[algo_index],
+                label=f'{algo.split("_")[2].capitalize()} - L={L}' if i == 0 else "",
+                markerfacecolor='none')
+
+# Impostazioni del grafico
+ax.set_xlabel("Dimensione del reticolo (L)")
+ax.set_ylabel("Errore su M")
+ax.legend()
+ax.grid()
+
+# Salva e mostra la figura
 plt.tight_layout()
 plt.savefig('./figure_3.pdf', format='pdf')

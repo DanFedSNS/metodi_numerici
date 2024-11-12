@@ -1,44 +1,65 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-L_array = [20]
-beta_couple = [0.42, 0.46]  # Choose a beta value for plotting
-modello = "ising2d_sq_cluster"
-# modello = "ising2d_hex_metro"
-# modello = "ising2d_tri_metro"
+# Parametri
+L_array = [30]
+beta_couple = [
+    [0.40, 0.43, 0.45, 0.48],   # Per il modello "ising2d_sq_cluster"
+    [0.25, 0.2625, 0.2812, 0.3], # Per il modello "ising2d_tri_cluster"
+    [0.63, 0.65, 0.69, 0.71]    # Per il modello "ising2d_hex_cluster"
+]
+modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
+colori = plt.get_cmap('tab10')
 
-colors = plt.get_cmap('tab10')
+# Creiamo una figura con 4 subplot orizzontali
+fig, ax = plt.subplots(1, 4, figsize=(20, 5))
 
-fig, ax = plt.subplots(2, 1, figsize=(8, 12))
+# Definire i limiti dell'asse x
+x_limits_magnetization = [-1, 1]
 
-# Define x-axis limits
-x_limits_magnetization = [-1, 1]  # Modify these limits as needed
+# Loop sui valori di beta
+for j in range(4):
+    
+    # Loop sui modelli
+    for k, modello in enumerate(modelli):
+        beta = beta_couple[k][j]
+        # Loop sui valori di L
+        for i in range(len(L_array)):
+            L = L_array[i]
+            valori_mag = np.linspace(-1, 1, L**2 + 1)
 
-for j in range(2): 
-    for i in range(len(L_array)):    
-        beta = beta_couple[j]
-        L = L_array[i]  
-        valori_mag = np.linspace(-1, 1, L**2+1)  # esempio di valori conosciuti di magnetizzazione
+            # Legge i dati per il modello e il valore di beta scelto
+            filepath = f'./{modello}/L{L}_beta{(beta):.4f}.dat'
 
-        # Read the data for the chosen beta value
-        filepath = f'./{modello}/L{L}_beta{beta:.3f}.dat'
-        data = np.loadtxt(filepath, skiprows=1, delimiter=",")  # Load the data file
+            data = np.loadtxt(filepath, skiprows=1, delimiter=",")
+            magnetization = data[:, 0]
 
-        magnetization = data[:, 0]  # Magnetization per site
+            atol = 1 / (L**2)
+            # Calcolo della frequenza delle occorrenze di magnetizzazione
+            magnetization_frequencies = [
+                np.count_nonzero(np.isclose(magnetization, val, atol=atol)) for val in valori_mag
+            ]
 
-        # Calcola la frequenza delle occorrenze di magnetizzazione ed energia
-        magnetization_frequencies = [np.count_nonzero(np.isclose(magnetization, val, atol=0.0024)) for val in valori_mag]
+            # Plot della distribuzione di magnetizzazione
+            label = f'{modello.split("_")[1]} (L={L})'
+            ax[j].plot(
+                valori_mag, magnetization_frequencies,
+                color=colori(k), label=label,
+                marker='none', linewidth=0.5
+            )
 
-        # Magnetization distribution (normalizzata)
-        ax[j].plot(valori_mag, magnetization_frequencies, color=colors(i), label=f'L={L}', marker='none', linestyle='-', linewidth=0.5)
-        ax[j].set_title(f'Magnetization Distribution for Beta={beta}')
+        # Imposta titolo, etichetta e limiti
+        ax[j].set_title(f'Beta={beta}')
         ax[j].set_xlabel('Magnetization per site')
         ax[j].set_ylabel('Occurrences')
-        ax[j].legend()
-        ax[j].set_xlim(x_limits_magnetization)  # Set x-axis limits for magnetization plot
+        ax[j].set_xlim(x_limits_magnetization)
 
-# Save the figure in a PDF
+    # Aggiungi la legenda
+    ax[j].legend()
+
+# Migliora la spaziatura tra i subplot
+plt.tight_layout()
+
+# Salva la figura in un PDF
 plt.savefig('./figure_1.pdf', format='pdf')
 plt.close(fig)
-
-

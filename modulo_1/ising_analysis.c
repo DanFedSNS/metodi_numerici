@@ -9,7 +9,7 @@
 #define scarto(x, y) ((y - x) / x)
 
 const int D = 2;
-char modello[] = "ising2d_tri_cluster";
+char modello[] = "ising2d_hex_cluster";
 
 double autocorr(double *x, double x_avg, double x_std, int n, int len_x){   //funzione di autocorrelazione
     double res = 0;
@@ -117,7 +117,7 @@ void analysis(int L, double beta){
     int lattice_size = (int) pow(L, D);
     char datafile[50]; 
     FILE *fp; // pointer to file
-    sprintf(datafile, "./%s/L%d_beta%.3f.dat", modello, L, beta);
+    sprintf(datafile, "./%s/L%d_beta%.4f.dat", modello, L, beta);
     fp = fopen(datafile, "r");
 
     if(fp==NULL){
@@ -179,22 +179,31 @@ void analysis(int L, double beta){
         beta, specific_heat, susceptibility, magn_abs_avg, energy_avg,
         binder_cum, sigma_magn, sigma_energy, sigma_susceptibility, sigma_sp_heat);
 
-    /*//Autocorrelation function
+    fclose(fp);
+
+    char datafile_ac[50]; // file name
+    sprintf(datafile_ac, "./analysis_%s/L%d_autocorr.dat", modello, L);
+    fp = fopen(datafile_ac, "a");
+
+    //Autocorrelation function
     double energy_sd = sd(energy, energy_avg, num_measures);
     double magn_sd = sd(magn, magn_abs_avg, num_measures);
     int max_autocorr = num_measures / 10;
-    fprintf(fp, "\nautocorrelation_energy = ");
+    /*fprintf(fp, "autocorrelation_energy = ");
     for (int n = 0; n < max_autocorr; n++){
         fprintf(fp, "%lf, ", autocorr(energy, energy_avg, energy_sd, n, num_measures));
     }
     fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
-    
-    fprintf(fp, "\nautocorrelation_magn = ");
-    for (int n = 0; n < max_autocorr; n++){
-        fprintf(fp, "%lf, ", autocorr(magn, magn_abs_avg, magn_sd, n, num_measures));
-    }
-    fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
     */
+    for (int n = 0; n < max_autocorr; n++) {
+        if (n == max_autocorr - 1) {
+            fprintf(fp, "%lf", autocorr(magn, magn_abs_avg, magn_sd, n, num_measures));
+        } else {
+            fprintf(fp, "%lf, ", autocorr(magn, magn_abs_avg, magn_sd, n, num_measures));
+        }
+    }
+    fprintf(fp, "\n");
+
     
     fclose(fp);
     free(magn);
@@ -208,26 +217,30 @@ void analysis(int L, double beta){
 int main(void) {
     int L_start = 10;
     int L_stop = 30;
-    int num_L = 3;
+    int num_L = 5;
     int L_array[num_L];
     for (int i = 0; i < num_L; i++) {
         L_array[i] = L_start + i * (L_stop - L_start) / (num_L - 1);
     }
 
-    int num_beta = 41;
+    int num_beta = 9;
     double beta_array[num_beta];
-    double beta_start = 0.42;
-    double beta_stop = 0.46;
+    double beta_start = 0.63;
+    double beta_stop = 0.71;
     
     for (int i = 0; i < num_beta; i++) {
         beta_array[i] = beta_start + i * (beta_stop - beta_start) / (num_beta - 1);
     }
 
     char datafile_o[50];
+    char datafile_ac[50];
 
     for (int j = 0; j < num_L; j++) {
         sprintf(datafile_o, "./analysis_%s/L%d.dat", modello, L_array[j]); 
         clear_initial_data(datafile_o);
+
+        sprintf(datafile_ac, "./analysis_%s/L%d_autocorr.dat", modello, L_array[j]);
+        clear_initial_data(datafile_ac);
 
         for (int i = 0; i < num_beta; i++) {
             analysis(L_array[j], beta_array[i]);

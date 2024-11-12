@@ -16,7 +16,7 @@ double beta;
 int lattice_size;
 void (*nearest)(int, int, int *, int *, int);
 double (*energy)(int *restrict, int, int, double);
-char modello[] = "ising2d_tri_cluster"; //ising2d_tri_cluster or ising2d_sq_cluster or ising2d_hex_cluster 
+char modello[] = "ising2d_sq_cluster"; //ising2d_tri_cluster or ising2d_sq_cluster or ising2d_hex_cluster 
 
 int update(int *restrict reticolo, int lattice_size, double prob){
     bool *restrict reticolo_aus = (bool*) malloc(lattice_size * sizeof(bool));     //reticolo_aus[x][y][z] = reticolo_aus[x * L^2 + y * L + z]
@@ -44,7 +44,7 @@ int update(int *restrict reticolo, int lattice_size, double prob){
             nearest(clusterx[p], clustery[p], nnx, nny, L);  //nn of cluster[p]
             for (int i = 0; i < q; i++){
                 if (reticolo_aus[pos(nnx[i], nny[i], L)] == false && reticolo[pos(nnx[i], nny[i], L)] == reticolo[pos(clusterx[p], clustery[p], L)] && myrand() < prob){                    
-                    clusterx[lc] = nnx[i];
+                    clusterx[lc] = nnx[i]; 
                     clustery[lc] = nny[i];
 
                     reticolo_aus[pos(nnx[i], nny[i], L)] = true;
@@ -139,8 +139,8 @@ void montecarlo(int iterations, int iter_bet_meas, int num_measures, bool save_c
 int main(void){
     int iterations = 1e4;
     int iter_bet_meas = 1;    //iterations between two measures
-    int num_measures = 1e5;
-    bool save_config = false;
+    int num_measures = 1e5; 
+    bool save_config = false; 
 
     choose_geometry(modello, &nearest, &energy, &q);
 
@@ -152,18 +152,21 @@ int main(void){
     int L_stop = 30;
     int num_L = 3;
     int L_array[num_L];
-    for (int i = 0; i < num_L; i++) {
+    for (int i = 0; i < num_L + 1; i++) {
         L_array[i] = L_start + i * (L_stop - L_start) / (num_L - 1);
     }
 
-    int num_beta = 41;
+    int num_beta = 5;
     double beta_array[num_beta];
-    double beta_start = 0.42;
-    double beta_stop = 0.46;
+    double beta_start = 0.4;
+    double beta_stop = 0.5;
 
-    for (int i = 0; i < num_beta; i++) {
+    for (int i = 0; i < num_beta + 1; i++) {
         beta_array[i] = beta_start + i * (beta_stop-beta_start) / (num_beta - 1);
     }
+
+
+//#pragma omp parallel for collapse(2)
 
     for (int i = 0; i < num_beta; i++){
         for (int j = 0; j < num_L; j++){

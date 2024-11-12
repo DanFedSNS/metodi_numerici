@@ -130,18 +130,20 @@ int main(void){
     int L_stop = 30;
     int num_L = 3;
     int L_array[num_L];
-    for (int i = 0; i < num_L; i++) {
+    for (int i = 0; i < num_L + 1; i++) {
         L_array[i] = L_start + i * (L_stop - L_start) / (num_L - 1);
     }
 
-    int num_beta = 41;
+    int num_beta = 5;
     double beta_array[num_beta];
-    double beta_start = 0.42;
-    double beta_stop = 0.46;
+    double beta_start = 0.4;
+    double beta_stop = 0.5;
 
-    for (int i = 0; i < num_beta; i++) {
+    for (int i = 0; i < num_beta + 1; i++) {
         beta_array[i] = beta_start + i * (beta_stop-beta_start) / (num_beta - 1);
     }
+
+//#pragma omp parallel for collapse(2)
 
     for (int i = 0; i < num_beta; i++){
         for (int j = 0; j < num_L; j++){
