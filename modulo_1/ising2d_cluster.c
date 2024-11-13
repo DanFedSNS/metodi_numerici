@@ -106,7 +106,7 @@ void presa_misure(int L, double beta, int *restrict lattice, int lattice_size, i
 
 void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_meas, int num_measures, bool save_config,
                 void (*nearest)(int, int, int *, int *, int), double (*energy)(int *restrict, int, int, double), int q){
-    clock_t begin = clock();
+    double begin = omp_get_wtime();
 
     int lattice_size = L*L;
     int *restrict lattice = (int *) malloc(lattice_size * sizeof(int));
@@ -126,9 +126,9 @@ void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_
 
     close_file(&fp, save_config, &fp_config);
 
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("\nHa impiegato %.3f secondi\n", time_spent);
+    double end = omp_get_wtime();
+    double time_spent = (end - begin);
+    //printf("\nHa impiegato %.3f secondi\n", time_spent);
 
     save_time_spent(beta, L, modello, time_spent, iterations, iter_bet_meas, num_measures);
 }
@@ -146,8 +146,8 @@ int main(void){
 
     int num_beta = 5;
     
-    #pragma omp parallel for collapse(3) shared(L_array, modello_values, num_beta)  // collapse the loops and define private variables
     for (int m = 0; m < num_modelli; m++) {       
+        #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta)  // collapse the loops and define private variables
         for (int i = 0; i < num_beta; i++){
             for (int j = 0; j < num_L; j++){
                 int iterations = 1e4;
@@ -163,7 +163,7 @@ int main(void){
                 choose_geometry(modello, &nearest, &energy, &q);
                 double beta = assing_beta(m, i, num_beta);
                 
-                printf("\n%s, L = %d, beta = %.4f", modello, L_array[j], beta);
+                printf("\n%s, L = %d, beta = %.5f", modello, L_array[j], beta);
                 // Initialize unique random seeds for each thread
                 unsigned long int seed1 = (unsigned long int)time(NULL) + omp_get_thread_num();
                 unsigned long int seed2 = seed1 + 127;
