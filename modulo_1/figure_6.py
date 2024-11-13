@@ -11,7 +11,7 @@ def power_law(x, A, n, C):
     return A * x**n + C
 
 # Parametri
-L_array = np.linspace(10, 30, 5, dtype=int)
+L_array = np.linspace(70, 120, 6, dtype=int)
 colors = plt.get_cmap('tab10')
 modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
 
@@ -20,9 +20,9 @@ fit_params = {model: {'A': [], 'B': [], 'C': []} for model in modelli}
 
 # Definizione dei valori iniziali del parametro p0 per ogni modello
 p0_values = {
-    "ising2d_sq_cluster": [1, 0.44, 1],  # Valori per il modello ising2d_sq_cluster
-    "ising2d_tri_cluster": [1, 0.23, 1],  # Valori per il modello ising2d_tri_cluster
-    "ising2d_hex_cluster": [1, 0.64, 1]   # Valori per il modello ising2d_hex_cluster
+    "ising2d_sq_cluster": [100, 0.4375, 150],  # Valori per il modello ising2d_sq_cluster
+    "ising2d_tri_cluster": [100, 0.4375, 150],  # Valori per il modello ising2d_tri_cluster
+    "ising2d_hex_cluster": [100, 0.4375, 150]   # Valori per il modello ising2d_hex_cluster
 }
 
 # Loop sui modelli e sui diversi valori di L

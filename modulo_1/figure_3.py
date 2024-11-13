@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Array di valori L da considerare
-L_array = np.linspace(10, 30, 5, dtype=int)
+L_array = np.linspace(70, 120, 6, dtype=int)
 
 # Lista dei modelli
 algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]

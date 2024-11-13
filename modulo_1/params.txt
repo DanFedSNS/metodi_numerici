@@ -1,0 +1,12 @@
+font_size_axis=12
+font_size_legend=8
+font_size_ticks=8
+line_width_axes=0.75
+line_width_grid_minor=0.1
+line_width_grid_major=0.1
+label_pad=0.5
+pad=0.1
+fig_width=3.2
+fig_height=3.2
+fig_height_colorbar=3.8
+dpi=600

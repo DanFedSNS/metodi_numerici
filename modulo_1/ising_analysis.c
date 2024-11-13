@@ -215,20 +215,20 @@ void analysis(int L, double beta){
 }
 
 int main(void) {
-    int L_start = 10;
-    int L_stop = 30;
-    int num_L = 5;
+    int L_start = 70;
+    int L_stop = 120;
+    int num_L = 6;
     int L_array[num_L];
-    for (int i = 0; i < num_L; i++) {
+    for (int i = 0; i < num_L + 1; i++) {
         L_array[i] = L_start + i * (L_stop - L_start) / (num_L - 1);
     }
 
-    int num_beta = 9;
+    int num_beta = 15;
     double beta_array[num_beta];
-    double beta_start = 0.63;
-    double beta_stop = 0.71;
+    double beta_start = 0.43;
+    double beta_stop = 0.45;
     
-    for (int i = 0; i < num_beta; i++) {
+    for (int i = 0; i < num_beta + 1; i++) {
         beta_array[i] = beta_start + i * (beta_stop - beta_start) / (num_beta - 1);
     }
 

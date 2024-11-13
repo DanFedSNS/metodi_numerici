@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 # Array di valori L da considerare
-L_array = np.linspace(10, 30, 5, dtype=int)
+L_array = np.linspace(70, 120, 6, dtype=int)
 
 # Lista dei modelli
 algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
@@ -13,8 +13,8 @@ styles = ['o', 's']
 colori = plt.get_cmap('tab10')
 
 # Definizione dei limiti per il fit
-x_lim_metro = (0, 150)  # Limiti per il metodo Metro
-x_lim_cluster = (0, 15)  # Limiti per il metodo Cluster
+x_lim_metro = (0, 20)  # Limiti per il metodo Metro
+x_lim_cluster = (0, 20)  # Limiti per il metodo Cluster
 
 # Creazione della figura con due subplot (uno sopra l'altro)
 fig, (ax_metro, ax_cluster) = plt.subplots(2, 1, figsize=(10, 10), sharex=False)
