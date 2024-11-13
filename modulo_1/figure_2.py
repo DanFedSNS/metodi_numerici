@@ -49,9 +49,9 @@ for i, L in enumerate(L_array):
         markeredgewidth = params['line_width_axes'], zorder = 2)
 
 
-
-
 for ax_ in ax.flat:
+    for spine in ax_.spines.values():
+        spine.set_linewidth(params['line_width_axes'])
     ax_.tick_params(axis='x', labelsize=params['font_size_ticks'], 
                     width=params['line_width_axes'], direction='in')
     ax_.tick_params(axis='y', labelsize=params['font_size_ticks'], 

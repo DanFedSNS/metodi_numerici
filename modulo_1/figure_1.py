@@ -4,12 +4,9 @@ import os
 import sys
 
 # Parametri
-L_array = [120]
-beta_couple = [
-    [0.43, 0.4357, 0.4429, 0.45],   # Per il modello "ising2d_sq_cluster"
-    [0.43, 0.4357, 0.4429, 0.45], # Per il modello "ising2d_tri_cluster"
-    [0.43, 0.4357, 0.4429, 0.45]    # Per il modello "ising2d_hex_cluster"
-]
+L_array = [100]
+beta_unificato = [0.21, 0.36, 0.56, 0.79]  # Unico vettore di beta per tutti i modelli
+tau = int(1e6)
 modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
 
 def load_params(filepath):
@@ -37,35 +34,41 @@ colori = plt.get_cmap('tab10')
 # Definire i limiti dell'asse x
 x_limits_magnetization = [-1, 1]
 
+# Numero di intervalli per il binning
+n_intervalli = 1000
+bin_edges = np.linspace(-1, 1, n_intervalli + 1)
+
 # Loop sui valori di beta
-for j in range(4):
+for j, beta in enumerate(beta_unificato):
     # Loop sui modelli
     for k, modello in enumerate(modelli):
-        beta = beta_couple[k][j]
         # Loop sui valori di L
         for i in range(len(L_array)):
             L = L_array[i]
-            valori_mag = np.linspace(-1, 1, L**2 + 1)
 
-            filepath = f'./{modello}/L{L}_beta{(beta):.4f}.dat'
+            # Costruzione del percorso del file
+            filepath = f'./{modello}/L{L}_beta{(beta):.5f}.dat'
 
+            # Caricamento dei dati
             data = np.loadtxt(filepath, skiprows=1, delimiter=",")
             magnetization = data[:, 0]
+            magnetization = magnetization[tau:]
 
-            atol = 60 / (L**2)
-            # Calcolo della frequenza delle occorrenze di magnetizzazione
-            magnetization_frequencies = [
-                np.count_nonzero(np.isclose(magnetization, val, atol=atol)) for val in valori_mag
-            ]
-            
+            # Binning classico: calcolo della frequenza per ogni bin
+            magnetization_frequencies, _ = np.histogram(magnetization, bins=bin_edges)
+
+            # Calcolo del centro di ogni bin per il plotting
+            bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
             # Plot della distribuzione di magnetizzazione
             label = f'{modello.split("_")[1]} (L={L})'
             ax[j].plot(
-                valori_mag, magnetization_frequencies,
+                bin_centers, magnetization_frequencies,
                 color=colori(k), label=label,
                 marker='none', linewidth=params['line_width_axes']
             )
 
+    # Personalizzazione del grafico
     for spine in ax[j].spines.values():
         spine.set_linewidth(params['line_width_axes'])
 
