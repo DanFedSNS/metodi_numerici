@@ -50,4 +50,6 @@ void linspace(double *arr, double start, double stop, int num);
 
 void arange_int(int *arr, int start, int stop, int num);
 
+double assing_beta(int m, int i, int num_beta);
+
 #endif

@@ -260,3 +260,27 @@ void arange_int(int *arr, int start, int stop, int num){
         arr[i] = start + i * delta;
     }
 }
+
+double assing_beta(int m, int i, int num_beta){     //m indica il modello, i indica l'indice di beta_array
+    double beta_start, beta_stop;
+
+    if (m == 0){
+        beta_start = 0.1;
+        beta_stop =  0.2;
+    }
+    else if (m == 1){
+        beta_start = 1;
+        beta_stop =  2;        
+    }
+    else if (m == 2){
+        beta_start = 10;
+        beta_stop =  20;
+    }
+    else{
+        printf("\nErrore nella funzione assign_beta\n");
+        exit(1);
+    }
+
+    double delta = (beta_stop - beta_start) / (num_beta - 1);
+    return beta_start + i * delta;  //sarebbe l'i-esimo elemento di linspace(beta_start, beta_stop, num_beta)
+}

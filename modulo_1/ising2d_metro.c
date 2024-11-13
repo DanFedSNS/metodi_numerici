@@ -6,24 +6,12 @@
 #include <time.h>
 #include "./include/random.h"
 #include "./include/get_array.h"
-//#include <omp.h>
+#include <omp.h>
 #define pos(rx, ry, L) (rx * L + ry)
 
-int L;
 const int D = 2;
-int q;  //nearest neighbours number
-double beta;
-int lattice_size;
-double p[7];     //pk = exp(-2beta k)
-int iterations = 1e4;
-int iter_bet_meas = 1;    //iterations between two measures
-int num_measures = 1e5;
-bool save_config = false;
-void (*nearest)(int, int, int *, int *, int);
-double (*energy)(int *restrict, int, int, double);
-char modello[] = "ising2d_sq_metro";   //ising2d_tri_metro or ising2d_sq_metro or ising2d_hex_metro 
 
-void update(int *restrict reticolo){
+void update(int L, int *restrict reticolo, double *p, void (*nearest)(int, int, int *, int *, int), int q){
     int rx = (int)((double)L * myrand());
     int ry = (int)((double)L * myrand());
 
@@ -49,24 +37,27 @@ void update(int *restrict reticolo){
     }
 }
 
-void termalizzazione(int *restrict lattice, int iterations, int lattice_size){
-    printf("\nAggiornamenti sulla termalizzazione:\n");
+void termalizzazione(int L, int *restrict lattice, int iterations, int lattice_size, double *p,
+                     void (*nearest)(int, int, int *, int *, int), int q){
+    //printf("\nAggiornamenti sulla termalizzazione:\n");
     for (int i=0; i < iterations * lattice_size; i++){  //termalizzazione
-        update(lattice);
+        update(L, lattice, p, nearest, q);
 
-        if (i % (1000*lattice_size) == 0){
+        /*if (i % (1000*lattice_size) == 0){
             printf("\33[2K\r");
             printf("Iterazione %.2e di %.2e", (double)i / (double)lattice_size, (double)iterations);
-        }
+        }*/
     }
     
 }
 
-void presa_misure(int *restrict lattice, int lattice_size, int num_measures, int iter_bet_meas, FILE *fp, bool save_config, FILE *fp_config){
-    printf("\nAggiornamenti sulle misure:\n");
+void presa_misure(int L, double beta, int *restrict lattice, int lattice_size, int num_measures, 
+                  int iter_bet_meas, FILE *fp, bool save_config, FILE *fp_config, double *p,
+                  void (*nearest)(int, int, int *, int *, int), double (*energy)(int *restrict, int, int, double), int q){
+    //printf("\nAggiornamenti sulle misure:\n");
     for (int j=0; j < num_measures; j++){    // presa misure
         for (int i=0; i < iter_bet_meas * lattice_size; i++){
-            update(lattice);
+            update(L, lattice, p, nearest, q);
         }
 
         fprintf(fp, "%f, %f\n", magn_ising(lattice, lattice_size), energy(lattice, lattice_size, L, beta));
@@ -79,20 +70,22 @@ void presa_misure(int *restrict lattice, int lattice_size, int num_measures, int
             fprintf(fp_config, "\n");
         }
 
-        if (j % 1000 == 0){
+        /*if (j % 1000 == 0){
             printf("\33[2K\r");
             printf("Iterazione %.2e di %.2e", (double)j, (double)num_measures);
-        }
+        }*/
     }
 
 }
 
-void montecarlo(){
+void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_meas, int num_measures, bool save_config,
+                void (*nearest)(int, int, int *, int *, int), double (*energy)(int *restrict, int, int, double), int q){
     clock_t begin = clock();
 
-    lattice_size = L*L;
+    int lattice_size = L*L;
     int *restrict lattice = (int *) malloc(lattice_size * sizeof(int));
     
+    double p[7];     //pk = exp(-2beta k)
     for (int k=0; k <= q; k++){    //p[0] non verrà utilizzato mai, ma è comodo perché torna con k = sr * Sr
         p[k] = exp(- 2.0 * beta * ((double) k)); 
     }
@@ -103,9 +96,9 @@ void montecarlo(){
 
     init_file(modello, L, beta, &fp, iterations, iter_bet_meas, num_measures, save_config, &fp_config);
     
-    termalizzazione(lattice, iterations, lattice_size);
+    termalizzazione(L, lattice, iterations, lattice_size, p, nearest, q);
     
-    presa_misure(lattice, lattice_size, num_measures, iter_bet_meas, fp, save_config, fp_config);
+    presa_misure(L, beta, lattice, lattice_size, num_measures, iter_bet_meas, fp, save_config, fp_config, p, nearest, energy, q);
     
     free(lattice);
 
@@ -120,38 +113,44 @@ void montecarlo(){
 
 
 int main(void){
-    choose_geometry(modello, &nearest, &energy, &q);
+    char *modello_values[] = {"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro"};
+    int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
 
-    const unsigned long int seed1=(unsigned long int) time(NULL);
-    const unsigned long int seed2=seed1+127;
-    myrand_init(seed1, seed2);
-
-    int L_start = 10;
-    int L_stop = 30;
+    int L_start = 16;
+    int L_stop = 24;
     int num_L = 3;
     int L_array[num_L];
-    for (int i = 0; i < num_L + 1; i++) {
-        L_array[i] = L_start + i * (L_stop - L_start) / (num_L - 1);
-    }
+    arange_int(L_array, L_start, L_stop, num_L);
 
-    int num_beta = 5;
-    double beta_array[num_beta];
-    double beta_start = 0.4;
-    double beta_stop = 0.5;
+    int num_beta = 5;  
+    
+    #pragma omp parallel for collapse(3) shared(L_array, modello_values, num_beta)  // collapse the loops and define private variables
+    for (int m = 0; m < num_modelli; m++) {
+        for (int i = 0; i < num_beta; i++) {
+            for (int j = 0; j < num_L; j++) {
+                int iterations = 1e4;
+                int iter_bet_meas = 1;    //iterations between two measures
+                int num_measures = 1e5;
+                bool save_config = false;
+                
+                int q;  //nearest neighbours number
+                void (*nearest)(int, int, int *, int *, int);
+                double (*energy)(int *restrict, int, int, double);
 
-    for (int i = 0; i < num_beta + 1; i++) {
-        beta_array[i] = beta_start + i * (beta_stop-beta_start) / (num_beta - 1);
-    }
+                char *modello = modello_values[m];
+                choose_geometry(modello, &nearest, &energy, &q);
+                double beta = assing_beta(m, i, num_beta);
 
-//#pragma omp parallel for collapse(2)
+                printf("\n%s, L = %d, beta = %.4f", modello, L_array[j], beta);
+                // Initialize unique random seeds for each thread
+                unsigned long int seed1 = (unsigned long int)time(NULL) + omp_get_thread_num();
+                unsigned long int seed2 = seed1 + 127;
+                myrand_init(seed1, seed2);
 
-    for (int i = 0; i < num_beta; i++){
-        for (int j = 0; j < num_L; j++){
-            beta = beta_array[i];
-            L = L_array[j];
-            montecarlo();
+                montecarlo(L_array[j], beta, modello, iterations, iter_bet_meas, num_measures, save_config, nearest, energy, q);
+            }
         }
     }
-    
+
     return EXIT_SUCCESS;
 }
