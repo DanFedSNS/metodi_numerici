@@ -9,7 +9,6 @@
 #define scarto(x, y) ((y - x) / x)
 
 const int D = 2;
-char modello[] = "ising2d_hex_cluster";
 
 double autocorr(double *x, double x_avg, double x_std, int n, int len_x){   //funzione di autocorrelazione
     double res = 0;
@@ -111,13 +110,13 @@ void clear_initial_data(const char* datafile_o) {
     fclose(fp);
 }
 
-void analysis(int L, double beta){
+void analysis(int L, double beta, int skip_lines, char *modello){
     clock_t begin = clock();
-    
+
     int lattice_size = (int) pow(L, D);
     char datafile[50]; 
     FILE *fp; // pointer to file
-    sprintf(datafile, "./%s/L%d_beta%.4f.dat", modello, L, beta);
+    sprintf(datafile, "./%s/L%d_beta%.5f.dat", modello, L, beta);
     fp = fopen(datafile, "r");
 
     if(fp==NULL){
@@ -131,6 +130,16 @@ void analysis(int L, double beta){
     int iterations, iter_bet_meas, num_measures;
     sscanf(header, "m, E, beta = %lf, L = %*d, iterations = %d, iter_bet_meas = %d, num_measures = %d", &beta, &iterations, &iter_bet_meas, &num_measures);
     
+    // Skip the first 'skip_lines' lines
+    for (int i = 0; i < skip_lines; i++) {
+        if (fgets(header, sizeof(header), fp) == NULL) {
+            printf("\nIl valore di skip_lines = %d è maggiore della lunghezza del file\n", skip_lines);
+            exit(1);
+        }
+    }
+
+    num_measures -= skip_lines;
+
     double * restrict magn = malloc(num_measures * sizeof(double));
     double * restrict energy = malloc(num_measures * sizeof(double));
     if (magn == NULL || energy == NULL) {   //check if malloc worked
@@ -175,7 +184,7 @@ void analysis(int L, double beta){
 
     fp = fopen(datafile_o, "a");
 
-    fprintf(fp, "%.3f,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
+    fprintf(fp, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
         beta, specific_heat, susceptibility, magn_abs_avg, energy_avg,
         binder_cum, sigma_magn, sigma_energy, sigma_susceptibility, sigma_sp_heat);
 
@@ -215,13 +224,14 @@ void analysis(int L, double beta){
 }
 
 int main(void) {
+    char *modello_values[] = {"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro", "ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
+    int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
+    
     int L_start = 70;
     int L_stop = 120;
     int num_L = 6;
     int L_array[num_L];
-    for (int i = 0; i < num_L + 1; i++) {
-        L_array[i] = L_start + i * (L_stop - L_start) / (num_L - 1);
-    }
+    arange_int(L_array, L_start, L_stop, num_L);
 
     int num_beta = 15;
     double beta_array[num_beta];
@@ -232,18 +242,24 @@ int main(void) {
         beta_array[i] = beta_start + i * (beta_stop - beta_start) / (num_beta - 1);
     }
 
-    char datafile_o[50];
-    char datafile_ac[50];
+    int skip_lines = 0;
+   
+    #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta, skip_lines)  // collapse the loops and define private variables
+    for (int m = 0; m < num_modelli; m++){
+        for (int j = 0; j < num_L; j++) {
+            char *modello = modello_values[m];
+            char datafile_o[50];
+            char datafile_ac[50];
+            
+            sprintf(datafile_o, "./analysis_%s/L%d.dat", modello, L_array[j]); 
+            clear_initial_data(datafile_o);
 
-    for (int j = 0; j < num_L; j++) {
-        sprintf(datafile_o, "./analysis_%s/L%d.dat", modello, L_array[j]); 
-        clear_initial_data(datafile_o);
+            sprintf(datafile_ac, "./analysis_%s/L%d_autocorr.dat", modello, L_array[j]);
+            clear_initial_data(datafile_ac);
 
-        sprintf(datafile_ac, "./analysis_%s/L%d_autocorr.dat", modello, L_array[j]);
-        clear_initial_data(datafile_ac);
-
-        for (int i = 0; i < num_beta; i++) {
-            analysis(L_array[j], beta_array[i]);
+            for (int i = 0; i < num_beta; i++) {
+                analysis(L_array[j], beta_array[i], skip_lines, modello);
+            }
         }
     }
 
