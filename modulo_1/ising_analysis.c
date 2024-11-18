@@ -197,7 +197,7 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     //Autocorrelation function
     double energy_sd = sd(energy, energy_avg, num_measures);
     double magn_sd = sd(magn, magn_abs_avg, num_measures);
-    int max_autocorr = num_measures / 10;
+    int max_autocorr = 1e4;
     /*fprintf(fp, "autocorrelation_energy = ");
     for (int n = 0; n < max_autocorr; n++){
         fprintf(fp, "%lf, ", autocorr(energy, energy_avg, energy_sd, n, num_measures));
@@ -220,28 +220,20 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("\nL = %d, beta = %f ha impiegato %.3f secondi\n", L, beta, time_spent);
+    //printf("\nL = %d, beta = %f ha impiegato %.3f secondi\n", L, beta, time_spent);
 }
 
 int main(void) {
-    char *modello_values[] = {"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro", "ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
+    char *modello_values[] = {"ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
     
-    int L_start = 70;
-    int L_stop = 120;
-    int num_L = 6;
+    int L_start = 10;
+    int L_stop = 150;
+    int num_L = 15;
     int L_array[num_L];
     arange_int(L_array, L_start, L_stop, num_L);
 
-    int num_beta = 15;
-    double beta_array[num_beta];
-    double beta_start = 0.43;
-    double beta_stop = 0.45;
-    
-    for (int i = 0; i < num_beta + 1; i++) {
-        beta_array[i] = beta_start + i * (beta_stop - beta_start) / (num_beta - 1);
-    }
-
+    int num_beta = 50;
     int skip_lines = 0;
    
     #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta, skip_lines)  // collapse the loops and define private variables
@@ -258,7 +250,8 @@ int main(void) {
             clear_initial_data(datafile_ac);
 
             for (int i = 0; i < num_beta; i++) {
-                analysis(L_array[j], beta_array[i], skip_lines, modello);
+                double beta = assing_beta(m, i, num_beta);
+                analysis(L_array[j], beta, skip_lines, modello);
             }
         }
     }
