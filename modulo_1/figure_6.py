@@ -2,134 +2,106 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import os
-import sys
 
-# Definizione della parabola per il fit
 def parabola(x, A, B, C):
     return A * (x - B)**2 + C
 
-# Definizione della legge di potenza con offset
 def power_law(x, A, n, C):
     return A * x**n + C
-
-# Parametri
-L_array = np.linspace(70, 120, 6, dtype=int)
-L_dense = np.linspace(min(L_array), max(L_array), 200)  # 200 punti per una maggiore densità
-modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
-
-# Creazione dei dizionari per salvare i parametri del fit
-fit_params = {model: {'A': [], 'B': [], 'C': []} for model in modelli}
-
-# Definizione dei valori iniziali del parametro p0 per ogni modello
-p0_values = {
-    "ising2d_sq_cluster": [100, 0.4375, 150],  # Valori per il modello ising2d_sq_cluster
-    "ising2d_tri_cluster": [100, 0.4375, 150],  # Valori per il modello ising2d_tri_cluster
-    "ising2d_hex_cluster": [100, 0.4375, 150]   # Valori per il modello ising2d_hex_cluster
-}
 
 def load_params(filepath):
     params = {}
     with open(filepath, 'r') as f:
         for line in f:
             key, value = line.strip().split('=')
-            if key in ['fig_width', 'fig_height', 'dpi']:
-                params[key] = float(value)
-            else:
-                params[key] = float(value) if '.' in value else int(value)
+            params[key] = float(value) if '.' in value else int(value)
     return params
+
+def load_data(filepath):
+    try:
+        data = np.loadtxt(filepath, delimiter=",")
+        return data[:, 0], data[:, 2]
+    except OSError:
+        print(f"Errore nel caricamento del file: {filepath}")
+        return None, None
+
+def perform_fit(model, x, y, p0):
+    try:
+        popt, _ = curve_fit(parabola, x, y, p0=p0)
+        return popt
+    except RuntimeError:
+        print(f"Fit fallito per {model}")
+        return [1, 1, 1]
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 params = load_params('params.txt')
 
+L_array = np.linspace(70, 90, 3, dtype=int)
+L_dense = np.linspace(min(L_array), max(L_array), 200)
+modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
+p0_values = {model: [100, 0.4375, 150] for model in modelli}
+
+# Inizializzazione dei dizionari per i parametri di fit
+fit_params = {model: {'A': [], 'B': [], 'C': []} for model in modelli}
+fit_params_power_B = {}
+fit_params_power_C = {}
+
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
-
-colors = plt.get_cmap('tab10') 
+colors = plt.get_cmap('tab10')
 
 # Loop sui modelli e sui diversi valori di L
 for model in modelli:
-    for i, L in enumerate(L_array):
-        filepath = f'./analysis_{model}/L{L}.dat'
-        # Caricamento dati
-        data = np.loadtxt(filepath, delimiter=",")
+    for L in L_array:
+        filepath = f'./data/analysis_{model}/L{L}.dat'
+        beta, susceptibility = load_data(filepath)
 
-        beta = data[:, 0]  # Asse x
-        susceptibility = data[:, 2]  # Asse y (suscettività)
+        A, B, C = perform_fit(model, beta, susceptibility, p0_values[model])
+        fit_params[model]['A'].append(A)
+        fit_params[model]['B'].append(B)
+        fit_params[model]['C'].append(C)
 
-        try:
-            popt, _ = curve_fit(parabola, beta, susceptibility, p0=p0_values[model])
-            A, B, C = popt
-
-            # Salvataggio dei parametri
-            fit_params[model]['A'].append(A)
-            fit_params[model]['B'].append(B)
-            fit_params[model]['C'].append(C)
-
-        except RuntimeError:
-            print(f"Fit fallito per {model} con L={L}")
-            fit_params[model]['A'].append(1)
-            fit_params[model]['B'].append(1)
-            fit_params[model]['C'].append(1)
-
-# Aggiungere il fit ai parametri B e C con una legge di potenza + offset
-fit_params_power_B = {model: None for model in modelli}
-fit_params_power_C = {model: None for model in modelli}
-
+# Fit dei parametri B e C con la legge di potenza
 for model in modelli:
-    # Fit per il parametro B
     try:
         popt_B, _ = curve_fit(power_law, L_array, fit_params[model]['B'], p0=[1, -1, 0])
-        A_B, n_B, C_B = popt_B
-        fit_params_power_B[model] = (A_B, n_B, C_B)
-        print(f"Fit potenza per il parametro B (modello {model}): A = {A_B}, n = {n_B}, C = {C_B}")
+        fit_params_power_B[model] = popt_B
+        print(f"Fit potenza per B ({model}): {popt_B}")
     except RuntimeError:
         print(f"Fit potenza fallito per B nel modello {model}")
 
-    # Fit per il parametro C
     try:
         popt_C, _ = curve_fit(power_law, L_array, fit_params[model]['C'], p0=[1, -1, 0])
-        A_C, n_C, C_C = popt_C
-        fit_params_power_C[model] = (A_C, n_C, C_C)
-        print(f"Fit potenza per il parametro C (modello {model}): A = {A_C}, n = {n_C}, C = {C_C}")
+        fit_params_power_C[model] = popt_C
+        print(f"Fit potenza per C ({model}): {popt_C}")
     except RuntimeError:
         print(f"Fit potenza fallito per C nel modello {model}")
 
-
-# Creazione dei subplot
-fig, ax = plt.subplots(1, 2, figsize=(2*params['fig_width'], params['fig_height']))
-
-for i, model in enumerate(modelli):
-    ax[0].plot(L_array, fit_params[model]['B'], marker='o', color=colors(i), label=model, linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
-    fit_B = power_law(L_dense, *fit_params_power_B[model])
-    ax[0].plot(L_dense, fit_B, color=colors(i), label=f'Fit {model}', marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
-
-ax[0].set_xlabel('L')
-ax[0].set_ylabel('Parametro B')
-ax[0].legend(loc="upper right")
-#ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
+# Creazione dei plot
+fig, ax = plt.subplots(1, 2, figsize=(2 * params.get('fig_width', 10), params.get('fig_height', 5)))
 
 for i, model in enumerate(modelli):
-    ax[1].plot(L_array, fit_params[model]['C'], marker='o', color=colors(i), label=model, linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
-    fit_C = power_law(L_dense, *fit_params_power_C[model])
-    ax[1].plot(L_dense, fit_C, color=colors(i), label=f'Fit {model}', marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
+    ax[0].plot(L_array, fit_params[model]['B'], 'o', color=colors(i), label=model, markerfacecolor='white')
+    fit_B = power_law(L_dense, *fit_params_power_B.get(model, [0, 0, 0]))
+    ax[0].plot(L_dense, fit_B, color=colors(i), linewidth=params.get('line_width_axes', 1), alpha=0.5)
 
-ax[1].set_xlabel('L')
-ax[1].set_ylabel('Parametro C')
-ax[1].legend(loc="upper right")
-#ax[1].set_xticks(ticks=[0.43, 0.44, 0.45])
+    ax[1].plot(L_array, fit_params[model]['C'], 'o', color=colors(i), label=model, markerfacecolor='white')
+    fit_C = power_law(L_dense, *fit_params_power_C.get(model, [0, 0, 0]))
+    ax[1].plot(L_dense, fit_C, color=colors(i), linewidth=params.get('line_width_axes', 1), alpha=0.5)
 
-for ax_ in ax.flat:
-    for spine in ax_.spines.values():
-        spine.set_linewidth(params['line_width_axes'])
-    ax_.tick_params(axis='x', labelsize=params['font_size_ticks'], 
-                    width=params['line_width_axes'], direction='in')
-    ax_.tick_params(axis='y', labelsize=params['font_size_ticks'], 
-                    width=params['line_width_axes'], direction='in')
-    ax_.margins(x=0.00, y=0.00)
-    ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
-    ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
+# Personalizzazione dei plot
+for idx, label in enumerate(['Parametro B', 'Parametro C']):
+    ax[idx].set_xlabel('L')
+    ax[idx].set_ylabel(label)
+    ax[idx].legend(loc="upper right")
+    ax[idx].grid(True)
 
-# Impostazioni finali e salvataggio della figura
-plt.tight_layout(pad=params['pad'])
+    for spine in ax[idx].spines.values():
+        spine.set_linewidth(params.get('line_width_axes', 1))
+
+    ax[idx].tick_params(axis='x', labelsize=params.get('font_size_ticks', 10), direction='in')
+    ax[idx].tick_params(axis='y', labelsize=params.get('font_size_ticks', 10), direction='in')
+
+plt.tight_layout(pad=params.get('pad', 1))
 plt.savefig('./figure_6.pdf', format='pdf')
 plt.close(fig)

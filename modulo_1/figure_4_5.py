@@ -5,7 +5,7 @@ import sys
 from scipy.optimize import curve_fit
 
 # Array di valori L da considerare
-L_array = np.linspace(70, 120, 6, dtype=int)
+L_array = np.linspace(10, 150, 15, dtype=int)
 
 # Lista dei modelli
 algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
@@ -30,8 +30,8 @@ plt.rc('font', family='serif')
 colori = plt.get_cmap('tab10')
 
 # Definizione dei limiti per il FIT
-x_lim_metro = (0, 20)  # Limiti per il metodo Metro
-x_lim_cluster = (0, 20)  # Limiti per il metodo Cluster
+x_lim_metro = (0, 100)  # Limiti per il metodo Metro
+x_lim_cluster = (0, 30)  # Limiti per il metodo Cluster
 
 fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 2*params['fig_height']))
 
@@ -51,7 +51,7 @@ def power_law(L, alpha, c):
 for algo_index, algo in enumerate(algos):
     tau_values = []  # Lista per memorizzare i tau per ogni L
     for i, L in enumerate(L_array):
-        filepath = f'./analysis_{algo}/L{L}_autocorr.dat'
+        filepath = f'./data/analysis_{algo}/L{L}_autocorr.dat'
         data = np.loadtxt(filepath, delimiter=",")
 
         autocorr_m = data[index_beta_fixed, :]
@@ -97,14 +97,18 @@ for ax_ in ax.flat:
     
 ax[0].set_xlabel("Indice dei dati")
 ax[0].set_xlim(x_lim_metro)
+ax[0].set_ylim([0, 1])
 ax[0].set_ylabel("Autocorrelazione (M)")
-ax[0].legend(loc="upper right", ncol=2)
+#ax[0].set_yscale('log')
+#ax[0].legend(loc="upper right", ncol=2)
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 
 ax[1].set_xlabel("Indice dei dati")
 ax[1].set_xlim(x_lim_cluster)
-ax[1].set_ylabel("Autocorrelazione (M)")
-ax[1].legend(loc="upper right", ncol=2)
+ax[0].set_ylim([0, 1])
+ax[0].set_ylabel("Autocorrelazione (M)")
+#ax[0].set_yscale('log')
+#ax[1].legend(loc="upper right", ncol=2)
 #ax[1].set_xticks(ticks=[0.43, 0.44, 0.45])
 
 plt.tight_layout(pad=params['pad'])

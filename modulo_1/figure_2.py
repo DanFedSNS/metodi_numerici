@@ -4,8 +4,8 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(70, 120, 6, dtype=int)
-model = "ising2d_sq_cluster"
+L_array = np.linspace(10, 150, 15, dtype=int)
+model = "ising2d_tri_cluster"
 
 def load_params(filepath):
     params = {}
@@ -30,7 +30,7 @@ colors = plt.get_cmap('tab10')
 fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width'], 2*params['fig_height']))
 
 for i, L in enumerate(L_array):
-    filepath = f'./analysis_{model}/L{L}.dat'
+    filepath = f'./data/analysis_{model}/L{L}.dat'
     data = np.loadtxt(filepath, delimiter=",")
 
     beta = data[:, 0]  
@@ -59,7 +59,7 @@ for ax_ in ax.flat:
     ax_.margins(x=0.00, y=0.00)
     ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
     ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
-    ax_.set_xticks(ticks=[0.43, 0.44, 0.45])
+    ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
 
 ax[0, 0].set_title("Specific Heat")
 ax[0, 0].set_xlabel("Beta")

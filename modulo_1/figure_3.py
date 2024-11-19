@@ -4,8 +4,8 @@ import os
 import sys
 
 # Array di valori L da considerare
-L_array = np.linspace(70, 120, 6, dtype=int)
-beta_fixed = 0.275
+L_array = np.linspace(10, 150, 15, dtype=int)
+beta_fixed = 0.275102
 
 # Lista dei modelli
 algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
@@ -35,7 +35,7 @@ fig, ax = plt.subplots(1, 1, figsize=(params['fig_width'], params['fig_height'])
 
 for algo_index, algo in enumerate(algos):
     for i, L in enumerate(L_array):
-        filepath = f'./analysis_{algo}/L{L}.dat'
+        filepath = f'./data/analysis_{algo}/L{L}.dat'
 
         data = np.loadtxt(filepath, delimiter=",")
         

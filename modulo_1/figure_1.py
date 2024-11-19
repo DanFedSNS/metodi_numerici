@@ -47,7 +47,7 @@ for j, beta in enumerate(beta_unificato):
             L = L_array[i]
 
             # Costruzione del percorso del file
-            filepath = f'./{modello}/L{L}_beta{(beta):.5f}.dat'
+            filepath = f'./data/{modello}/L{L}_beta{(beta):.5f}.dat'
 
             # Caricamento dei dati
             data = np.loadtxt(filepath, skiprows=1, delimiter=",")
