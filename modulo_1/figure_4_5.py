@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 L_array = np.linspace(10, 150, 15, dtype=int)
 
 # Lista dei modelli
-algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
+algos = ["ising2d_hex_cluster", "ising2d_tri_metro"]
 
 def load_params(filepath):
     params = {}
@@ -35,7 +35,7 @@ x_lim_cluster = (0, 30)  # Limiti per il metodo Cluster
 
 fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 2*params['fig_height']))
 
-index_beta_fixed = 4
+index_beta_fixed = 26
 
 tau_metro = []
 tau_cluster = []
@@ -155,6 +155,7 @@ ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_m
 
 ax.legend(loc="upper left")
 ax.set_xlabel("L")
+ax.set_ylim([0, 100])
 ax.set_ylabel("Tempo Caratteristico")
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 

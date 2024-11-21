@@ -5,7 +5,7 @@ import sys
 
 # Array of different L values to consider
 L_array = np.linspace(10, 150, 15, dtype=int)
-model = "ising2d_hex_cluster"
+models = ["ising2d_hex_cluster", "ising2d_tri_cluster", "ising2d_sq_cluster"]
 
 def load_params(filepath):
     params = {}
@@ -25,63 +25,43 @@ params = load_params('params.txt')
 plt.rc('font', family='serif')
 
 colors = plt.get_cmap('tab10') 
+# Dizionario con i valori di beta_c per i tre modelli
+beta_c_values = {
+    "ising2d_hex_cluster": np.log(2 + np.sqrt(3)) / 2,
+    "ising2d_tri_cluster": np.log(np.sqrt(3)) / 2,
+    "ising2d_sq_cluster": np.log(1 + np.sqrt(2)) / 2
+}
 
-# Creiamo una figura con 4 subplot orizzontali
-fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width'], 2*params['fig_height']))
+# Creiamo una figura con 3 subplot verticali
+fig, axes = plt.subplots(len(models), 1, figsize=(params['fig_width'], len(models) * params['fig_height']))
 
-for i, L in enumerate(L_array):
-    filepath = f'./data/analysis_{model}/L{L}.dat'
-    data = np.loadtxt(filepath, delimiter=",")
+for ax, model in zip(axes, models):
+    for i, L in enumerate(L_array):
+        filepath = f'./data/analysis_{model}/L{L}.dat'
+        data = np.loadtxt(filepath, delimiter=",")
 
-    beta_c = np.log(2 + np.sqrt(3))/2   #sq: np.log(1 + np.sqrt(2)) / 2     #tri: np.log(np.sqrt(3))/2
-    beta = data[:, 0] 
-    beta = (beta - beta_c) * L
-    specific_heat = data[:, 1]  # Specific heat
-    susceptibility = data[:, 2] / L ** 1.75 # Susceptibility
-    magn_abs_avg = data[:, 3]  # Average absolute magnetization
-    energy_avg = data[:, 4]  # Average energy
- 
-    ax[0, 0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
-        markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[0, 1].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
-        markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[1, 0].plot(beta, magn_abs_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
-        markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[1, 1].plot(beta, energy_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
-        markeredgewidth = params['line_width_axes'], zorder = 2)
+        beta_c = beta_c_values[model]
+        beta = data[:, 0]
+        beta = (beta - beta_c) * L
+        susceptibility = data[:, 2] / L ** 1.75  # Susceptibility
 
+        ax.plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none',
+                markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
 
-for ax_ in ax.flat:
-    for spine in ax_.spines.values():
+    # Impostazioni estetiche per ogni subplot
+    for spine in ax.spines.values():
         spine.set_linewidth(params['line_width_axes'])
-    ax_.tick_params(axis='x', labelsize=params['font_size_ticks'], 
-                    width=params['line_width_axes'], direction='in')
-    ax_.tick_params(axis='y', labelsize=params['font_size_ticks'], 
-                    width=params['line_width_axes'], direction='in')
-    ax_.margins(x=0.00, y=0.00)
-    ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
-    ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
-    #ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
-
-ax[0, 0].set_title("Specific Heat")
-ax[0, 0].set_xlabel("Beta")
-ax[0, 0].set_ylabel("Specific Heat")
-ax[0, 0].legend(loc='best', fontsize=params['font_size_legend'])
-
-ax[0, 1].set_title("Susceptibility")
-ax[0, 1].set_xlabel("Beta")
-ax[0, 1].set_ylabel("Susceptibility")
-ax[0, 1].legend(loc='best', fontsize=params['font_size_legend'])
-
-ax[1, 0].set_title("Average Absolute Magnetization")
-ax[1, 0].set_xlabel("Beta")
-ax[1, 0].set_ylabel("Average Absolute Magnetization")
-ax[1, 0].legend(loc='best', fontsize=params['font_size_legend'])
-
-ax[1, 1].set_title("Average Energy")
-ax[1, 1].set_xlabel("Beta")
-ax[1, 1].set_ylabel("Average Energy")
-ax[1, 1].legend(loc='best', fontsize=params['font_size_legend'])
+    ax.tick_params(axis='x', labelsize=params['font_size_ticks'],
+                   width=params['line_width_axes'], direction='in')
+    ax.tick_params(axis='y', labelsize=params['font_size_ticks'],
+                   width=params['line_width_axes'], direction='in')
+    ax.margins(x=0.00, y=0.00)
+    ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
+    ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
+    ax.set_title(f"Susceptibility ({model.upper()} model)")
+    ax.set_xlabel("Beta")
+    ax.set_ylabel("Susceptibility")
+    ax.legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])
 plt.savefig('./figure_7.pdf', format='pdf')
