@@ -250,7 +250,7 @@ int main(void) {
             clear_initial_data(datafile_ac);
 
             for (int i = 0; i < num_beta; i++) {
-                double beta = assing_beta(modello, i, num_beta);
+                double beta = assign_beta(modello, i, num_beta);
                 analysis(L_array[j], beta, skip_lines, modello);
             }
         }

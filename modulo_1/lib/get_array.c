@@ -261,7 +261,7 @@ void arange_int(int *arr, int start, int stop, int num){
     }
 }
 
-double assing_beta(char *modello, int i, int num_beta){     //m indica il modello, i indica l'indice di beta_array
+double assign_beta(char *modello, int i, int num_beta){     //m indica il modello, i indica l'indice di beta_array
     double beta_start, beta_stop;
 
     if (strncmp(modello, "ising2d_tri", strlen("ising2d_tri")) == 0){
@@ -283,5 +283,34 @@ double assing_beta(char *modello, int i, int num_beta){     //m indica il modell
 
     double delta = (beta_stop - beta_start) / (num_beta - 1);
     return beta_start + i * delta;  //sarebbe l'i-esimo elemento di linspace(beta_start, beta_stop, num_beta)
+}
+
+double assign_beta_close(char *modello, int i, int num_beta, int L){   //close to beta_c
+    double b_start, b_stop, beta_c;
+
+    if (strncmp(modello, "ising2d_tri", strlen("ising2d_tri")) == 0){
+        b_start = -.8;
+        b_stop =  -.4;
+        beta_c = 0.2746531;
+    }
+    else if (strncmp(modello, "ising2d_sq", strlen("ising2d_sq")) == 0){
+        b_start = -.8;
+        b_stop = -.4;     
+        beta_c = 0.4406868;   
+    }
+    else if (strncmp(modello, "ising2d_hex", strlen("ising2d_hex")) == 0){
+        b_start = -1;
+        b_stop = 1;
+        beta_c = 0.6584789;
+    }
+    else{
+        printf("\nErrore nella funzione assign_beta: modello = %s non valido\n", modello);
+        exit(1);
+    }
+
+    double delta = (b_stop - b_start) / (num_beta - 1);
+    double b_res = b_start + i * delta;  //sarebbe l'i-esimo elemento di linspace(beta_start, beta_stop, num_beta)
+
+    return b_res / L + beta_c;
 }
 

@@ -50,6 +50,8 @@ void linspace(double *arr, double start, double stop, int num);
 
 void arange_int(int *arr, int start, int stop, int num);
 
-double assing_beta(char *modello, int i, int num_beta);
+double assign_beta(char *modello, int i, int num_beta);
+
+double assign_beta_close(char *modello, int i, int num_beta, int L);
 
 #endif

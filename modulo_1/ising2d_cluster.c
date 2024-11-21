@@ -161,7 +161,7 @@ int main(void){
 
                 char *modello = modello_values[m];
                 choose_geometry(modello, &nearest, &energy, &q);
-                double beta = assing_beta(m, i, num_beta);
+                double beta = assign_beta_close(modello, i, num_beta, L_array[j]);
                 
                 printf("\n%s, L = %d, beta = %.5f", modello, L_array[j], beta);
                 // Initialize unique random seeds for each thread
