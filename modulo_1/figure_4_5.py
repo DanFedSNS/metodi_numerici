@@ -6,7 +6,7 @@ from scipy.optimize import curve_fit
 
 # Array di valori L da considerare
 L_array = np.linspace(10, 150, 15, dtype=int)
-
+L_graph = np.linspace(110, 150, 5, dtype=int)
 # Lista dei modelli
 algos = ["ising2d_hex_cluster", "ising2d_tri_metro"]
 
@@ -76,9 +76,10 @@ for algo_index, algo in enumerate(algos):
         # Aggiunta del fit alla lista dei tau
         tau_values.append(tau_fit)
 
-        ax[algo_index].plot(x_fit, exp_decay(x_fit, *popt), color=colori(algo_index), label=label, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
-        ax[algo_index].plot(x_indices, autocorr_m, label=label, color=colori(algo_index), marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
-       
+        if L in L_graph:
+            ax[algo_index].plot(x_fit, exp_decay(x_fit, *popt), color=colori(algo_index), label=label, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
+            ax[algo_index].plot(x_indices, autocorr_m, label=label, color=colori(algo_index), marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
+            
     if "metro" in algo:
         tau_metro = tau_values
     else:
@@ -95,24 +96,24 @@ for ax_ in ax.flat:
     ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
     ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
     
-ax[0].set_xlabel("Indice dei dati")
+ax[0].set_xlabel("Indice dei dati", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[0].set_xlim(x_lim_metro)
 ax[0].set_ylim([0, 1])
-ax[0].set_ylabel("Autocorrelazione (M)")
+ax[0].set_ylabel("Autocorrelazione (M)", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 #ax[0].set_yscale('log')
-#ax[0].legend(loc="upper right", ncol=2)
+ax[0].legend(loc="upper right", fontsize=params['font_size_legend'])
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 
-ax[1].set_xlabel("Indice dei dati")
+ax[1].set_xlabel("Indice dei dati", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[1].set_xlim(x_lim_cluster)
 ax[0].set_ylim([0, 1])
-ax[0].set_ylabel("Autocorrelazione (M)")
+ax[0].set_ylabel("Autocorrelazione (M)", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 #ax[0].set_yscale('log')
-#ax[1].legend(loc="upper right", ncol=2)
+ax[1].legend(loc="upper right", fontsize=params['font_size_legend'])
 #ax[1].set_xticks(ticks=[0.43, 0.44, 0.45])
 
 plt.tight_layout(pad=params['pad'])
-plt.savefig('./figure_4.pdf', format='pdf')
+plt.savefig('./figure/figure_4.pdf', format='pdf')
 plt.close(fig)
 
 fig2, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
@@ -153,13 +154,13 @@ ax.margins(x=0.00, y=0.00)
 ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
 ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
 
-ax.legend(loc="upper left")
-ax.set_xlabel("L")
+ax.legend(loc="upper left", fontsize=params['font_size_legend'])
+ax.set_xlabel("L", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax.set_ylim([0, 100])
-ax.set_ylabel("Tempo Caratteristico")
+ax.set_ylabel("Tempo Caratteristico", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 
 # Salva la figura
 plt.tight_layout(pad=params['pad'])
-plt.savefig('./figure_5.pdf', format='pdf')
+plt.savefig('./figure/figure_5.pdf', format='pdf')
 plt.close(fig)

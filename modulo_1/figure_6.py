@@ -91,9 +91,9 @@ for i, model in enumerate(modelli):
 
 # Personalizzazione dei plot
 for idx, label in enumerate(['Parametro B', 'Parametro C']):
-    ax[idx].set_xlabel('L')
-    ax[idx].set_ylabel(label)
-    ax[idx].legend(loc="upper right")
+    ax[idx].set_xlabel('L', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax[idx].set_ylabel(label, fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax[idx].legend(loc="upper right", fontsize=params['font_size_legend'])
     ax[idx].grid(True)
 
     for spine in ax[idx].spines.values():
@@ -103,5 +103,5 @@ for idx, label in enumerate(['Parametro B', 'Parametro C']):
     ax[idx].tick_params(axis='y', labelsize=params.get('font_size_ticks', 10), direction='in')
 
 plt.tight_layout(pad=params.get('pad', 1))
-plt.savefig('./figure_6.pdf', format='pdf')
+plt.savefig('./figure/figure_6.pdf', format='pdf')
 plt.close(fig)

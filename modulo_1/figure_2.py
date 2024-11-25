@@ -27,7 +27,7 @@ plt.rc('font', family='serif')
 colors = plt.get_cmap('tab10') 
 
 # Creiamo una figura con 4 subplot orizzontali
-fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width'], 2*params['fig_height']))
+fig, ax = plt.subplots(2, 2, figsize=(params['fig_width'], params['fig_height']))
 
 for i, L in enumerate(L_array):
     filepath = f'./data/analysis_{model}/L{L}.dat'
@@ -61,26 +61,23 @@ for ax_ in ax.flat:
     ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
     ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
 
-ax[0, 0].set_title("Specific Heat")
-ax[0, 0].set_xlabel("Beta")
-ax[0, 0].set_ylabel("Specific Heat")
+
+ax[0, 0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0, 0].set_ylabel("Specific Heat", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[0, 0].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[0, 1].set_title("Susceptibility")
-ax[0, 1].set_xlabel("Beta")
-ax[0, 1].set_ylabel("Susceptibility")
+ax[0, 1].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0, 1].set_ylabel("Susceptibility", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[0, 1].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[1, 0].set_title("Average Absolute Magnetization")
-ax[1, 0].set_xlabel("Beta")
-ax[1, 0].set_ylabel("Average Absolute Magnetization")
+ax[1, 0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1, 0].set_ylabel("Average Absolute Magnetization", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[1, 0].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[1, 1].set_title("Average Energy")
-ax[1, 1].set_xlabel("Beta")
-ax[1, 1].set_ylabel("Average Energy")
+ax[1, 1].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1, 1].set_ylabel("Average Energy", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[1, 1].legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])
-plt.savefig('./figure_2.pdf', format='pdf')
+plt.savefig('./figure/figure_2.pdf', format='pdf')
 plt.close(fig)

@@ -4,9 +4,9 @@ import os
 import sys
 
 # Parametri
-L_array = [100]
+L_array = [20]
 beta_unificato = [0.21, 0.36, 0.56, 0.79]  # Unico vettore di beta per tutti i modelli
-tau = int(1e6)
+tau = int(5e4)
 modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
 
 def load_params(filepath):
@@ -27,7 +27,7 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 # Creiamo una figura con 4 subplot orizzontali
-fig, ax = plt.subplots(1, 4, figsize=(4*params['fig_width'], params['fig_height']))
+fig, ax = plt.subplots(1, 4, figsize=(2*params['fig_width']+0.25, 0.5*params['fig_height']))
 
 colori = plt.get_cmap('tab10')
 
@@ -35,7 +35,7 @@ colori = plt.get_cmap('tab10')
 x_limits_magnetization = [-1, 1]
 
 # Numero di intervalli per il binning
-n_intervalli = 1000
+n_intervalli = 401
 bin_edges = np.linspace(-1, 1, n_intervalli + 1)
 
 # Loop sui valori di beta
@@ -53,10 +53,10 @@ for j, beta in enumerate(beta_unificato):
             data = np.loadtxt(filepath, skiprows=1, delimiter=",")
             magnetization = data[:, 0]
             magnetization = magnetization[tau:]
-
+            
             # Binning classico: calcolo della frequenza per ogni bin
             magnetization_frequencies, _ = np.histogram(magnetization, bins=bin_edges)
-
+            magnetization_frequencies = magnetization_frequencies / len(magnetization)
             # Calcolo del centro di ogni bin per il plotting
             bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
@@ -90,5 +90,5 @@ for j, beta in enumerate(beta_unificato):
 
 # Migliora la spaziatura tra i subplot
 fig.tight_layout(pad=params['pad'])
-plt.savefig('./figure_1.pdf', format='pdf', dpi=int(params['dpi']))
+plt.savefig('./figure/figure_1.pdf', format='pdf', dpi=int(params['dpi']))
 plt.close(fig)
