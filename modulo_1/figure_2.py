@@ -4,7 +4,7 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(10, 150, 15, dtype=int)
+L_array = np.linspace(60, 150, 10, dtype=int)
 model = "ising2d_tri_cluster"
 
 def load_params(filepath):
@@ -21,7 +21,7 @@ def load_params(filepath):
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 params = load_params('params.txt')
 
-plt.rc('text', usetex=True)
+#plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 colors = plt.get_cmap('tab10') 
@@ -31,13 +31,13 @@ fig, ax = plt.subplots(2, 2, figsize=(params['fig_width'], params['fig_height'])
 
 for i, L in enumerate(L_array):
     filepath = f'./data/analysis_{model}/L{L}.dat'
-    data = np.loadtxt(filepath, delimiter=",")
+    data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
 
     beta = data[:, 0]  
-    specific_heat = data[:, 1]  # Specific heat
-    susceptibility = data[:, 2]  # Susceptibility
-    magn_abs_avg = data[:, 3]  # Average absolute magnetization
-    energy_avg = data[:, 4]  # Average energy
+    specific_heat = data[:, 3]  # Specific heat
+    susceptibility = data[:, 7]  # Susceptibility
+    magn_abs_avg = data[:, 5]  # Average absolute magnetization
+    energy_avg = data[:, 1]  # Average energy
  
     ax[0, 0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)

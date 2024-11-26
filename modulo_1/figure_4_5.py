@@ -5,10 +5,10 @@ import sys
 from scipy.optimize import curve_fit
 
 # Array di valori L da considerare
-L_array = np.linspace(10, 150, 15, dtype=int)
+L_array = np.linspace(60, 150, 10, dtype=int)
 L_graph = np.linspace(110, 150, 5, dtype=int)
 # Lista dei modelli
-algos = ["ising2d_hex_cluster", "ising2d_tri_metro"]
+algos = ["ising2d_tri_cluster", "ising2d_tri_metro"]
 
 def load_params(filepath):
     params = {}
@@ -35,7 +35,7 @@ x_lim_cluster = (0, 30)  # Limiti per il metodo Cluster
 
 fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 2*params['fig_height']))
 
-index_beta_fixed = 26
+index_beta_fixed = 19
 
 tau_metro = []
 tau_cluster = []
