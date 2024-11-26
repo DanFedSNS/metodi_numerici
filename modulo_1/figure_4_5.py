@@ -33,7 +33,7 @@ colori = plt.get_cmap('tab10')
 x_lim_metro = (0, 100)  # Limiti per il metodo Metro
 x_lim_cluster = (0, 30)  # Limiti per il metodo Cluster
 
-fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 2*params['fig_height']))
+fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 5/3*params['fig_height']))
 
 index_beta_fixed = 19
 
@@ -52,7 +52,7 @@ for algo_index, algo in enumerate(algos):
     tau_values = []  # Lista per memorizzare i tau per ogni L
     for i, L in enumerate(L_array):
         filepath = f'./data/analysis_{algo}/L{L}_autocorr.dat'
-        data = np.loadtxt(filepath, delimiter=",")
+        data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
 
         autocorr_m = data[index_beta_fixed, :]
         x_indices = np.arange(len(autocorr_m))

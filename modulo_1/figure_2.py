@@ -4,7 +4,8 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(60, 150, 10, dtype=int)
+#L_array = np.linspace(60, 150, 10, dtype=int)
+L_array = np.linspace(60, 150, 4, dtype=int)
 model = "ising2d_tri_cluster"
 
 def load_params(filepath):
@@ -27,7 +28,7 @@ plt.rc('font', family='serif')
 colors = plt.get_cmap('tab10') 
 
 # Creiamo una figura con 4 subplot orizzontali
-fig, ax = plt.subplots(2, 2, figsize=(params['fig_width'], params['fig_height']))
+fig, ax = plt.subplots(4, 1, figsize=(params['fig_width'], 2.5*params['fig_height']))
 
 for i, L in enumerate(L_array):
     filepath = f'./data/analysis_{model}/L{L}.dat'
@@ -39,13 +40,13 @@ for i, L in enumerate(L_array):
     magn_abs_avg = data[:, 5]  # Average absolute magnetization
     energy_avg = data[:, 1]  # Average energy
  
-    ax[0, 0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[0, 1].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[1].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[1, 0].plot(beta, magn_abs_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[2].plot(beta, magn_abs_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[1, 1].plot(beta, energy_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[3].plot(beta, energy_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
 
 
@@ -62,21 +63,21 @@ for ax_ in ax.flat:
     ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
 
 
-ax[0, 0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[0, 0].set_ylabel("Specific Heat", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[0, 0].legend(loc='best', fontsize=params['font_size_legend'])
+ax[0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_ylabel("Specific Heat", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[0, 1].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[0, 1].set_ylabel("Susceptibility", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[0, 1].legend(loc='best', fontsize=params['font_size_legend'])
+ax[1].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].set_ylabel("Susceptibility", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[1, 0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[1, 0].set_ylabel("Average Absolute Magnetization", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[1, 0].legend(loc='best', fontsize=params['font_size_legend'])
+ax[2].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[2].set_ylabel("Average Absolute Magnetization", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[2].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[1, 1].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[1, 1].set_ylabel("Average Energy", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[1, 1].legend(loc='best', fontsize=params['font_size_legend'])
+ax[3].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[3].set_ylabel("Average Energy", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[3].legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])
 plt.savefig('./figure/figure_2.pdf', format='pdf')

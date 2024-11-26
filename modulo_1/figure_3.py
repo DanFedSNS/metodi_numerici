@@ -4,7 +4,7 @@ import os
 import sys
 
 # Array di valori L da considerare
-L_array = np.linspace(10, 150, 15, dtype=int)
+L_array = np.linspace(60, 150, 10, dtype=int)
 beta_fixed = 0.275102
 
 # Lista dei modelli
@@ -31,13 +31,13 @@ plt.rc('font', family='serif')
 
 colors = plt.get_cmap('tab10') 
 
-fig, ax = plt.subplots(1, 1, figsize=(params['fig_width'], params['fig_height']))
+fig, ax = plt.subplots(1, 1, figsize=(params['fig_width'], 5/6*params['fig_height']))
 
 for algo_index, algo in enumerate(algos):
     for i, L in enumerate(L_array):
         filepath = f'./data/analysis_{algo}/L{L}.dat'
 
-        data = np.loadtxt(filepath, delimiter=",")
+        data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
         
         beta = data[:, 0]  
         sigma_m = data[:, 6] 
