@@ -100,6 +100,57 @@ double binning(double *x, int len_x, int bin_min, int bin_max){
     return sigma_fin / values_considered;
 }
 
+// compute the jacknife samples of <E>, <E^2>-<E>^2, <M>, <|M|>, <M^2>-<|M|^2>, <M2>, <M^4>/<M^2>^2
+void jacknife(double * restrict datajack, 
+                 double const * const restrict magn, 
+                 double const * const restrict energy, 
+                 long int num_bins, 
+                 int binsize){
+    long int i, r;
+    int j;
+    const long int sampleeff=num_bins*(long int) binsize;
+    double Etot, E2tot, Mabstot, M2tot;
+    double E, E2, Mabs, M2;
+
+    Etot=0.0;
+    E2tot=0.0;
+    Mabstot=0.0;
+    M2tot=0.0;
+
+    for(i=0; i<sampleeff; i++){
+        Etot+=energy[i];
+        E2tot+=pow(energy[i], 2.0);
+        Mabstot+=magn[i];
+        M2tot+=pow(magn[i],2.0);
+    }
+
+    for(i=0; i<num_bins; i++){
+        E=Etot;
+        E2=E2tot;
+        Mabs=Mabstot;
+        M2=M2tot;
+
+        for(j=0; j<binsize; j++){
+            r=i*binsize+j;
+
+            E-=energy[r];
+            E2-=pow(energy[r], 2.0);
+            Mabs-=magn[r];
+            M2-=pow(magn[r],2.0);
+        }
+
+        E/=(double)((num_bins-1)*binsize); 
+        E2/=(double)((num_bins-1)*binsize);
+        Mabs/=(double)((num_bins-1)*binsize);
+        M2/=(double)((num_bins-1)*binsize);
+
+        datajack[4*i+0]=E;
+        datajack[4*i+1]=E2-E*E;
+        datajack[4*i+3]=Mabs;
+        datajack[4*i+4]=M2-Mabs*Mabs;
+    }
+}
+
 void clear_initial_data(const char* datafile_o) {
     
     FILE *fp = fopen(datafile_o, "w");
@@ -175,7 +226,7 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     double sigma_energy = binning(energy, num_measures, bin_min, bin_max);
     double sigma_susceptibility = binning(chi_arr, num_measures, bin_min, bin_max);
     double sigma_sp_heat = binning(sp_heat_arr, num_measures, bin_min, bin_max);
-
+    
     free(chi_arr);
     free(sp_heat_arr);
 
@@ -188,9 +239,10 @@ void analysis(int L, double beta, int skip_lines, char *modello){
         beta, specific_heat, susceptibility, magn_abs_avg, energy_avg,
         binder_cum, sigma_magn, sigma_energy, sigma_susceptibility, sigma_sp_heat);
 
+    
     fclose(fp);
 
-    char datafile_ac[50]; // file name
+    /*char datafile_ac[50]; // file name
     sprintf(datafile_ac, "./analysis_%s/L%d_autocorr.dat", modello, L);
     fp = fopen(datafile_ac, "a");
 
@@ -198,12 +250,12 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     double energy_sd = sd(energy, energy_avg, num_measures);
     double magn_sd = sd(magn, magn_abs_avg, num_measures);
     int max_autocorr = 1e4;
-    /*fprintf(fp, "autocorrelation_energy = ");
+    fprintf(fp, "autocorrelation_energy = ");
     for (int n = 0; n < max_autocorr; n++){
         fprintf(fp, "%lf, ", autocorr(energy, energy_avg, energy_sd, n, num_measures));
     }
     fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
-    */
+    
     for (int n = 0; n < max_autocorr; n++) {
         if (n == max_autocorr - 1) {
             fprintf(fp, "%lf", autocorr(magn, magn_abs_avg, magn_sd, n, num_measures));
@@ -214,7 +266,7 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     fprintf(fp, "\n");
 
     
-    fclose(fp);
+    fclose(fp);*/
     free(magn);
     free(energy);
     
@@ -224,16 +276,16 @@ void analysis(int L, double beta, int skip_lines, char *modello){
 }
 
 int main(void) {
-    char *modello_values[] = {"ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
+    char *modello_values[] = {"ising2d_tri_cluster"}; //, "ising2d_sq_cluster", "ising2d_hex_cluster"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
     
-    int L_start = 10;
-    int L_stop = 150;
-    int num_L = 15;
+    int L_start = 30;
+    int L_stop = 40;
+    int num_L = 2;
     int L_array[num_L];
     arange_int(L_array, L_start, L_stop, num_L);
 
-    int num_beta = 50;
+    int num_beta = 2;
     int skip_lines = 0;
    
     #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta, skip_lines)  // collapse the loops and define private variables
@@ -250,7 +302,7 @@ int main(void) {
             clear_initial_data(datafile_ac);
 
             for (int i = 0; i < num_beta; i++) {
-                double beta = assign_beta(modello, i, num_beta);
+                double beta = assign_beta_close(modello, i, num_beta, L_array[j]);
                 analysis(L_array[j], beta, skip_lines, modello);
             }
         }

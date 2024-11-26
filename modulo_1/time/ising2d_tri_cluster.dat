@@ -132,3 +132,11 @@ time = 0.05 min, beta = 0.251926, L = 22, iterations = 10000, iter_bet_meas = 1,
 time = 0.05 min, beta = 0.256471, L = 22, iterations = 10000, iter_bet_meas = 1, num_measures = 100000
 
 time = 0.02 min, beta = 0.242835, L = 22, iterations = 10000, iter_bet_meas = 1, num_measures = 100000
+
+time = 0.05 min, beta = 0.257986, L = 30, iterations = 10000, iter_bet_meas = 1, num_measures = 100000
+
+time = 0.08 min, beta = 0.262153, L = 40, iterations = 10000, iter_bet_meas = 1, num_measures = 100000
+
+time = 0.14 min, beta = 0.278820, L = 30, iterations = 10000, iter_bet_meas = 1, num_measures = 100000
+
+time = 0.21 min, beta = 0.277778, L = 40, iterations = 10000, iter_bet_meas = 1, num_measures = 100000

@@ -39,7 +39,7 @@ for ix, file_path in enumerate(file_path_list):
 
     ax.plot(L_values, avg_time, marker='o', linestyle="none", label = f"{file_path}")
 
-print(filtered_data.to_string())
+
 plt.ylabel("Time (min)", fontsize=12)
 plt.xlabel("L", fontsize=12)
 plt.grid(True)

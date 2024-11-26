@@ -289,18 +289,18 @@ double assign_beta_close(char *modello, int i, int num_beta, int L){   //close t
     double b_start, b_stop, beta_c;
 
     if (strncmp(modello, "ising2d_tri", strlen("ising2d_tri")) == 0){
-        b_start = -.8;
-        b_stop =  -.4;
+        b_start = -0.5;
+        b_stop =  0.125;
         beta_c = 0.2746531;
     }
     else if (strncmp(modello, "ising2d_sq", strlen("ising2d_sq")) == 0){
-        b_start = -.8;
-        b_stop = -.4;     
+        b_start = -0.75;
+        b_stop = 0.125;     
         beta_c = 0.4406868;   
     }
     else if (strncmp(modello, "ising2d_hex", strlen("ising2d_hex")) == 0){
-        b_start = -1;
-        b_stop = 1;
+        b_start = -1.0;
+        b_stop = 0.5;
         beta_c = 0.6584789;
     }
     else{
