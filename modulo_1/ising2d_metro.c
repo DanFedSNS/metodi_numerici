@@ -60,7 +60,7 @@ void presa_misure(int L, double beta, int *restrict lattice, int lattice_size, i
             update(L, lattice, p, nearest, q);
         }
 
-        fprintf(fp, "%f, %f\n", magn_ising(lattice, lattice_size), energy(lattice, lattice_size, L, beta));
+        fprintf(fp, "%.10f, %.10f\n", magn_ising(lattice, lattice_size), energy(lattice, lattice_size, L, beta));
         
         if (save_config == true){
             for (int a=0; a < lattice_size; a++){

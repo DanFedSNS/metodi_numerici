@@ -11,71 +11,79 @@
 
 const int D = 2;
 
-int update(int L, int *restrict reticolo, int lattice_size, double prob,
-           void (*nearest)(int, int, int *, int *, int), int q){
-    bool *restrict reticolo_aus = (bool*) malloc(lattice_size * sizeof(bool));     //reticolo_aus[x][y][z] = reticolo_aus[x * L^2 + y * L + z]
-    int *restrict clusterx = (int*) malloc(lattice_size * sizeof(int));
-    int *restrict clustery = (int*) malloc(lattice_size * sizeof(int));
+void build_cluster_norec(int const * const restrict reticolo, 
+                         long int r, 
+                         int * restrict occup, 
+                         long int * restrict pointtoocc, 
+                         long int * restrict clustersize,
+                         void (*nearest)(int, int, int *, int *, int),
+                         long int volume,
+                         double prob, int q, int L){
+    long int r1, nnew;    
+    long int nold=0; // starting value, with *clustersize=1
 
-    for (int j=0; j<lattice_size; j++){
-        reticolo_aus[j] = false;
-    }
-
-    int nold = 0;
-    int nnew = 1;
-    int lc = 1;
-
-    int rx = (int)((double)L * myrand());
-    int ry = (int)((double)L * myrand());
-
-    clusterx[0] = rx;
-    clustery[0] = ry;
-    reticolo_aus[pos(rx, ry, L)] = true;
+    // if first neighbors have the same orientation and are not occupied
+    // they are added to the cluster with probability prob
 
     int nnx[q], nny[q];
-    while (nold < nnew){
-        for (int p = nold; p < nnew; p++){
-            nearest(clusterx[p], clustery[p], nnx, nny, L);  //nn of cluster[p]
-            for (int i = 0; i < q; i++){
-                if (reticolo_aus[pos(nnx[i], nny[i], L)] == false && reticolo[pos(nnx[i], nny[i], L)] == reticolo[pos(clusterx[p], clustery[p], L)] && myrand() < prob){                    
-                    clusterx[lc] = nnx[i]; 
-                    clustery[lc] = nny[i];
+    while(*clustersize>nold){ // this means that there are sites recently added, whose neighbors has not been checked yet, so we check them
+        nnew=*clustersize;
 
-                    reticolo_aus[pos(nnx[i], nny[i], L)] = true;
-                    lc++;
+        for (int p = nold; p < nnew; p++){
+            r1=pointtoocc[p];
+            nearest(r1/L, r1%L, nnx, nny, L);  //nn of cluster[p]
+            
+            for (int i = 0; i < q; i++){
+                if(occup[pos(nnx[i], nny[i], L)]==0 && reticolo[r1]*reticolo[pos(nnx[i], nny[i], L)]==1){
+                    if(myrand()<prob){
+                        occup[pos(nnx[i], nny[i], L)]=1;
+                        pointtoocc[*clustersize] = pos(nnx[i], nny[i], L);
+                        (*clustersize)++;
+                    }
                 }
             }
         }
 
-        nold = nnew;
-        nnew = lc;
+        nold=nnew;
     }
+}
 
-    for (int i = 0; i < lc; i++){
-        reticolo[pos(clusterx[i], clustery[i], L)] *= -1;
-    }
+void update(int L, int *restrict reticolo, int lattice_size, double prob,
+            void (*nearest)(int, int, int *, int *, int), int q){
+    int *occup=(int *)malloc((unsigned long int)(lattice_size)*sizeof(int));
+    long int *pointtoocc = (long int *)malloc((unsigned long int)(lattice_size)*sizeof(long int));
     
-    free(reticolo_aus);
-    free(clusterx);
-    free(clustery);
+    for(int r=0; r<lattice_size; r++){
+        occup[r]=0;
+    }
+    long int clustersize = 0;
 
-    return lc;
+    int r=(int)((double)lattice_size*myrand());
+    occup[r]=1; // r is set as occupied
+    pointtoocc[0]=r; // a pointer to "r" is added in position "clustersize"
+    clustersize++;
+
+    build_cluster_norec(reticolo, r, occup, pointtoocc, &clustersize, nearest, lattice_size, prob, q, L);
+
+    for(int r=0; r<clustersize; r++){
+        reticolo[pointtoocc[r]] = -reticolo[pointtoocc[r]];
+    }
+
+    free(occup);
+    free(pointtoocc);
 }
 
 void termalizzazione(int L, int *restrict lattice, int iterations, int lattice_size, double prob,
                      void (*nearest)(int, int, int *, int *, int), int q){
     //printf("\nAggiornamenti sulla termalizzazione:\n");
-    int lunghezza_cluster_media = 0;
     for (int i=0; i < iterations; i++){  //termalizzazione
-        lunghezza_cluster_media += update(L, lattice, lattice_size, prob, nearest, q); 
+        update(L, lattice, lattice_size, prob, nearest, q); 
         
         /*if (i % 1000 == 0){
             printf("\33[2K\r");
             printf("Iterazione %.2e di %.2e", (double)i, (double)iterations);
         }*/
     }
-
-    //printf("\nlunghezza media cluster = %f", (double)lunghezza_cluster_media / iterations);
 }
 
 void presa_misure(int L, double beta, int *restrict lattice, int lattice_size, int num_measures, int iter_bet_meas, 
@@ -135,24 +143,21 @@ void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_
 
 
 int main(void){
-    char *modello_values[] = {"ising2d_tri_cluster"}; //{"ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
+    char *modello_values[] = {"ising2d_sq_cluster"}; //{"ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
     
-    int L_start = 30;
-    int L_stop = 40;
-    int num_L = 2;
-    int L_array[num_L];
-    arange_int(L_array, L_start, L_stop, num_L);
+    int num_L = 1;
+    int L_array[] = {90};
 
-    int num_beta = 2;
+    int num_beta = 40;
     
     for (int m = 0; m < num_modelli; m++) {       
         #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta) schedule(dynamic, 1)  // collapse the loops and define private variables
         for (int i = 0; i < num_beta; i++){
             for (int j = 0; j < num_L; j++){
-                int iterations = 1e4;
+                int iterations = 0;
                 int iter_bet_meas = 1;    //iterations between two measures
-                int num_measures = 1e5; 
+                int num_measures = 1e6; 
                 bool save_config = false; 
 
                 int q;

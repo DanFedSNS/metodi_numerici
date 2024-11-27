@@ -180,7 +180,7 @@ double energy_sq(int *restrict reticolo, int lattice_size, int L, double beta){
         }
     }
 
-    return sum * beta / (double) lattice_size;
+    return sum / (double) lattice_size;
 } 
 
 double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta){
@@ -202,7 +202,7 @@ double energy_tri(int *restrict reticolo, int lattice_size, int L, double beta){
         }
     }
 
-    return sum * beta / (double) lattice_size;
+    return sum / (double) lattice_size;
 } 
 
 double energy_hex(int *restrict reticolo, int lattice_size, int L, double beta){
@@ -222,7 +222,7 @@ double energy_hex(int *restrict reticolo, int lattice_size, int L, double beta){
         }
     }
 
-    return sum * beta / (double) lattice_size;
+    return sum / (double) lattice_size;
 }
 
 void choose_geometry(char *modello, void (**nearest)(int, int, int *, int *, int), double (**energy)(int *restrict, int, int, double), int *q){

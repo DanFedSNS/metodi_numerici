@@ -5,8 +5,8 @@ import sys
 
 # Array of different L values to consider
 #L_array = np.linspace(60, 150, 10, dtype=int)
-L_array = np.linspace(60, 150, 4, dtype=int)
-model = "ising2d_tri_cluster"
+L_array = np.linspace(90, 100, 2, dtype=int)
+model = "ising2d_sq_cluster"
 
 def load_params(filepath):
     params = {}
@@ -60,7 +60,7 @@ for ax_ in ax.flat:
     ax_.margins(x=0.00, y=0.00)
     ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
     ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
-    ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
+    #ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
 
 
 ax[0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])

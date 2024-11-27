@@ -4,8 +4,8 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(10, 150, 15, dtype=int)
-models = ["ising2d_hex_cluster", "ising2d_tri_cluster", "ising2d_sq_cluster"]
+L_array = np.linspace(90, 150, 4, dtype=int)
+models = ["ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_tri_cluster"]
 
 def load_params(filepath):
     params = {}
@@ -38,12 +38,13 @@ fig, axes = plt.subplots(len(models), 1, figsize=(params['fig_width'], len(model
 for ax, model in zip(axes, models):
     for i, L in enumerate(L_array):
         filepath = f'./data/analysis_{model}/L{L}.dat'
-        data = np.loadtxt(filepath, delimiter=",")
+        data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
+
 
         beta_c = beta_c_values[model]
         beta = data[:, 0]
         beta = (beta - beta_c) * L
-        susceptibility = data[:, 2] / L ** 1.75  # Susceptibility
+        susceptibility = data[:, 7] / L ** 1.75  # Susceptibility
 
         ax.plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none',
                 markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
