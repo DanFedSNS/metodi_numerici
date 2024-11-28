@@ -113,9 +113,9 @@ int main()
     
     int num_beta = 40;
     
-    #pragma omp parallel for shared(num_beta)  // collapse the loops and define private variables
+    #pragma omp parallel for shared(num_beta) schedule(dynamic, 1) // collapse the loops and define private variables
     for (int i = 0; i < num_beta; i++){
-        int L = 90;
+        int L = 100;
         double beta = assign_beta_close("ising2d_sq", i, num_beta, L);
         int i, *lattice, *occup;
         long int r, volume, sample, iter, clustersize; 
@@ -195,7 +195,7 @@ int main()
         //return EXIT_FAILURE;
         }
 
-        fprintf(fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %d\n", beta, L, 0, 1, sample); 
+        fprintf(fp, "m, E, beta = %f, L = %d, iterations = %d, iter_bet_meas = %d, num_measures = %ld\n", beta, L, 0, 1, sample); 
         // probability of addition to the cluster
         prob=1.0-exp(-2.0*beta);
 
@@ -224,7 +224,7 @@ int main()
         locE=energy(lattice, nnp, volume);
         locM=magn(lattice, volume);
 
-        fprintf(fp, "%.12f, %.12f\n", locM, locE);
+        fprintf(fp, "%.12f %.12f\n", locM, locE);
         }
 
         // close datafile

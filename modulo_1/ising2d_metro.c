@@ -125,7 +125,7 @@ int main(void){
     int num_beta = 5;  
     
     for (int m = 0; m < num_modelli; m++) {
-        #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta)  // collapse the loops and define private variables
+        #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta) schedule(dynamic, 1) // collapse the loops and define private variables
         for (int i = 0; i < num_beta; i++) {
             for (int j = 0; j < num_L; j++) {
                 int iterations = 0;

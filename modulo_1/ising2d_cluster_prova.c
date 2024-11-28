@@ -60,7 +60,7 @@ void update(int L, int *restrict reticolo, int lattice_size, double prob,
 
     int r=(int)((double)lattice_size*myrand());
     occup[r]=1; // r is set as occupied
-    pointtoocc[0]=r; // a pointer to "r" is added in position "clustersize"
+    pointtoocc[clustersize]=r; // a pointer to "r" is added in position "clustersize"
     clustersize++;
 
     build_cluster_norec(reticolo, r, occup, pointtoocc, &clustersize, nearest, lattice_size, prob, q, L);
@@ -71,19 +71,6 @@ void update(int L, int *restrict reticolo, int lattice_size, double prob,
 
     free(occup);
     free(pointtoocc);
-}
-
-void termalizzazione(int L, int *restrict lattice, int iterations, int lattice_size, double prob,
-                     void (*nearest)(int, int, int *, int *, int), int q){
-    //printf("\nAggiornamenti sulla termalizzazione:\n");
-    for (int i=0; i < iterations; i++){  //termalizzazione
-        update(L, lattice, lattice_size, prob, nearest, q); 
-        
-        /*if (i % 1000 == 0){
-            printf("\33[2K\r");
-            printf("Iterazione %.2e di %.2e", (double)i, (double)iterations);
-        }*/
-    }
 }
 
 void presa_misure(int L, double beta, int *restrict lattice, int lattice_size, int num_measures, int iter_bet_meas, 
@@ -118,7 +105,7 @@ void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_
 
     int lattice_size = L*L;
     int *restrict lattice = (int *) malloc(lattice_size * sizeof(int));
-    double prob = 1.0 -  exp(- 2.0 * beta);
+    double prob = 1.0 - exp(- 2.0 * beta);
 
     initialize_lattice_ising(lattice, lattice_size);
     
@@ -126,8 +113,6 @@ void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_
 
     init_file(modello, L, beta, &fp, iterations, iter_bet_meas, num_measures, save_config, &fp_config);
 
-    termalizzazione(L, lattice, iterations, lattice_size, prob, nearest, q);
-    
     presa_misure(L, beta, lattice, lattice_size, num_measures, iter_bet_meas, fp, fp_config, save_config, prob, nearest, energy, q);
 
     free(lattice);
