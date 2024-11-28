@@ -46,7 +46,7 @@ for algo_index, algo in enumerate(algos):
         beta_index = (np.abs(beta - beta_fixed)).argmin()
 
         # Plotta la suscettività per ogni modello al variare di L
-        ax.plot(L, sigma_m[beta_index], styles[algo_index], color=colors(algo_index), label=f'{algo.split("_")[2].capitalize()} - L={L}' if i == 0 else "", markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
+        ax.plot(L, sigma_m[beta_index], styles[algo_index], color=colors(algo_index), label=f'{algo.split("_")[2].capitalize()}' if i == 0 else "", markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
     
 
 for spine in ax.spines.values():
@@ -60,8 +60,8 @@ ax.margins(x=0.00, y=0.00)
 ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
 ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
 
-ax.set_xlabel("Dimensione del reticolo (L)", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_ylabel("Errore su M", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax.set_xlabel("L", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax.set_ylabel("$\\sigma_{\\langle m \\rangle}$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax.legend(loc='best', fontsize=params['font_size_legend'])
 ax.set_xticks(ticks=[10, 50, 80, 100])
 

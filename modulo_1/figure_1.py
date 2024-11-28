@@ -61,7 +61,7 @@ for j, beta in enumerate(beta_unificato):
             bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
             # Plot della distribuzione di magnetizzazione
-            label = f'{modello.split("_")[1]} (L={L})'
+            label = f'{modello.split("_")[1]}'
             ax[j].plot(
                 bin_centers, magnetization_frequencies,
                 color=colori(k), label=label,
@@ -72,8 +72,9 @@ for j, beta in enumerate(beta_unificato):
     for spine in ax[j].spines.values():
         spine.set_linewidth(params['line_width_axes'])
 
-    ax[j].set_xlabel('Magnetization per site', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-    ax[j].set_ylabel('Occurrences', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax[j].set_title('$\\beta = ' + str(beta) + '$', fontsize=params['font_size_axis'])
+    ax[j].set_xlabel('m', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax[j].set_ylabel('P(m)', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
     ax[j].set_xlim(x_limits_magnetization)
 
     handles, labels = ax[j].get_legend_handles_labels()

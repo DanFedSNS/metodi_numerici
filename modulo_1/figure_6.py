@@ -19,7 +19,7 @@ def load_params(filepath):
 
 def load_data(filepath):
     try:
-        data = np.loadtxt(filepath, delimiter=",")
+        data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
         return data[:, 0], data[:, 2]
     except OSError:
         print(f"Errore nel caricamento del file: {filepath}")
@@ -78,19 +78,20 @@ for model in modelli:
         print(f"Fit potenza fallito per C nel modello {model}")
 
 # Creazione dei plot
-fig, ax = plt.subplots(1, 2, figsize=(2 * params.get('fig_width', 10), params.get('fig_height', 5)))
+fig, ax = plt.subplots(2, 1, figsize=(params.get('fig_width', 10), 1.5*params.get('fig_height', 5)))
 
 for i, model in enumerate(modelli):
-    ax[0].plot(L_array, fit_params[model]['B'], 'o', color=colors(i), label=model, markerfacecolor='white')
+    label = f'{model.split("_")[1]}'
+    ax[0].plot(L_array, fit_params[model]['B'], 'o', color=colors(i), label=label, markerfacecolor='white')
     fit_B = power_law(L_dense, *fit_params_power_B.get(model, [0, 0, 0]))
     ax[0].plot(L_dense, fit_B, color=colors(i), linewidth=params.get('line_width_axes', 1), alpha=0.5)
 
-    ax[1].plot(L_array, fit_params[model]['C'], 'o', color=colors(i), label=model, markerfacecolor='white')
+    ax[1].plot(L_array, fit_params[model]['C'], 'o', color=colors(i), label=label, markerfacecolor='white')
     fit_C = power_law(L_dense, *fit_params_power_C.get(model, [0, 0, 0]))
     ax[1].plot(L_dense, fit_C, color=colors(i), linewidth=params.get('line_width_axes', 1), alpha=0.5)
 
 # Personalizzazione dei plot
-for idx, label in enumerate(['Parametro B', 'Parametro C']):
+for idx, label in enumerate(['$\\beta_p$', '$\\chi_p$']):
     ax[idx].set_xlabel('L', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
     ax[idx].set_ylabel(label, fontsize=params['font_size_axis'], labelpad=params['label_pad'])
     ax[idx].legend(loc="upper right", fontsize=params['font_size_legend'])

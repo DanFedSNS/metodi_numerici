@@ -28,8 +28,9 @@ plt.rc('font', family='serif')
 colors = plt.get_cmap('tab10') 
 
 # Creiamo una figura con 4 subplot orizzontali
-fig, ax = plt.subplots(4, 1, figsize=(params['fig_width'], 2.5*params['fig_height']))
+fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width']+0.25, 1.5*params['fig_height']))
 
+ax = ax.flatten()
 for i, L in enumerate(L_array):
     filepath = f'./data/analysis_{model}/L{L}.dat'
     data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
@@ -63,20 +64,20 @@ for ax_ in ax.flat:
     #ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
 
 
-ax[0].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[0].set_ylabel("Specific Heat", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_ylabel("$C$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[0].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[1].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[1].set_ylabel("Susceptibility", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].set_ylabel("$\chi'$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[1].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[2].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[2].set_ylabel("Average Absolute Magnetization", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[2].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[2].set_ylabel("$\\langle |m|\\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[2].legend(loc='best', fontsize=params['font_size_legend'])
 
-ax[3].set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[3].set_ylabel("Average Energy", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[3].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[3].set_ylabel("$\\langle E \\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[3].legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])

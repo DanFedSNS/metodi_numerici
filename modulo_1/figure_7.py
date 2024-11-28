@@ -33,7 +33,7 @@ beta_c_values = {
 }
 
 # Creiamo una figura con 3 subplot verticali
-fig, axes = plt.subplots(len(models), 1, figsize=(params['fig_width'], len(models) * params['fig_height']))
+fig, axes = plt.subplots(3, 1, figsize=(params['fig_width'], 2.25*params['fig_height']))
 
 for ax, model in zip(axes, models):
     for i, L in enumerate(L_array):
@@ -59,8 +59,8 @@ for ax, model in zip(axes, models):
     ax.margins(x=0.00, y=0.00)
     ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
     ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
-    ax.set_xlabel("Beta", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-    ax.set_ylabel("Susceptibility", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax.set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax.set_ylabel("$\\chi'$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
     ax.legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])

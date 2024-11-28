@@ -33,7 +33,7 @@ colori = plt.get_cmap('tab10')
 x_lim_metro = (0, 100)  # Limiti per il metodo Metro
 x_lim_cluster = (0, 30)  # Limiti per il metodo Cluster
 
-fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 5/3*params['fig_height']))
+fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 1.5*params['fig_height']))
 
 index_beta_fixed = 19
 
@@ -52,7 +52,10 @@ for algo_index, algo in enumerate(algos):
     tau_values = []  # Lista per memorizzare i tau per ogni L
     for i, L in enumerate(L_array):
         filepath = f'./data/analysis_{algo}/L{L}_autocorr.dat'
-        data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
+        data = np.genfromtxt(filepath, delimiter=",", dtype=float, filling_values=np.nan)
+
+        print(np.isnan(data).any(), np.isinf(data).any())
+
 
         autocorr_m = data[index_beta_fixed, :]
         x_indices = np.arange(len(autocorr_m))
@@ -68,7 +71,7 @@ for algo_index, algo in enumerate(algos):
         x_fit = x_indices[mask_fit]
         y_fit = autocorr_m[mask_fit]
 
-        label = f'{algo.split("_")[2].capitalize()} - L={L}'
+        label = f'L={L}'
 
         popt, _ = curve_fit(exp_decay, x_fit, y_fit, p0=[1, 10])
         A_fit, tau_fit = popt
@@ -77,7 +80,7 @@ for algo_index, algo in enumerate(algos):
         tau_values.append(tau_fit)
 
         if L in L_graph:
-            ax[algo_index].plot(x_fit, exp_decay(x_fit, *popt), color=colori(algo_index), label=label, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
+            ax[algo_index].plot(x_fit, exp_decay(x_fit, *popt), color=colori(algo_index), label=None, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
             ax[algo_index].plot(x_indices, autocorr_m, label=label, color=colori(algo_index), marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
             
     if "metro" in algo:
@@ -96,19 +99,19 @@ for ax_ in ax.flat:
     ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
     ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
     
-ax[0].set_xlabel("Indice dei dati", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_xlabel("Numero di aggiornamenti", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[0].set_xlim(x_lim_metro)
 ax[0].set_ylim([0, 1])
-ax[0].set_ylabel("Autocorrelazione (M)", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_ylabel("Autocorr di $m$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 #ax[0].set_yscale('log')
 ax[0].legend(loc="upper right", fontsize=params['font_size_legend'])
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 
-ax[1].set_xlabel("Indice dei dati", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].set_xlabel("Numero di aggiornamenti", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[1].set_xlim(x_lim_cluster)
-ax[0].set_ylim([0, 1])
-ax[0].set_ylabel("Autocorrelazione (M)", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-#ax[0].set_yscale('log')
+ax[1].set_ylim([0, 1])
+ax[1].set_ylabel("Autocorr di $m$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+#ax[1].set_yscale('log')
 ax[1].legend(loc="upper right", fontsize=params['font_size_legend'])
 #ax[1].set_xticks(ticks=[0.43, 0.44, 0.45])
 
@@ -116,7 +119,7 @@ plt.tight_layout(pad=params['pad'])
 plt.savefig('./figure/figure_4.pdf', format='pdf')
 plt.close(fig)
 
-fig2, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
+fig2, ax = plt.subplots(figsize=(params['fig_width'], 0.75*params['fig_height']))
 
 # Plot dei tempi caratteristici al variare di L
 ax.plot(L_array, tau_metro, label="Metro", color='blue', marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)

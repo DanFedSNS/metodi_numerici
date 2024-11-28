@@ -2,7 +2,7 @@ import subprocess
 
 scripts = [
     "./modulo_1/figure_1.py",
-    "./modulo_1/figure_2.py"
+    "./modulo_1/figure_2.py",
     "./modulo_1/figure_3.py",
     "./modulo_1/figure_4_5.py",
     "./modulo_1/figure_6.py",

@@ -1,3 +1,4 @@
+//OPEN ################################################################
 #include<math.h>
 #include<stdio.h>
 #include<stdlib.h>
@@ -24,7 +25,7 @@ double magn(int const * const restrict lattice, long int volume)
 
   return (double) sum / (double) volume;
   }
-
+//CLOSE ################################################################
 
 // energy per site
 double energy(int const * const restrict lattice, 
@@ -46,15 +47,15 @@ double energy(int const * const restrict lattice,
   return (double) sum / (double) volume;
   }
 
-
+//OPEN ################################################################
 // non-recursive construction of the culter
 void build_cluster_norec(int const * const restrict lattice, 
                          long int r, 
                          int * restrict occup, 
                          long int * restrict pointtoocc, 
                          long int * restrict clustersize,
-                         long int const * const restrict nnp, 
-                         long int const * const restrict nnm,
+                         long int const * const restrict nnp, //DIVERSO
+                         long int const * const restrict nnm, // DIVERSO
                          long int volume,
                          double prob)
   {
@@ -67,7 +68,7 @@ void build_cluster_norec(int const * const restrict lattice,
 
   // if first neighbors have the same orientation and are not occupied
   // they are added to the cluster with probability prob
-
+//CLOSE ################################################################
   while(*clustersize>oldcs) // this means that there are sites recently added, whose neighbors has not been checked yet, so we check them
        { 
        oldcsnew=*clustersize;
@@ -122,7 +123,6 @@ int main()
         long int *nnp, *nnm, *pointtoocc;
         double locE, locM, prob;
         
-      
         sample = 1e6;
         char datafile[STRING_LENGTH];
         sprintf(datafile, "./%s/L%d_beta%.5f.dat", "bonati", L, beta);
@@ -201,30 +201,30 @@ int main()
 
         for(iter=0; iter<sample; iter++)
         {
-        for(r=0; r<volume; r++) 
-            {
-            occup[r]=0;
-            }
-        clustersize=0;
+            for(r=0; r<volume; r++) 
+                {
+                occup[r]=0;
+                }
+            clustersize=0;
 
-        r=(int)((double)volume*myrand());
-        occup[r]=1; // r is set as occupied
-        pointtoocc[clustersize]=r; // a pointer to "r" is added in position "clustersize"
-        clustersize++;
+            r=(int)((double)volume*myrand());
+            occup[r]=1; // r is set as occupied
+            pointtoocc[clustersize]=r; // a pointer to "r" is added in position "clustersize"
+            clustersize++;
 
-        //build_cluster_rec(lattice, r, occup, pointtoocc, &clustersize, nnp, nnm, volume, prob);
-        build_cluster_norec(lattice, r, occup, pointtoocc, &clustersize, nnp, nnm, volume, prob);
+            //build_cluster_rec(lattice, r, occup, pointtoocc, &clustersize, nnp, nnm, volume, prob);
+            build_cluster_norec(lattice, r, occup, pointtoocc, &clustersize, nnp, nnm, volume, prob);
 
-        // flip the cluster
-        for(r=0; r<clustersize; r++)
-            {
-            lattice[pointtoocc[r]]=-lattice[pointtoocc[r]];
-            }
+            // flip the cluster
+            for(r=0; r<clustersize; r++)
+                {
+                lattice[pointtoocc[r]]=-lattice[pointtoocc[r]];
+                }
 
-        locE=energy(lattice, nnp, volume);
-        locM=magn(lattice, volume);
+            locE=energy(lattice, nnp, volume);
+            locM=magn(lattice, volume);
 
-        fprintf(fp, "%.12f %.12f\n", locM, locE);
+            fprintf(fp, "%.12f %.12f\n", locM, locE);
         }
 
         // close datafile
