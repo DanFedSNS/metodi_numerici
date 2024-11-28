@@ -10,6 +10,7 @@
 
 #define DIM 2 // dimensionality
 #define STRING_LENGTH 50
+#define nn_pos(rr, ii, q) ((rr) * q + (ii))
 
 // magnetization per site
 double magn(int const * const restrict lattice, long int volume)
@@ -50,7 +51,7 @@ void build_cluster_norec(int const * const restrict lattice,
                          double prob,
                          int q)
   {
-  #define nn_pos(rr, ii) ((rr) * q + (ii))
+  
   (void) r; // just to avoid warnings
   int i;
   long int index, r1;
@@ -71,12 +72,12 @@ void build_cluster_norec(int const * const restrict lattice,
 
           for(i=0; i<q; i++)
              {
-             if(occup[nn[nn_pos(r1, i)]]==0 && lattice[r1]*lattice[nn[nn_pos(r1, i)]]==1)
+             if(occup[nn[nn_pos(r1, i, q)]]==0 && lattice[r1]*lattice[nn[nn_pos(r1, i, q)]]==1)
                {
                if(myrand()<prob)
                  {
-                 occup[nn[nn_pos(r1, i)]]=1;
-                 pointtoocc[*clustersize]=nn[nn_pos(r1, i)];
+                 occup[nn[nn_pos(r1, i, q)]]=1;
+                 pointtoocc[*clustersize]=nn[nn_pos(r1, i, q)];
                  (*clustersize)++;
                  }
                }
@@ -95,8 +96,11 @@ int main()
     char *modello_values[] = {"ising2d_sq_cluster"}; //{"ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
     
-    int num_L = 1;
-    int L_array[] = {100};
+    int L_start = 16;
+    int L_stop = 24;
+    int num_L = 3;
+    int L_array[num_L];
+    arange_int(L_array, L_start, L_stop, num_L);
 
     int num_beta = 40;
     
@@ -116,7 +120,6 @@ int main()
               
               char *modello = modello_values[mm];
               choose_geometry(modello, &nearest, &energy, &q);
-              int nnx[q], nny[q];
     
               double beta = assign_beta_close(modello, ii, num_beta, L_array[jj]);
               
