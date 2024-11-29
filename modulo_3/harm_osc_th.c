@@ -133,8 +133,7 @@ void overrelaxation(double *restrict lattice, long int r, double nnsum, double e
 	lattice[r] = ris;
 }
 
-int montecarlo(int Nt, double simbeta, long int sample)
-{
+int montecarlo(int Nt, double simbeta, long int sample){
 	double begin = omp_get_wtime();
 	double *lattice;
 	long int r, acc;
@@ -142,7 +141,9 @@ int montecarlo(int Nt, double simbeta, long int sample)
 	double nnsum;
 	double x, x2, Knaive;
 
-	char datafile[] = "prova.dat";
+	char datafile[STRING_LENGTH];
+	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta); // file name initialized with a string
+
 	FILE *fp;
 
 	const int measevery = 10;
@@ -181,8 +182,7 @@ int montecarlo(int Nt, double simbeta, long int sample)
 	nnm[0] = Nt - 1;
 
 	// initialize lattice
-	for (r = 0; r < Nt; r++)
-	{
+	for (r = 0; r < Nt; r++){
 		lattice[r] = 0.0;
 	}
 
@@ -194,13 +194,12 @@ int montecarlo(int Nt, double simbeta, long int sample)
 		return EXIT_FAILURE;
 	}
 
+	fprintf(fp, "Nt = %d, simbeta = %.10f, sample = %ld\n", Nt, simbeta, sample/measevery);
+
 	acc = 0;
-	for (int iter = 0; iter < sample; iter++)
-	{
-		if (myrand() < 0.5)
-		{
-			for (r = 0; r < Nt; r++)
-			{
+	for (int iter = 0; iter < sample; iter++){
+		if (myrand() < 0.5){
+			for (r = 0; r < Nt; r++){
 				nnsum = lattice[nnp[r]] + lattice[nnm[r]];
 
 				#ifdef METRO
@@ -210,8 +209,7 @@ int montecarlo(int Nt, double simbeta, long int sample)
 				#endif
 			}
 		}
-		else
-		{
+		else{
 			// overrelaxation
 			for (int j = 0; j < overrelaxsteps; j++){
 				for (r = 0; r < Nt; r++){
@@ -228,11 +226,13 @@ int montecarlo(int Nt, double simbeta, long int sample)
 			Knaive = calc_Knaive(lattice, nnp, Nt, eta);
 
 			fprintf(fp, "%.10f %.10f %.10f ", x, x2, Knaive);
-			int n_corr_max = 2;
+			int n_corr_max = 3;
 			for (int n = 1; n <= n_corr_max; n++){
 				for (int m = 1; m <= n_corr_max; m++){
-					for (int deltat = 0; deltat <= Nt / 4; deltat+= Nt/4){
-						fprintf(fp, "%.10f ", correlator(lattice, Nt, deltat, n, m));
+					if ((n+m) % 2 == 0 && m >= n){
+						for (int deltat = Nt/4 - 1; deltat <= Nt / 4; deltat+= Nt/4){
+							fprintf(fp, "%.10f ", correlator(lattice, Nt, deltat, n, m));
+						}
 					}
 				}
 			}

@@ -5,7 +5,7 @@
 #include<stdbool.h>
 #include<time.h>
 #include "./include/get_array.h"
-//#include<omp.h>
+#include<omp.h>
 #define scarto(x, y) ((y - x) / x)
 
 const int D = 2;
@@ -161,9 +161,9 @@ void analysis(int L, double beta, int skip_lines, char *modello){
 
     fp = fopen(datafile_o, "a");
 
-    fprintf(fp, "%lf ", beta);
+    fprintf(fp, "%.10f ", beta);
     for(int j=0; j<4; j++){
-       fprintf(fp, "%lf %lf ", res[j], err[j]);
+       fprintf(fp, "%.10f %.10f ", res[j], err[j]);
     }
     fprintf(fp, "\n");
 

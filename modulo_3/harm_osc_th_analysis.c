@@ -1,9 +1,8 @@
-#include<math.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include"../include/read_data.h"
 
 #define STRING_LENGTH 50
 
@@ -13,178 +12,175 @@
 // thir columns = K (averaged on Nt)
 
 // compute the jacknife samples of <x>, <x^2>, <Knaive>, <Hnaive>, <H>
-void computejack(double * restrict datajack, 
-                 double const * const restrict data, 
-                 long int numberofbins, 
+void computejack(double *restrict datajack,
+                 double const *const restrict data,
+                 long int numberofbins,
                  int binsize,
-                 double eta)
-  {
-  long int i, r;
-  int j;
-  const long int sampleeff=numberofbins*(long int) binsize;
-  double xtot, x2tot, Ktot;
-  double x, x2, K;
+                 double eta,
+                 int n) // 'n' is the number of variables
+{
+    long int i, r;
+    int j, var;
+    const long int sampleeff = numberofbins * (long int)binsize;
+    double *totals = malloc(n * sizeof(double)); // To store totals for each variable
+    double *subtotals = malloc(n * sizeof(double)); // To store subtotals in the bin loop
 
-  xtot=0.0;
-  x2tot=0.0;
-  Ktot=0.0;
-
-  for(i=0; i<sampleeff; i++)
-     {
-     xtot +=data[3*i+0];
-     x2tot+=data[3*i+1];
-     Ktot +=data[3*i+2];
-     }
-
-  for(i=0; i<numberofbins; i++)
-     {
-     x=xtot;
-     x2=x2tot;
-     K=Ktot;
-
-     for(j=0; j<binsize; j++)
-        {
-        r=i*binsize+j;
-
-        x -=data[3*r+0];
-        x2-=data[3*r+1];
-        K -=data[3*r+2];
-        }
-
-     x/=(double)((numberofbins-1)*binsize); 
-     x2/=(double)((numberofbins-1)*binsize);
-     K/=(double)((numberofbins-1)*binsize);
-  
-     datajack[4*i+0]=x;
-     datajack[4*i+1]=x2;
-     datajack[4*i+2]=K;
-     datajack[4*i+3]=0.5*x2 -K +0.5/eta;
-     }
-  }
-
-
-// main
-int main(int argc, char **argv)
-    {
-    int therm, binsize, j;
-    long int sample, numberofbins, sampleeff, i, Nt;
-    double simbeta, eta;
-    double *data, *datajack, ris[4], err[4];   // 4 becuse there are 4 observables
-    char datafile[STRING_LENGTH];
-
-    if(argc != 6)
-      {
-      fprintf(stdout, "How to use this program:\n");
-      fprintf(stdout, "  %s therm binsize datafile simbeta Nt\n\n", argv[0]);
-      fprintf(stdout, "  therm = number of lines to be discarded as thermalization\n");
-      fprintf(stdout, "  binsize = size of the bin to be used in binning/blocking\n");
-      fprintf(stdout, "  datafile = name of the data file to be analyzed\n");
-      fprintf(stdout, "  simbeta = hbar*omega/(k_B T)\n");
-      fprintf(stdout, "  Nt = number of temporal steps\n\n");
-      fprintf(stdout, "Output:\n");
-      fprintf(stdout, "  <x>, err, <x^2>, err, <Knaive>, err, <H>, err\n");
-      fprintf(stdout, "  computed using binning and jackknife\n\n");
-
-      return EXIT_SUCCESS;
-      }
-    else
-      {
-      // read input
-      therm=atoi(argv[1]);
-      binsize=atoi(argv[2]);
-
-      if(strlen(argv[3]) >= STRING_LENGTH)
-        {
-        fprintf(stderr, "File name too long. Increse STRING_LENGTH or shorten the name (%s, %d)\n", __FILE__, __LINE__);
-        return EXIT_FAILURE;
-        }
-      else
-        {
-        strcpy(datafile, argv[3]);
-        }
-      }
-    simbeta=atof(argv[4]);
-    Nt=atol(argv[5]);
-
-    if(Nt<=1)
-      {
-      fprintf(stderr, "'Nt' must be larger than 1\n");
-      return EXIT_FAILURE;
-      }
-
-    // definition of eta
-    eta=simbeta/(double) Nt;
-
-    if(binsize<=0)
-      {
-      fprintf(stderr, "'binsize' must be positive\n");
-      return EXIT_FAILURE;
-      }
-
-    // determine the length of the file
-    sample=linecounter_mc(datafile, 3);
-
-    // initialize numberofbins and sampleeff
-    numberofbins=(sample-therm)/binsize;
-    sampleeff=numberofbins*binsize;
-
-    // allocate data arrays
-    data=(double *)malloc((unsigned long int)(3*sampleeff)*sizeof(double)); // 3 columns!
-    if(data==NULL)
-      {
-      fprintf(stderr, "Allocation problem at (%s, %d)\n", __FILE__, __LINE__);
-      return EXIT_FAILURE;
-      }
-
-    // allocate jackknife samples
-    datajack=(double *)malloc((unsigned long int)(4*numberofbins)*sizeof(double)); // 4 because there are 4 observables
-    if(datajack==NULL)
-      {
-      fprintf(stderr, "Allocation problem at (%s, %d)\n", __FILE__, __LINE__);
-      return EXIT_FAILURE;
-      }
-
-    // initialize data
-    readdata_mc(datafile, therm, sampleeff, data, 3);
-
-    // compute jackknife resamplings
-    computejack(datajack, data, numberofbins, binsize, eta);
-
-    // compute average
-    for(j=0; j<4; j++)
-       {
-       ris[j]=0.0;
-       for(i=0; i<numberofbins; i++)
-          {
-          ris[j]+=datajack[4*i+j];
-          }
-       ris[j]/=(double)numberofbins;
-       }
-
-    // compute error
-    for(j=0; j<4; j++)
-       {
-       err[j]=0.0;
-       for(i=0; i<numberofbins; i++)
-          {
-          err[j]+=pow(ris[j]-datajack[4*i+j], 2.0);
-          }
-       // this corrects for a factor that is irrelevant but we leave it just for clarity
-       err[j]*=(double)(numberofbins-1);
-       err[j]/=(double)numberofbins;
-       err[j]=sqrt(err[j]);
-       }
-
-    // free data arrays
-    free(data);
-    free(datajack);
-
-    for(j=0; j<4; j++)
-       {
-       printf("%.12f %.12f ", ris[j], err[j]);
-       }
-    printf("\n");
-
-    return EXIT_SUCCESS;
+    // Initialize totals to zero
+    for (var = 0; var < n; var++) {
+        totals[var] = 0.0;
     }
 
+    // Calculate the total sums for all variables
+    for (i = 0; i < sampleeff; i++) {
+        for (var = 0; var < n; var++) {
+            totals[var] += data[n * i + var];
+        }
+    }
+
+    // Loop over bins
+    for (i = 0; i < numberofbins; i++) {
+        // Copy totals to subtotals
+        for (var = 0; var < n; var++) {
+            subtotals[var] = totals[var];
+        }
+
+        // Subtract bin data from subtotals
+        for (j = 0; j < binsize; j++) {
+            r = i * binsize + j;
+            for (var = 0; var < n; var++) {
+                subtotals[var] -= data[n * r + var];
+            }
+        }
+
+        // Normalize and assign values to `datajack`
+        for (var = 0; var < n; var++) {
+            subtotals[var] /= (double)((numberofbins - 1) * binsize);
+            datajack[(n + 1) * i + var] = subtotals[var]; // Use an extended column width (n + 1)
+        }
+
+        // Compute the special value and place it in the last column
+        if (n >= 3) { // Ensure there are at least three variables
+            datajack[(n + 1) * i + n] = 0.5 * subtotals[1] - subtotals[2] + 0.5 / eta;
+        }
+    }
+
+    // Free allocated memory
+    free(totals);
+    free(subtotals);
+}
+
+
+void analysis(int Nt, double simbeta){
+	int skip_lines, binsize, j;
+	long int sample, numberofbins, sampleeff, i;
+	double eta;
+	double *data, *datajack;
+	FILE *fp;
+	char datafile[STRING_LENGTH];
+	skip_lines = 1e4;
+	int num_vars = 7;	//x, x^2, K, corrs
+
+	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta);
+	fp = fopen(datafile, "r");
+
+	char header[1000];
+    fgets(header, sizeof(header), fp);  //ottiene la prima riga
+	
+    sscanf(header, "Nt = %*d, simbeta = %*f, sample = %ld", &sample);
+ 	
+	binsize = sample / 100;
+	
+	// definition of eta
+	eta = simbeta / (double)Nt;
+	
+	// initialize numberofbins and sampleeff
+	sample -= skip_lines;
+	numberofbins = sample / binsize;
+	sampleeff = numberofbins * binsize;
+	
+	// allocate data arrays
+	data = (double *)malloc((unsigned long int)(num_vars * sampleeff) * sizeof(double)); // 3 columns!
+	if (data == NULL){
+		fprintf(stderr, "Allocation problem at (%s, %d)\n", __FILE__, __LINE__);
+		exit(1);
+	}
+
+	// allocate jackknife samples
+	datajack = (double *)malloc((unsigned long int)((num_vars + 1) * numberofbins) * sizeof(double)); // 4 because there are 4 observables
+	if (datajack == NULL){
+		fprintf(stderr, "Allocation problem at (%s, %d)\n", __FILE__, __LINE__);
+		exit(1);
+	}
+	
+	// Skip the first 'skip_lines' lines
+    for (i = 0; i < skip_lines; i++) {
+        if (fgets(header, sizeof(header), fp) == NULL) {
+            printf("\nIl valore di skip_lines = %d è maggiore della lunghezza del file\n", skip_lines);
+            exit(1);
+        }
+    }
+
+	for (i = 0; i < sampleeff; i++){
+        for (int var = 0; var < num_vars; var++) {
+			if (fscanf(fp, "%lf", &data[num_vars * i + var]) != 1){
+				fprintf(stderr, "Error reading variable %d for data index %ld\n", var, i);
+				exit(EXIT_FAILURE);
+    		}
+		}
+	}
+
+
+    fclose(fp);
+     
+	// compute jackknife resamplings
+	computejack(datajack, data, numberofbins, binsize, eta, num_vars);
+
+	int num_res = num_vars + 1;
+	double ris[num_res], err[num_res];
+	// compute average
+	for (j = 0; j < num_res; j++){
+		ris[j] = 0.0;
+		for (i = 0; i < numberofbins; i++){
+			ris[j] += datajack[num_res * i + j];
+		}
+
+		ris[j] /= (double)numberofbins;
+	}
+
+	// compute error
+	for (j = 0; j < num_res; j++){
+		err[j] = 0.0;
+		for (i = 0; i < numberofbins; i++){
+			err[j] += pow(ris[j] - datajack[num_res * i + j], 2.0);
+		}
+		// this corrects for a factor that is irrelevant but we leave it just for clarity
+		err[j] *= (double)(numberofbins - 1);
+		err[j] /= (double)numberofbins;
+		err[j] = sqrt(err[j]);
+	}
+
+	// free data arrays
+	free(data);
+	free(datajack);
+
+	char datafile_o[50]; // file name
+    sprintf(datafile_o, "./analysis/Nt%d_simbeta%.1f.dat", Nt, simbeta);
+	
+	fp = fopen(datafile_o, "w");
+	fprintf(fp, "Nt = %d, simbeta = %.10f\n", Nt, simbeta);
+
+	for (j = 0; j < num_res; j++){
+		fprintf(fp, "%.10f %.10f\n", ris[j], err[j]);
+	}
+
+	fclose(fp);
+}
+
+int main(){
+	int Nt = 10;
+	double simbeta = 5.0;
+
+	analysis(Nt, simbeta);
+
+	return EXIT_SUCCESS;
+}
