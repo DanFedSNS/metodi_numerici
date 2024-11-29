@@ -79,7 +79,6 @@ double calc_Knaive(double const *const restrict lattice,
 double correlator(double const *const restrict lattice, long int Nt, long int deltat, int n, int m)
 {
 	long int r, raux;
-	int i;
 	double res = 0;
 
 	for (r = 0; r < Nt; r++){
@@ -92,21 +91,18 @@ double correlator(double const *const restrict lattice, long int Nt, long int de
 }
 
 // Metropolis update, return 1 if accepted
-int metropolis(double *restrict lattice, long int r, double nnsum, double eta, const double delta)
-{
+int metropolis(double *restrict lattice, long int r, double nnsum, double eta, const double delta){
 	double trial, Eold, Enew;
 
 	Eold = lattice[r] * lattice[r] * (eta / 2.0 + 1. / eta) - lattice[r] * nnsum / eta;
 	trial = lattice[r] + delta * (1.0 - 2.0 * myrand());
 	Enew = trial * trial * (eta / 2.0 + 1. / eta) - trial * nnsum / eta;
 
-	if (Enew < Eold)
-	{
+	if (Enew < Eold){
 		lattice[r] = trial;
 		return 1;
 	}
-	else if (myrand() < exp(-(Enew - Eold)))
-	{
+	else if (myrand() < exp(-(Enew - Eold))){
 		lattice[r] = trial;
 		return 1;
 	}
@@ -133,6 +129,17 @@ void overrelaxation(double *restrict lattice, long int r, double nnsum, double e
 	lattice[r] = ris;
 }
 
+void save_time_spent(double time_spent, int Nt, double simbeta, long int sample, long int measevery){
+	char datafile_time[50];
+    sprintf(datafile_time, "./time/time.dat");
+    FILE *fp_time;
+
+    fp_time = fopen(datafile_time, "a");
+    fprintf(fp_time, "\ntime = %.2f min, Nt = %d, simbeta = %.2f, sample = %ld, measevery = %ld\n", time_spent/60.0, Nt, simbeta, sample, measevery);    
+    fclose(fp_time);	
+}
+
+
 int montecarlo(int Nt, double simbeta, long int sample){
 	double begin = omp_get_wtime();
 	double *lattice;
@@ -140,6 +147,8 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	long int *nnp, *nnm;
 	double nnsum;
 	double x, x2, Knaive;
+	int deltat_array[] = {Nt/2 - 1, Nt/4 + 2};
+	int num_deltat = sizeof(deltat_array) / sizeof(int);
 
 	char datafile[STRING_LENGTH];
 	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta); // file name initialized with a string
@@ -147,7 +156,7 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	FILE *fp;
 
 	const int measevery = 10;
-	const int overrelaxsteps = 1;
+	const int overrelaxsteps = 5;
 
 	double eta = simbeta / (double)Nt;
 	const double delta = 2.0 * sqrt(eta);
@@ -227,11 +236,15 @@ int montecarlo(int Nt, double simbeta, long int sample){
 
 			fprintf(fp, "%.10f %.10f %.10f ", x, x2, Knaive);
 			int n_corr_max = 3;
-			for (int n = 1; n <= n_corr_max; n++){
-				for (int m = 1; m <= n_corr_max; m++){
-					if ((n+m) % 2 == 0 && m >= n){
-						for (int deltat = Nt/4 - 1; deltat <= Nt / 4; deltat+= Nt/4){
-							fprintf(fp, "%.10f ", correlator(lattice, Nt, deltat, n, m));
+			for (r = 2; r <= n_corr_max; r++){
+				fprintf(fp, "%.10f ", calc_xn(lattice, Nt, 2*r));
+			}
+
+			for (r = 0; r < num_deltat; r++){
+				for (int n = 1; n <= n_corr_max; n++){
+					for (int m = 1; m <= n_corr_max; m++){
+						if ((n+m) % 2 == 0 && m >= n){		
+							fprintf(fp, "%.10f ", correlator(lattice, Nt, deltat_array[r], n, m));
 						}
 					}
 				}
@@ -251,7 +264,8 @@ int montecarlo(int Nt, double simbeta, long int sample){
 
 	double end = omp_get_wtime();
     double time_spent = (end - begin);
-    printf("\nHa impiegato %.3f secondi\n", time_spent);
+
+	save_time_spent(time_spent, Nt, simbeta, sample, measevery);
 
 	return EXIT_SUCCESS;
 }
@@ -263,7 +277,7 @@ int main(void)
 
 	myrand_init(seed1, seed2);
 
-	montecarlo(10, 5, 1e6);
+	montecarlo(120, 10, 1e7);
 
 	return EXIT_SUCCESS;
 }

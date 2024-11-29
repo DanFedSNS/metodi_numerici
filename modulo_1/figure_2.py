@@ -4,9 +4,9 @@ import os
 import sys
 
 # Array of different L values to consider
-#L_array = np.linspace(60, 150, 10, dtype=int)
-L_array = np.linspace(90, 100, 2, dtype=int)
-model = "ising2d_sq_cluster"
+L_array = np.linspace(60, 150, 10, dtype=int)
+#L_array = np.linspace(90, 100, 2, dtype=int)
+model = "ising2d_tri_cluster"
 
 def load_params(filepath):
     params = {}
@@ -32,7 +32,7 @@ fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width']+0.25, 1.5*params['fi
 
 ax = ax.flatten()
 for i, L in enumerate(L_array):
-    filepath = f'./data/analysis_{model}/L{L}.dat'
+    filepath = f'./Misura lunga/analysis_{model}/L{L}.dat'
     data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
 
     beta = data[:, 0]  

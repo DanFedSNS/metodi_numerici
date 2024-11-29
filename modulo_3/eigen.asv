@@ -1,0 +1,38 @@
+filename = './analysis/Nt60_simbeta10.0.dat';
+
+fid = fopen(filename, 'r');
+
+header = fopen(fid);
+data = fscanf(fid, '%f %f', [2, Inf]); % Read as a 2-row matrix
+fclose(fid);
+data = data';
+
+first_column = data(:, 1);
+
+% Select specific values (e.g., rows 1, 3, 5)
+selected_values = first_column([1, 3, 5]); % Replace with desired indices
+
+% Display the selected values
+disp('Selected values from the first column:');
+disp(selected_values);
+% Define the matrix
+x2 = first_column(2);
+x4 = first_column(4);
+x6 = first_column(5);
+
+A = [first_column(6), 0, first_column(7);
+     0, first_column(8) - x2^2, 0;
+     first_column(7), 0, first_column(9)]; % Example matrix, replace with your own
+
+B = [x2, 0, x4;
+     0, x4 - x2^2, 0;
+     x4, 0, x6];
+
+
+[eigenvectors, eigenvalues_matrix] = eig(A, B);
+
+eigenvalues = diag(eigenvalues_matrix);
+
+disp('The eigenvalues of the matrix are:');
+disp(eigenvalues);
+

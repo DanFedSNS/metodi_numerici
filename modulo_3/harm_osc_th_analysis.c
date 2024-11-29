@@ -77,8 +77,8 @@ void analysis(int Nt, double simbeta){
 	double *data, *datajack;
 	FILE *fp;
 	char datafile[STRING_LENGTH];
-	skip_lines = 1e4;
-	int num_vars = 7;	//x, x^2, K, corrs
+	skip_lines = 1e5;
+	int num_vars = 9;	//x, x^2, K, corrs
 
 	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta);
 	fp = fopen(datafile, "r");
@@ -177,8 +177,8 @@ void analysis(int Nt, double simbeta){
 }
 
 int main(){
-	int Nt = 10;
-	double simbeta = 5.0;
+	int Nt = 200;
+	double simbeta = 10.0;
 
 	analysis(Nt, simbeta);
 

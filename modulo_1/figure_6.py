@@ -36,9 +36,9 @@ def perform_fit(model, x, y, p0):
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 params = load_params('params.txt')
 
-L_array = np.linspace(70, 90, 3, dtype=int)
+L_array = np.linspace(60, 150, 10, dtype=int)
 L_dense = np.linspace(min(L_array), max(L_array), 200)
-modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
+modelli = ["ising2d_sq_cluster"]#], "ising2d_tri_cluster", "ising2d_hex_cluster"]
 p0_values = {model: [100, 0.4375, 150] for model in modelli}
 
 # Inizializzazione dei dizionari per i parametri di fit
