@@ -4,8 +4,8 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(90, 150, 4, dtype=int)
-models = ["ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_tri_cluster"]
+L_array = np.linspace(60, 150, 10, dtype=int)
+models = ["ising2d_tri_cluster", "ising2d_tri_cluster", "ising2d_tri_cluster"]
 
 def load_params(filepath):
     params = {}
