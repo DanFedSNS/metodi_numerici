@@ -113,16 +113,16 @@ void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_
 
 
 int main(void){
-    char *modello_values[] = {"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro"};
+    char *modello_values[] = {"ising_sq_metro"};//{"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
 
-    int L_start = 16;
-    int L_stop = 24;
-    int num_L = 3;
+    int L_start = 10;
+    int L_stop = 40;
+    int num_L = 7;
     int L_array[num_L];
     arange_int(L_array, L_start, L_stop, num_L);
 
-    int num_beta = 5;  
+    int num_beta = 1;  
     
     for (int m = 0; m < num_modelli; m++) {
         #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta) schedule(dynamic, 1) // collapse the loops and define private variables

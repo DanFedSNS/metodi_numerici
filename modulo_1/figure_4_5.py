@@ -5,7 +5,7 @@ import sys
 from scipy.optimize import curve_fit
 
 # Array di valori L da considerare
-L_array = np.linspace(60, 150, 10, dtype=int)
+L_array = np.linspace(60, 200, 15, dtype=int)
 L_graph = np.linspace(110, 150, 5, dtype=int)
 # Lista dei modelli
 algos = ["ising2d_tri_cluster", "ising2d_tri_metro"]
@@ -35,7 +35,6 @@ x_lim_cluster = (0, 30)  # Limiti per il metodo Cluster
 
 fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 1.5*params['fig_height']))
 
-index_beta_fixed = 19
 
 tau_metro = []
 tau_cluster = []
@@ -51,13 +50,13 @@ def power_law(L, alpha, c):
 for algo_index, algo in enumerate(algos):
     tau_values = []  # Lista per memorizzare i tau per ogni L
     for i, L in enumerate(L_array):
-        filepath = f'./data/analysis_{algo}/L{L}_autocorr.dat'
+        filepath = f'./data/corr/analysis_{algo}/L{L}_autocorr.dat'
         data = np.genfromtxt(filepath, delimiter=",", dtype=float, filling_values=np.nan)
 
         print(np.isnan(data).any(), np.isinf(data).any())
 
 
-        autocorr_m = data[index_beta_fixed, :]
+        autocorr_m = data
         x_indices = np.arange(len(autocorr_m))
 
         # Definizione del range per il fit
@@ -126,11 +125,11 @@ ax.plot(L_array, tau_metro, label="Metro", color='blue', marker='o', linestyle='
 ax.plot(L_array, tau_cluster, label="Cluster", color='red', marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
 
 # Fit per i dati Metro
-popt_metro, _ = curve_fit(power_law, L_array, tau_metro, p0=[1, 1])
+popt_metro, _ = curve_fit(power_law, L_array, tau_metro, p0=[2.1, 1])
 alpha_metro, c_metro = popt_metro
 
 # Fit per i dati Cluster
-popt_cluster, _ = curve_fit(power_law, L_array, tau_cluster, p0=[1, 1])
+popt_cluster, _ = curve_fit(power_law, L_array, tau_cluster, p0=[0.2, 1])
 alpha_cluster, c_cluster = popt_cluster
 
 print(f"Fit Metro: alpha = {alpha_metro:.4f}, c = {c_metro:.4f}")
@@ -159,7 +158,7 @@ ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_m
 
 ax.legend(loc="upper left", fontsize=params['font_size_legend'])
 ax.set_xlabel("L", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_ylim([0, 100])
+#ax.set_ylim([0, 100])
 ax.set_ylabel("Tempo Caratteristico", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 
