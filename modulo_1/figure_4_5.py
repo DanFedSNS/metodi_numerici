@@ -5,7 +5,7 @@ import sys
 from scipy.optimize import curve_fit
 
 # Array di valori L da considerare
-L_array = np.linspace(60, 200, 15, dtype=int)
+L_array = np.linspace(10, 200, 20, dtype=int)
 L_graph = np.linspace(110, 150, 5, dtype=int)
 # Lista dei modelli
 algos = ["ising2d_tri_cluster", "ising2d_tri_metro"]
@@ -54,7 +54,6 @@ for algo_index, algo in enumerate(algos):
         data = np.genfromtxt(filepath, delimiter=",", dtype=float, filling_values=np.nan)
 
         print(np.isnan(data).any(), np.isinf(data).any())
-
 
         autocorr_m = data
         x_indices = np.arange(len(autocorr_m))

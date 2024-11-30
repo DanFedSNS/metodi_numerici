@@ -4,8 +4,7 @@ import os
 import sys
 
 # Array di valori L da considerare
-L_array = np.linspace(60, 150, 10, dtype=int)
-beta_fixed = 0.275102
+L_array = np.linspace(10, 200, 20, dtype=int)
 
 # Lista dei modelli
 algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
@@ -35,20 +34,14 @@ fig, ax = plt.subplots(1, 1, figsize=(params['fig_width'], 5/6*params['fig_heigh
 
 for algo_index, algo in enumerate(algos):
     for i, L in enumerate(L_array):
-        filepath = f'./data/analysis_{algo}/L{L}.dat'
-
+        filepath = f'./data/corr/analysis_{algo}/L{L}.dat'
         data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
-        
-        beta = data[:, 0]  
-        sigma_m = data[:, 6] 
-
-        # Trova l'indice del valore di beta più vicino a beta_fixed
-        beta_index = (np.abs(beta - beta_fixed)).argmin()
+         
+        sigma_m = data[6] 
 
         # Plotta la suscettività per ogni modello al variare di L
-        ax.plot(L, sigma_m[beta_index], styles[algo_index], color=colors(algo_index), label=f'{algo.split("_")[2].capitalize()}' if i == 0 else "", markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
+        ax.plot(L, sigma_m, styles[algo_index], color=colors(algo_index), label=f'{algo.split("_")[2].capitalize()}' if i == 0 else "", markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
     
-
 for spine in ax.spines.values():
         spine.set_linewidth(params['line_width_axes'])
 
