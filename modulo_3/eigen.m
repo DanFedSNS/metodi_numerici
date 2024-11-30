@@ -1,3 +1,4 @@
+clear;
 Nt = 120;
 tau = (Nt/2 - 1) - (Nt/4 + 2);
 filename = sprintf('Nt%d_simbeta10.0.dat', Nt);
@@ -12,7 +13,6 @@ header = fgetl(fid);
 data = fscanf(fid, '%f %f', [2, Inf]); % Read as a 2-row matrix
 fclose(fid);
 data = data';
-
 first_column = data(:, 1);
 
 
@@ -22,17 +22,24 @@ x6 = first_column(5);
 
 A = [first_column(6), 0, first_column(7);
      0, first_column(8) - x2^2, 0;
-     first_column(7), 0, first_column(9)]; % Example matrix, replace with your own
+     first_column(7), 0, first_column(9)];
 
-B = [x2, 0, x4;
-     0, x4 - x2^2, 0;
-     x4, 0, x6];
+
+B = [first_column(6+4), 0, first_column(7+4);
+     0, first_column(8+4) - x2^2, 0;
+     first_column(7+4), 0, first_column(9+4)];
 
 
 [eigenvectors, eigenvalues_matrix] = eig(A, B);
 
 eigenvalues = diag(eigenvalues_matrix);
 
-disp("The gaps are:");
-disp(-log(eigenvalues)/tau);
+disp(A);
+disp(B);
+disp(eigenvalues);
+gaps = -log(eigenvalues)/ tau;
+fprintf("The gaps are (gap0 = %f):\n", min(gaps));
+disp(gaps/min(gaps));
+
+
 

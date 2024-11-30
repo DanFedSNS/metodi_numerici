@@ -78,7 +78,7 @@ void analysis(int Nt, double simbeta){
 	FILE *fp;
 	char datafile[STRING_LENGTH];
 	skip_lines = 1e5;
-	int num_vars = 9;	//x, x^2, K, corrs
+	int num_vars = 12;	//x, x^2, K, corrs
 
 	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta);
 	fp = fopen(datafile, "r");
@@ -86,7 +86,7 @@ void analysis(int Nt, double simbeta){
 	char header[1000];
     fgets(header, sizeof(header), fp);  //ottiene la prima riga
 	
-    sscanf(header, "Nt = %*d, simbeta = %*f, sample = %ld", &sample);
+    sscanf(header, "Nt = %*d, simbeta = %*f, sample = %ld", &sample);	//attenzione, sample non è il numero di misure, bisogna dividere per measevery
  	
 	binsize = sample / 100;
 	
@@ -177,7 +177,7 @@ void analysis(int Nt, double simbeta){
 }
 
 int main(){
-	int Nt = 200;
+	int Nt = 120;
 	double simbeta = 10.0;
 
 	analysis(Nt, simbeta);

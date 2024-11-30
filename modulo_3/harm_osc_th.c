@@ -147,6 +147,7 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	long int *nnp, *nnm;
 	double nnsum;
 	double x, x2, Knaive;
+	int n_corr_max = 3;
 	int deltat_array[] = {Nt/2 - 1, Nt/4 + 2};
 	int num_deltat = sizeof(deltat_array) / sizeof(int);
 
@@ -235,7 +236,6 @@ int montecarlo(int Nt, double simbeta, long int sample){
 			Knaive = calc_Knaive(lattice, nnp, Nt, eta);
 
 			fprintf(fp, "%.10f %.10f %.10f ", x, x2, Knaive);
-			int n_corr_max = 3;
 			for (r = 2; r <= n_corr_max; r++){
 				fprintf(fp, "%.10f ", calc_xn(lattice, Nt, 2*r));
 			}
@@ -243,7 +243,7 @@ int montecarlo(int Nt, double simbeta, long int sample){
 			for (r = 0; r < num_deltat; r++){
 				for (int n = 1; n <= n_corr_max; n++){
 					for (int m = 1; m <= n_corr_max; m++){
-						if ((n+m) % 2 == 0 && m >= n){		
+						if ((n+m) % 2 == 0 && m >= n){
 							fprintf(fp, "%.10f ", correlator(lattice, Nt, deltat_array[r], n, m));
 						}
 					}
@@ -270,14 +270,13 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	return EXIT_SUCCESS;
 }
 
-int main(void)
-{
+int main(void){
 	const unsigned long int seed1 = (unsigned long int)time(NULL);
 	const unsigned long int seed2 = seed1 + 127;
 
 	myrand_init(seed1, seed2);
 
-	montecarlo(120, 10, 1e7);
+	montecarlo(120, 10, 5e7);
 
 	return EXIT_SUCCESS;
 }
