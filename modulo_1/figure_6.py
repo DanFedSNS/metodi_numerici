@@ -32,8 +32,12 @@ params = load_params('params.txt')
 
 L_array = np.linspace(60, 150, 10, dtype=int)
 L_dense = np.linspace(min(L_array), max(L_array), 200)
-modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
-p0_values = {model: [500000, 0.272, 100] for model in modelli}
+modelli = ["ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_hex_cluster"]
+p0_values = {
+    "ising2d_sq_cluster": [5000000, 0.45, 100],  
+    "ising2d_tri_cluster": [5000000, 0.272, 100],    
+    "ising2d_hex_cluster": [5000000, 0.65, 400],     
+}
 
 fit_params = {model: {'A': [], 'B': [], 'C': [], 'A_err': [], 'B_err': [], 'C_err': []} for model in modelli}
 fit_params_power_B = {}
