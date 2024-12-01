@@ -32,7 +32,7 @@ fig, ax = plt.subplots(1, 4, figsize=(2*params['fig_width']+0.25, 0.5*params['fi
 colori = plt.get_cmap('tab10')
 
 # Definire i limiti dell'asse x
-x_limits_magnetization = [-1, 1]
+x_limits_magnetization = [0, 1]
 
 # Numero di intervalli per il binning
 n_intervalli = 401
@@ -86,7 +86,9 @@ for j, beta in enumerate(beta_unificato):
                width=params['line_width_axes'], direction='in')
     ax[j].tick_params(axis='y', labelsize=params['font_size_ticks'], 
                width=params['line_width_axes'], direction='in')
-    ax[j].set_xticks(ticks=[-1, -0.5, 0, 0.5, 1])
+    ax[j].set_xticks(ticks=[0, 0.5, 1])
+    ax[j].set_yticks(ticks=[0, 0.05, 0.1])
+    ax[j].set_ylim([0, 0.1])
     ax[j].margins(x=0.00, y=0.00)
 
 # Migliora la spaziatura tra i subplot

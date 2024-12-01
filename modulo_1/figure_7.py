@@ -4,8 +4,8 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(60, 150, 10, dtype=int)
-models = ["ising2d_tri_cluster", "ising2d_tri_cluster", "ising2d_tri_cluster"]
+L_array = np.linspace(70, 150, 5, dtype=int)
+models = ["ising2d_tri_cluster", "ising2d_sq_cluster", "ising2d_sq_cluster"]
 
 def load_params(filepath):
     params = {}
@@ -59,8 +59,8 @@ for ax, model in zip(axes, models):
     ax.margins(x=0.00, y=0.00)
     ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
     ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
-    ax.set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-    ax.set_ylabel("$\\chi'$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax.set_xlabel("$L^{\\frac{1}{\\nu}}(\\beta - \\beta_c)$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+    ax.set_ylabel("$\\chi'\\cdot L^{\\frac{\\nu}{\\gamma}}$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
     ax.legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])

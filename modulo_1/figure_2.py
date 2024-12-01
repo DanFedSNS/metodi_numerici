@@ -4,7 +4,7 @@ import os
 import sys
 
 # Array of different L values to consider
-L_array = np.linspace(60, 150, 10, dtype=int)
+L_array = np.linspace(70, 150, 5, dtype=int)
 #L_array = np.linspace(90, 100, 2, dtype=int)
 model = "ising2d_tri_cluster"
 
@@ -32,15 +32,19 @@ fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width']+0.25, 1.5*params['fi
 
 ax = ax.flatten()
 for i, L in enumerate(L_array):
-    filepath = f'./Misura lunga/analysis_{model}/L{L}.dat'
+    filepath = f'./data/analysis_{model}/L{L}.dat'
     data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
 
     beta = data[:, 0]  
-    specific_heat = data[:, 3]  # Specific heat
-    susceptibility = data[:, 7]  # Susceptibility
-    magn_abs_avg = data[:, 5]  # Average absolute magnetization
     energy_avg = data[:, 1]  # Average energy
- 
+    energy_avg_err = data[:, 2]  # Error on average energy
+    specific_heat = data[:, 3]  # Specific heat
+    specific_heat_err = data[:, 4]  # Error on specific heat
+    magn_abs_avg = data[:, 5]  # Average absolute magnetization
+    magn_abs_avg_err = data[:, 6]  # Error on average absolute magnetization
+    susceptibility = data[:, 7]  # Susceptibility
+    susceptibility_err = data[:, 8]  # Error on susceptibility
+    
     ax[0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
     ax[1].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
