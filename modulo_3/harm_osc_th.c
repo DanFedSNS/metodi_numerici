@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <omp.h>
-
+#include"./include/get_array.h"
 #include "./include/boxmuller.h"
 #include "./include/random.h"
 
@@ -43,8 +43,7 @@ double calc_x2(double const *const restrict lattice, long int Nt)
 }
 
 // <x^n>
-double calc_xn(double const *const restrict lattice, long int Nt, int n)
-{
+double calc_xn(double const *const restrict lattice, long int Nt, int n){
 	long int r;
 	double res = 0.0;
 
@@ -148,7 +147,7 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	double nnsum;
 	double x, x2, Knaive;
 	int n_corr_max = 3;
-	int deltat_array[] = {Nt/2 - 1, Nt/4 + 2};
+	int deltat_array[] = {Nt/4 - 1, 4};
 	int num_deltat = sizeof(deltat_array) / sizeof(int);
 
 	char datafile[STRING_LENGTH];
@@ -271,12 +270,21 @@ int montecarlo(int Nt, double simbeta, long int sample){
 }
 
 int main(void){
-	const unsigned long int seed1 = (unsigned long int)time(NULL);
-	const unsigned long int seed2 = seed1 + 127;
+	int L_start = 80;
+    int L_stop = 130;
+    int num_L = 11;
+    int L_array[num_L];
+    arange_int(L_array, L_start, L_stop, num_L);
+	
+	#pragma omp parallel for shared(L_array) schedule(dynamic, 1)  // collapse the loops and define private variables
+	for (int i = 0; i < num_L; i++){
+		const unsigned long int seed1=(unsigned long int) time(NULL) + omp_get_thread_num();
+        const unsigned long int seed2=seed1+127;
 
-	myrand_init(seed1, seed2);
-
-	montecarlo(120, 10, 5e7);
+        // initialize random number generator
+        myrand_init(seed1, seed2);
+		montecarlo(L_array[i], 10, 2e7);
+	}
 
 	return EXIT_SUCCESS;
 }

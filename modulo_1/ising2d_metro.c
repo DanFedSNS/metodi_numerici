@@ -113,7 +113,7 @@ void montecarlo(int L, double beta, char *modello, int iterations, int iter_bet_
 
 
 int main(void){
-    char *modello_values[] = {"ising_sq_metro"};//{"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro"};
+    char *modello_values[] = {"ising2d_sq_metro"};//{"ising2d_tri_metro", "ising2d_sq_metro", "ising2d_hex_metro"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
 
     int L_start = 10;
@@ -130,7 +130,7 @@ int main(void){
             for (int j = 0; j < num_L; j++) {
                 int iterations = 0;
                 int iter_bet_meas = 1;    //iterations between two measures
-                int num_measures = 1e5;
+                int num_measures = 1e6;
                 bool save_config = false;
                 
                 int q;  //nearest neighbours number
@@ -139,7 +139,7 @@ int main(void){
 
                 char *modello = modello_values[m];
                 choose_geometry(modello, &nearest, &energy, &q);
-                double beta = assign_beta(modello, i, num_beta);
+                double beta = log(sqrt(3.0)) / 2.0; //assign_beta(modello, i, num_beta);
 
                 printf("\n%s, L = %d, beta = %.5f", modello, L_array[j], beta);
                 // Initialize unique random seeds for each thread

@@ -1,0 +1,14 @@
+
+time = 0.38 min, beta = 0.274653, L = 10, iterations = 0, iter_bet_meas = 1, num_measures = 1000000
+
+time = 0.77 min, beta = 0.274653, L = 15, iterations = 0, iter_bet_meas = 1, num_measures = 1000000
+
+time = 1.25 min, beta = 0.274653, L = 20, iterations = 0, iter_bet_meas = 1, num_measures = 1000000
+
+time = 1.89 min, beta = 0.274653, L = 25, iterations = 0, iter_bet_meas = 1, num_measures = 1000000
+
+time = 2.59 min, beta = 0.274653, L = 30, iterations = 0, iter_bet_meas = 1, num_measures = 1000000
+
+time = 3.54 min, beta = 0.274653, L = 35, iterations = 0, iter_bet_meas = 1, num_measures = 1000000
+
+time = 4.43 min, beta = 0.274653, L = 40, iterations = 0, iter_bet_meas = 1, num_measures = 1000000

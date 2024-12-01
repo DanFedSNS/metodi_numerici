@@ -173,16 +173,16 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     sprintf(datafile_ac, "./analysis_%s/L%d_autocorr.dat", modello, L);
     fp = fopen(datafile_ac, "a");
 
-    /*//Autocorrelation function
+    //Autocorrelation function
     //double energy_sd = sd(energy, res[0], num_measures);
     double magn_sd = sd(magn, res[2], num_measures);
     int max_autocorr = 1e4;
-    fprintf(fp, "autocorrelation_energy = ");
+    /*fprintf(fp, "autocorrelation_energy = ");
     for (int n = 0; n < max_autocorr; n++){
         fprintf(fp, "%lf, ", autocorr(energy, res[0], energy_sd, n, num_measures));
     }
     fseek(fp, -2, SEEK_CUR); //rimuove ", " finali
-    
+    */
     for (int n = 0; n < max_autocorr; n++) {
         if (n == max_autocorr - 1) {
             fprintf(fp, "%lf", autocorr(magn, res[2], magn_sd, n, num_measures));
@@ -192,7 +192,7 @@ void analysis(int L, double beta, int skip_lines, char *modello){
     }
     fprintf(fp, "\n");
 
-    fclose(fp);*/
+    fclose(fp);
     free(magn);
     free(energy);
     free(datajack);
@@ -204,19 +204,16 @@ void analysis(int L, double beta, int skip_lines, char *modello){
 }
 
 int main(void) {
-    char *modello_values[] = {"ising2d_sq_cluster"};//, "ising2d_sq_cluster", "ising2d_hex_cluster"};
+    char *modello_values[] = {"ising2d_sq_metro"};//, "ising2d_sq_cluster", "ising2d_hex_cluster"};
     int num_modelli = sizeof(modello_values) / sizeof(modello_values[0]);
     
-    /*int L_start = 30;
+    int L_start = 10;
     int L_stop = 40;
-    int num_L = 2;
+    int num_L = 7;
     int L_array[num_L];
-    arange_int(L_array, L_start, L_stop, num_L);*/
+    arange_int(L_array, L_start, L_stop, num_L);
 
-    int num_L = 1;
-    int L_array[] = {100};
-
-    int num_beta = 40;
+    int num_beta = 1;
     int skip_lines = 2e4;
    
     #pragma omp parallel for collapse(2) shared(L_array, modello_values, num_beta, skip_lines) schedule(dynamic, 1) // collapse the loops and define private variables
@@ -233,7 +230,7 @@ int main(void) {
             clear_initial_data(datafile_ac);
 
             for (int i = 0; i < num_beta; i++) {
-                double beta = assign_beta_close(modello, i, num_beta, L_array[j]);
+                double beta = log(sqrt(3.0)) / 2.0; //assign_beta_close(modello, i, num_beta, L_array[j]);
                 analysis(L_array[j], beta, skip_lines, modello);
             }
         }

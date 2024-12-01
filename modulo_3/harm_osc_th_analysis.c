@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <omp.h>
+#include"./include/get_array.h"
 
 #define STRING_LENGTH 50
 
@@ -69,6 +70,25 @@ void computejack(double *restrict datajack,
     free(subtotals);
 }
 
+int count_columns(char *datafile) {
+	FILE *fp;
+	fp = fopen(datafile, "r");
+    char line[1024];
+    int columns = 0;
+
+	fgets(line, sizeof(line), fp);
+	fgets(line, sizeof(line), fp);
+    char *token;
+	char *line_copy = strdup(line); // Create a copy of the line
+	token = strtok(line_copy, " \t\n");
+	while (token != NULL){
+		columns++;
+		token = strtok(NULL, " \t\n");
+	}
+	free(line_copy); // Free the duplicated line
+	fclose(fp);
+    return columns;
+}
 
 void analysis(int Nt, double simbeta){
 	int skip_lines, binsize, j;
@@ -77,12 +97,13 @@ void analysis(int Nt, double simbeta){
 	double *data, *datajack;
 	FILE *fp;
 	char datafile[STRING_LENGTH];
+	int num_vars;	//x, x^2, K, corrs
 	skip_lines = 1e5;
-	int num_vars = 12;	//x, x^2, K, corrs
 
 	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta);
+	num_vars = count_columns(datafile);
+	printf("num_vars = %d\n", num_vars);
 	fp = fopen(datafile, "r");
-
 	char header[1000];
     fgets(header, sizeof(header), fp);  //ottiene la prima riga
 	
@@ -177,10 +198,18 @@ void analysis(int Nt, double simbeta){
 }
 
 int main(){
-	int Nt = 120;
-	double simbeta = 10.0;
+	int L_start = 80;
+    int L_stop = 130;
+    int num_L = 11;
+    int L_array[num_L];
+    arange_int(L_array, L_start, L_stop, num_L);
+	
+	#pragma omp parallel for shared(L_array) schedule(dynamic, 1)  // collapse the loops and define private variables
+	for (int i = 0; i < num_L; i++){
+		analysis(L_array[i], 10.0);
+	}
 
-	analysis(Nt, simbeta);
+	
 
 	return EXIT_SUCCESS;
 }
