@@ -128,13 +128,13 @@ void overrelaxation(double *restrict lattice, long int r, double nnsum, double e
 	lattice[r] = ris;
 }
 
-void save_time_spent(double time_spent, int Nt, double simbeta, long int sample, long int measevery){
+void save_time_spent(double time_spent, int Nt, double simbeta, long int sample, long int measevery, double acc_rate){
 	char datafile_time[50];
     sprintf(datafile_time, "./time/time.dat");
     FILE *fp_time;
 
     fp_time = fopen(datafile_time, "a");
-    fprintf(fp_time, "\ntime = %.2f min, Nt = %d, simbeta = %.2f, sample = %ld, measevery = %ld\n", time_spent/60.0, Nt, simbeta, sample, measevery);    
+    fprintf(fp_time, "\ntime = %.2f min, Nt = %d, simbeta = %.2f, sample = %ld, measevery = %ld, acc_rate = %f\n", time_spent/60.0, Nt, simbeta, sample, measevery, acc_rate);    
     fclose(fp_time);	
 }
 
@@ -146,7 +146,7 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	long int *nnp, *nnm;
 	double nnsum;
 	double x, x2, Knaive;
-	int n_corr_max = 3;
+	int n_corr_max = 4;
 	int deltat_array[] = {Nt/4 - 1, 4};
 	int num_deltat = sizeof(deltat_array) / sizeof(int);
 
@@ -235,8 +235,10 @@ int montecarlo(int Nt, double simbeta, long int sample){
 			Knaive = calc_Knaive(lattice, nnp, Nt, eta);
 
 			fprintf(fp, "%.10f %.10f %.10f ", x, x2, Knaive);
-			for (r = 2; r <= n_corr_max; r++){
-				fprintf(fp, "%.10f ", calc_xn(lattice, Nt, 2*r));
+			for (r = 3; r <= n_corr_max; r++){
+				if (r%2 == 0){
+					fprintf(fp, "%.10f ", calc_xn(lattice, Nt, r));
+				}
 			}
 
 			for (r = 0; r < num_deltat; r++){
@@ -253,7 +255,7 @@ int montecarlo(int Nt, double simbeta, long int sample){
 		}
 	}
 
-	printf("Acceptance rate %f\n", (double)acc / (double)sample / (double)Nt);
+	double acc_rate = (double)acc / (double)sample / (double)Nt;
 
 	fclose(fp);
 
@@ -264,15 +266,15 @@ int montecarlo(int Nt, double simbeta, long int sample){
 	double end = omp_get_wtime();
     double time_spent = (end - begin);
 
-	save_time_spent(time_spent, Nt, simbeta, sample, measevery);
+	save_time_spent(time_spent, Nt, simbeta, sample, measevery, acc_rate);
 
 	return EXIT_SUCCESS;
 }
 
 int main(void){
 	int L_start = 80;
-    int L_stop = 130;
-    int num_L = 11;
+    int L_stop = 190;
+    int num_L = 12;
     int L_array[num_L];
     arange_int(L_array, L_start, L_stop, num_L);
 	
@@ -283,7 +285,7 @@ int main(void){
 
         // initialize random number generator
         myrand_init(seed1, seed2);
-		montecarlo(L_array[i], 10, 2e7);
+		montecarlo(L_array[i], 10, 3e8);
 	}
 
 	return EXIT_SUCCESS;

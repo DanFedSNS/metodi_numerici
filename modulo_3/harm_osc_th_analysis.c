@@ -98,7 +98,7 @@ void analysis(int Nt, double simbeta){
 	FILE *fp;
 	char datafile[STRING_LENGTH];
 	int num_vars;	//x, x^2, K, corrs
-	skip_lines = 1e5;
+	skip_lines = 1e4;
 
 	sprintf(datafile, "./misure/Nt%d_simbeta%.1f.dat", Nt, simbeta);
 	num_vars = count_columns(datafile);
@@ -199,8 +199,8 @@ void analysis(int Nt, double simbeta){
 
 int main(){
 	int L_start = 80;
-    int L_stop = 130;
-    int num_L = 11;
+    int L_stop = 190;
+    int num_L = 12;
     int L_array[num_L];
     arange_int(L_array, L_start, L_stop, num_L);
 	
