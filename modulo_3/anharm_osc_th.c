@@ -11,8 +11,7 @@
 #define STRING_LENGTH 50
 
 // average position
-double calc_x(double const *const restrict lattice, long int Nt)
-{
+double calc_x(double const *const restrict lattice, long int Nt){
 	long int r;
 	double ris;
 
@@ -26,8 +25,7 @@ double calc_x(double const *const restrict lattice, long int Nt)
 }
 
 // average position square
-double calc_x2(double const *const restrict lattice, long int Nt)
-{
+double calc_x2(double const *const restrict lattice, long int Nt){
 	long int r;
 	double ris;
 
@@ -57,8 +55,7 @@ double calc_xn(double const *const restrict lattice, long int Nt, int n){
 double calc_Knaive(double const *const restrict lattice,
 				   long int const *const restrict nnp,
 				   long int Nt,
-				   double eta)
-{
+				   double eta){
 	long int r;
 	double ris, aux;
 
@@ -73,8 +70,7 @@ double calc_Knaive(double const *const restrict lattice,
 }
 
 // <x^n(deltat) x^n(0)> correlator
-double correlator(double const *const restrict lattice, long int Nt, long int deltat, int n, int m)
-{
+double correlator(double const *const restrict lattice, long int Nt, long int deltat, int n, int m){
 	long int r, raux;
 	double res = 0;
 
@@ -88,12 +84,12 @@ double correlator(double const *const restrict lattice, long int Nt, long int de
 }
 
 // Metropolis update, return 1 if accepted
-int metropolis(double *restrict lattice, long int r, double nnsum, double eta, const double delta){
+int metropolis(double *restrict lattice, long int r, double nnsum, double eta, const double delta, double g){
 	double trial, Eold, Enew;
 
-	Eold = lattice[r] * lattice[r] * (eta / 2.0 + 1. / eta) - lattice[r] * nnsum / eta;
+	Eold = lattice[r] * lattice[r] * (eta / 2.0 + 1. / eta) - lattice[r] * nnsum / eta + eta * g * pow(lattice[r], 4);
 	trial = lattice[r] + delta * (1.0 - 2.0 * myrand());
-	Enew = trial * trial * (eta / 2.0 + 1. / eta) - trial * nnsum / eta;
+	Enew = trial * trial * (eta / 2.0 + 1. / eta) - trial * nnsum / eta + eta * g * pow(trial, 4);
 
 	if (Enew < Eold){
 		lattice[r] = trial;
@@ -114,18 +110,19 @@ void overrelaxation(double *restrict lattice, long int r, double nnsum, double e
 	lattice[r] = ris;
 }
 
-void save_time_spent(double time_spent, int Nt, double simbeta, long int sample, int measevery, double acc_rate, int num_deltat){
+void save_time_spent(double time_spent, int Nt, double simbeta, double g, long int sample, int measevery, double acc_rate, int num_deltat){
 	char datafile_time[50];
     sprintf(datafile_time, "./time/time.dat");
     FILE *fp_time;
 
     fp_time = fopen(datafile_time, "a");
-    fprintf(fp_time, "\ntime = %.2f min, Nt = %d, simbeta = %.2f, sample = %ld, measevery = %d, acc_rate = %f, num_deltat = %d\n", time_spent/60.0, Nt, simbeta, sample, measevery, acc_rate, num_deltat);    
+    fprintf(fp_time, "\ntime = %.2f min, Nt = %d, simbeta = %.3f, g = %.3f, sample = %ld, measevery = %d, acc_rate = %f, num_deltat = %d\n",
+						time_spent/60.0, Nt, simbeta, g, sample, measevery, acc_rate, num_deltat);    
     fclose(fp_time);	
 }
 
 
-int montecarlo(int Nt, double eta, long int sample){
+int montecarlo(int Nt, double eta, long int sample, double g){
 	double begin = omp_get_wtime();
 	double *lattice;
 	long int r, acc;
@@ -138,12 +135,12 @@ int montecarlo(int Nt, double eta, long int sample){
 	double simbeta = eta * (double)Nt;
 
 	char datafile[STRING_LENGTH];
-	sprintf(datafile, "./misure/Nt%d_simbeta%.2f.dat", Nt, simbeta); // file name initialized with a string
+	sprintf(datafile, "./misure/Nt%d_simbeta%.3f_g%.3f.dat", Nt, simbeta, g); // file name initialized with a string
 
 	FILE *fp;
 
-	const int measevery = 10;
-	const int overrelaxsteps = 5;
+	const int measevery = 1000;
+	//const int overrelaxsteps = 5;
 
 	const double delta = 2.0 * sqrt(eta);
 
@@ -168,8 +165,7 @@ int montecarlo(int Nt, double eta, long int sample){
 	}
 
 	// initialize nnp and nnm for periodic b.c.
-	for (r = 0; r < Nt; r++)
-	{
+	for (r = 0; r < Nt; r++)	{
 		nnp[r] = r + 1;
 		nnm[r] = r - 1;
 	}
@@ -183,33 +179,21 @@ int montecarlo(int Nt, double eta, long int sample){
 
 	// open data file
 	fp = fopen(datafile, "w");
-	if (fp == NULL)
-	{
+	if (fp == NULL)	{
 		fprintf(stderr, "Error in opening the file %s (%s, %d)\n", datafile, __FILE__, __LINE__);
 		return EXIT_FAILURE;
 	}
 
-	fprintf(fp, "Nt = %d, simbeta = %.10f, sample = %ld, measevery = %d, num_deltat = %d\n", Nt, simbeta, sample, measevery, num_deltat);
+	fprintf(fp, "Nt = %d, simbeta = %.10f, g = %.10f, sample = %ld, measevery = %d, num_deltat = %d\n", Nt, simbeta, g, sample, measevery, num_deltat);
 
 	acc = 0;
 	for (int iter = 0; iter < sample; iter++){
-		if (myrand() < 0.5){
-			for (r = 0; r < Nt; r++){
-				nnsum = lattice[nnp[r]] + lattice[nnm[r]];
-
-				acc += metropolis(lattice, r, nnsum, eta, delta);
-			}
+		for (int i = 0; i < Nt; i++){
+			r = (int)((double)Nt * myrand());
+			nnsum = lattice[nnp[r]] + lattice[nnm[r]];
+			acc += metropolis(lattice, r, nnsum, eta, delta, g);
 		}
-		else{
-			// overrelaxation
-			for (int j = 0; j < overrelaxsteps; j++){
-				for (r = 0; r < Nt; r++){
-					nnsum = lattice[nnp[r]] + lattice[nnm[r]];
-
-					overrelaxation(lattice, r, nnsum, eta);
-				}
-			}
-		}
+	
 
 		if (iter % measevery == 0){
 			x = calc_x(lattice, Nt);
@@ -248,7 +232,7 @@ int montecarlo(int Nt, double eta, long int sample){
 	double end = omp_get_wtime();
     double time_spent = (end - begin);
 
-	save_time_spent(time_spent, Nt, simbeta, sample, measevery, acc_rate, num_deltat);
+	save_time_spent(time_spent, Nt, simbeta, g, sample, measevery, acc_rate, num_deltat);
 
 	return EXIT_SUCCESS;
 }
@@ -256,18 +240,32 @@ int montecarlo(int Nt, double eta, long int sample){
 int main(void){
 	int Nt_start = 20;
     int Nt_stop = 100;
-    int num_Nt = 5;
+    int num_Nt = 1;
     int Nt_array[num_Nt];
-    arange_int(Nt_array, Nt_start, Nt_stop, num_Nt);
+    //arange_int(Nt_array, Nt_start, Nt_stop, num_Nt);
 	
-	#pragma omp parallel for shared(Nt_array) schedule(dynamic, 1)  // collapse the loops and define private variables
-	for (int i = 0; i < num_Nt; i++){
-		const unsigned long int seed1=(unsigned long int) time(NULL) + omp_get_thread_num();
-        const unsigned long int seed2=seed1+127;
+	
+	double g_start = -2.0;
+    double g_stop = 1.0;
+    int num_g = 11;
+    double g_array_aux[num_g];
+    double g_array[num_g];
+	
+    linspace(g_array_aux, g_start, g_stop, num_g);
+	for (int j = 0; j < num_g; j++){
+        g_array[j] = pow(10, g_array_aux[j]);
+    } 
 
-        // initialize random number generator
-        myrand_init(seed1, seed2);
-		montecarlo(Nt_array[i], 10, 5e8);
+	#pragma omp parallel for collapse(2) shared(Nt_array, g_array) schedule(dynamic, 1)  // collapse the loops and define private variables
+	for (int i = 0; i < num_Nt; i++){
+		for (int j = 0; j < num_g; j++){
+			const unsigned long int seed1=(unsigned long int) time(NULL) + omp_get_thread_num();
+        	const unsigned long int seed2=seed1+127;
+
+        	// initialize random number generator
+        	myrand_init(seed1, seed2);
+			montecarlo(200, 1.0 / 28.0, 5e8, g_array[j]);
+		}
 	}
 
 	return EXIT_SUCCESS;

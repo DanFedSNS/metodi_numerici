@@ -12,7 +12,7 @@ gaps = np.zeros((len(Nt_array), num_gaps))
 
 # Loop over Nt_array
 for ix, Nt in enumerate(Nt_array):
-    tau = (Nt / 4 - 1) - 4
+    tau = Nt/2 - 1 - Nt/4
     eta = simbeta / Nt
     filename = f'Nt{int(Nt)}_simbeta{simbeta:.1f}.dat'
     
@@ -37,7 +37,7 @@ for ix, Nt in enumerate(Nt_array):
     
     # Extract necessary values
     x2 = first_column[1]
-    x4 = first_column[4]
+    x4 = first_column[3]
     #x6 = first_column[4]
     
     # Define matrices A and B
@@ -55,24 +55,25 @@ for ix, Nt in enumerate(Nt_array):
     """
     
     A = np.array([
-        [first_column[5], 0, first_column[6], 0],
-        [0, first_column[7] - x2**2, 0, first_column[8] - x2 * x4],
-        [first_column[6], 0, first_column[9], 0],
-        [0, first_column[8] - x2 * x4, 0, first_column[10] - x4**2]
+        [first_column[4], 0, first_column[5], 0],
+        [0, first_column[6] - x2**2, 0, first_column[7] - x2 * x4],
+        [first_column[5], 0, first_column[8], 0],
+        [0, first_column[7] - x2 * x4, 0, first_column[9] - x4**2]
     ])
     B = np.array([
-        [first_column[5+6], 0, first_column[6+6], 0],
-        [0, first_column[7+6] - x2**2, 0, first_column[8+6] - x2 * x4],
-        [first_column[6+6], 0, first_column[9+6], 0],
-        [0, first_column[8+6] - x2 * x4, 0, first_column[10+6] - x4**2]
+        [first_column[4+6], 0, first_column[5+6], 0],
+        [0, first_column[6+6] - x2**2, 0, first_column[7+6] - x2 * x4],
+        [first_column[5+6], 0, first_column[8+6], 0],
+        [0, first_column[7+6] - x2 * x4, 0, first_column[9+6] - x4**2]
     ])
     # Solve the generalized eigenvalue problem
     eigenvalues, _ = np.linalg.eig(np.linalg.inv(B) @ A)
-    print(eigenvalues)
+
     # Process eigenvalues
     eigenvalues = -np.log(eigenvalues) / (tau * eta)
     gaps[ix, :] = np.sort(eigenvalues)
 
+print(A, B)
 # Print gaps
 print(gaps)
 

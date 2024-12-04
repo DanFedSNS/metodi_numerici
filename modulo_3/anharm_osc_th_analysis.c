@@ -77,7 +77,8 @@ void computejack(double *restrict datajack,
                  double eta,
                  long int sampleeff,
                  int num_vars,
-                 int skip_lines)
+                 int skip_lines,
+                 double g)
 {
     long int i, r;
     int var;
@@ -146,7 +147,7 @@ void computejack(double *restrict datajack,
 
         // Compute the special value and place it in the last column
         if (num_vars >= 3) { // Ensure there are at least three variables
-            datajack[(num_vars + 1) * i + num_vars] = 0.5 * subtotals[1] - subtotals[2] + 0.5 / eta;
+            datajack[(num_vars + 1) * i + num_vars] = 0.5 * subtotals[1] - subtotals[2] + 0.5 / eta + eta * g * subtotals[3];
         }
     }
 
@@ -177,7 +178,7 @@ int count_columns(char *datafile) {
     return columns;
 }
 
-void analysis(int Nt, double eta){
+void analysis(int Nt, double eta, double g){
 	int skip_lines, binsize, j;
 	long int sample, measevery, numberofbins, sampleeff, i;
 	double *datajack;
@@ -187,15 +188,14 @@ void analysis(int Nt, double eta){
 	skip_lines = 1e4;
     double simbeta = eta * (double)Nt;
     
-	sprintf(datafile, "./misure/Nt%d_simbeta%.2f.dat", Nt, simbeta);
+	sprintf(datafile, "./misure/Nt%d_simbeta%.3f_g%.3f.dat", Nt, simbeta, g);
 	num_vars = count_columns(datafile);
 	
 	fp = fopen(datafile, "r");
 	char header[1000];
     fgets(header, sizeof(header), fp);  //ottiene la prima riga
 	
-    sscanf(header, "Nt = %*d, simbeta = %*f, sample = %ld, measevery = %ld, num_deltat = %*d", &sample, &measevery);	//attenzione, sample non è il numero di misure, bisogna dividere per measevery
-	printf("sample = %ld, measeery = %ld\n", sample, measevery);
+    sscanf(header, "Nt = %*d, simbeta = %*f, g = %*f, sample = %ld, measevery = %ld, num_deltat = %*d", &sample, &measevery);	//attenzione, sample non è il numero di misure, bisogna dividere per measevery
     sample /= measevery;
 
 	binsize = sample / 100;
@@ -217,7 +217,7 @@ void analysis(int Nt, double eta){
 	
  
 	// compute jackknife resamplings
-    computejack(datajack, fp, numberofbins, binsize, eta, sampleeff, num_vars, skip_lines);
+    computejack(datajack, fp, numberofbins, binsize, eta, sampleeff, num_vars, skip_lines, g);
     fclose(fp);
     
 	int num_res = num_vars + 1;
@@ -248,7 +248,7 @@ void analysis(int Nt, double eta){
 	free(datajack);
 
 	char datafile_o[50]; // file name
-    sprintf(datafile_o, "./analysis/Nt%d_simbeta%.2f.dat", Nt, simbeta);
+    sprintf(datafile_o, "./analysis/Nt%d_simbeta%.3f_g%.3f.dat", Nt, simbeta, g);
 	
 	fp = fopen(datafile_o, "w");
 	fprintf(fp, "%s\n", header);
@@ -263,16 +263,28 @@ void analysis(int Nt, double eta){
 int main(){
     int Nt_start = 20;
     int Nt_stop = 100;
-    int num_Nt = 5;
+    int num_Nt = 1;
     int Nt_array[num_Nt];
-    arange_int(Nt_array, Nt_start, Nt_stop, num_Nt);
+    //arange_int(Nt_array, Nt_start, Nt_stop, num_Nt);
 	
-	#pragma omp parallel for shared(Nt_array) schedule(dynamic, 1)  // collapse the loops and define private variables
-	for (int i = 0; i < num_Nt; i++){
-		analysis(Nt_array[i], 10.0);
-	}
+	
+	double g_start = -2.0;
+    double g_stop = 1.0;
+    int num_g = 11;
+    double g_array_aux[num_g];
+    double g_array[num_g];
+	
+    linspace(g_array_aux, g_start, g_stop, num_g);
+	for (int j = 0; j < num_g; j++){
+        g_array[j] = pow(10, g_array_aux[j]);
+    } 
 
-	
+	#pragma omp parallel for collapse(2) shared(Nt_array, g_array) schedule(dynamic, 1)  // collapse the loops and define private variables
+	for (int i = 0; i < num_Nt; i++){
+		for (int j = 0; j < num_g; j++){
+			analysis(200, 1.0 / 28.0, g_array[j]);
+		}
+	}
 
 	return EXIT_SUCCESS;
 }
