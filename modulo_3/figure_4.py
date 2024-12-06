@@ -75,12 +75,12 @@ entropy_H = np.array(mean_H)
 error_H = np.array(error_H)
 
 # Eseguiamo il plot
-ax.errorbar(g_values, mean_x, yerr=error_x, fmt='o', color=color_palette(0),
-            label="Mean X", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
-ax.errorbar(g_values, mean_x_squared, yerr=error_x_squared, fmt='o', color=color_palette(1),
+# ax.plot(g_values, mean_x, yerr=error_x, fmt='o', color=color_palette(0),
+#             label="Mean X", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+ax.plot(g_values, mean_x_squared, 's', color=color_palette(1),
             label="Mean X^2", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
-ax.errorbar(g_values, mean_H, yerr=error_H, fmt='o', color=color_palette(2),
-            label="Entropy H", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+ax.plot(g_values, mean_H, 's', color=color_palette(2),
+            label="Mean H", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 
 # Personalizzazione dei subplot
 for spine in ax.spines.values():

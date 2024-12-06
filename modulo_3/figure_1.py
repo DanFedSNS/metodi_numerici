@@ -72,15 +72,13 @@ errors3 = np.array(errors3)
 beta_dense = np.linspace(betas.min(), betas.max(), 1000)
 y_anal = 0.5*(1 + np.e**(-beta_dense))/(1-np.e**(-beta_dense))
 
-ax.plot(beta_dense, y_anal, color=colors(0), label="Curve 1", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
-
 # Eseguiamo il plot
-ax.errorbar(betas, curve1, yerr=errors1, fmt='o', color=colors(0),
-            label="Curve 1", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
-ax.errorbar(betas, curve2, yerr=errors2, fmt='o', color=colors(1),
-            label="Curve 2", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
-ax.errorbar(betas, curve3, yerr=errors3, fmt='o', color=colors(2),
-            label="Curve 3", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
+# ax.errorbar(betas, curve1, yerr=errors1, fmt='o', color=colors(0),
+#             label="Curve 1", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
+ax.errorbar(betas, curve2, yerr=errors2, fmt='o', color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
+# ax.errorbar(betas, curve3, yerr=errors3, fmt='o', color=colors(2),
+#             label="Curve 3", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
+ax.plot(beta_dense, y_anal, color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2, alpha=0.5)
 
 # Personalizzazione dei subplot
 for spine in ax.spines.values():
@@ -96,8 +94,7 @@ ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_m
 
 # Etichette degli assi
 ax.set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_ylabel("$C$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.legend(loc='best', fontsize=params['font_size_legend'])
+ax.set_ylabel("$\\leftangle H \\rightangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax.set_xscale('log')
 ax.set_yscale('log')
 

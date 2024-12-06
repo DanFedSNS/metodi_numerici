@@ -23,7 +23,7 @@ plt.rc('font', family='serif')
 colors = plt.get_cmap('tab10')
 
 # Cartella dei dati
-data_folder = './analysis/fig2/'
+data_folder = './analysis/fig5/'
 file_pattern = os.path.join(data_folder, 'wf_Nt*_simbeta*_g*.dat')
 files = glob.glob(file_pattern)
 
@@ -34,8 +34,8 @@ for idx, file_path in enumerate(sorted(files)):
     with open(file_path, 'r') as file:
         for line in file:
             if line.startswith('Nt'):
-                simbeta_str = line.split(',')[1]
-                simbeta = float(simbeta_str.split('=')[1].strip())
+                g_str = line.split(',')[1]
+                g = float(g_str.split('=')[1].strip())
                 break
     
     # Caricare i dati
@@ -45,7 +45,7 @@ for idx, file_path in enumerate(sorted(files)):
     occurrences /= sum(occurrences)
     
     # Plottare la curva
-    ax.plot(positions, occurrences, label=f"$\\beta = {simbeta:.3f}$", 
+    ax.plot(positions, occurrences, label=f"$g = {g:.3f}$", 
             color=colors(idx % 10), 
             markerfacecolor='white', 
             markeredgewidth=params['line_width_axes'], 
@@ -72,5 +72,5 @@ ax.legend(fontsize=params['font_size_legend'])
 
 # Salvataggio della figura
 plt.tight_layout(pad=params['pad'])
-plt.savefig('./figure/figure_2.pdf', format='pdf')
+plt.savefig('./figure/figure_5.pdf', format='pdf')
 plt.close(fig)
