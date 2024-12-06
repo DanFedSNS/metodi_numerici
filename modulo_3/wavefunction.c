@@ -8,7 +8,7 @@
 #include "./include/boxmuller.h"
 #include "./include/random.h"
 
-#define STRING_LENGTH 50
+#define STRING_LENGTH 100
 
 // Metropolis update, return 1 if accepted
 int metropolis(double *restrict lattice, long int r, double nnsum, double eta, const double delta, double g){
@@ -70,7 +70,7 @@ int montecarlo(int Nt, double eta, long int sample, double g){
 	}
 
 	char datafile[STRING_LENGTH];
-	sprintf(datafile, "./misure/wf_Nt%d_simbeta%.3f_g%.3f.dat", Nt, simbeta, g); // file name initialized with a string
+	sprintf(datafile, "./analysis/fig2/wf_Nt%d_simbeta%.3f_g%.3f.dat", Nt, simbeta, g); // file name initialized with a string
 
 	FILE *fp;
 

@@ -6,7 +6,7 @@ Nt = 200
 simbeta = .714
 g = 0
 
-file_path = f'./misure/wf_Nt{Nt}_simbeta{simbeta:.3f}_g{g:.3f}.dat'
+file_path = f'./analysis/fig2/wf_Nt{Nt}_simbeta{simbeta:.3f}_g{g:.3f}.dat'
 
 # Load the data, skipping the header row
 data = np.loadtxt(file_path, skiprows=1)
