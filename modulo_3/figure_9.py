@@ -23,15 +23,12 @@ plt.rc('font', family='serif')
 color_palette = plt.get_cmap('tab10')
 
 # Percorso ai file
-data_directory = './analysis/fig456/'
+data_directory = './analysis/fig3/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-Nt = 200
 times = np.linspace(0, 100, 11)
-simbeta = 7.143
 num_gaps = 4
 num_mc = 1000
-eta = simbeta / Nt
 
 # Variabili per raccogliere i risultati
 g_values = []
@@ -44,6 +41,11 @@ for index, data_filepath in enumerate(data_filepaths):
         # Lettura del valore di g
         for line in data_file:
             if line.startswith('Nt'):
+                Nt_line = line.split(',')[0] 
+                Nt_value = float(Nt_line.split('=')[1].strip())
+                simbeta_line = line.split(',')[1]
+                simbeta_value = float(simbeta_line.split('=')[1].strip())
+
                 g_line = line.split(',')[2] 
                 g_value = float(g_line.split('=')[1].strip())
                 if g_value not in gap_samples:
@@ -109,7 +111,8 @@ for index, data_filepath in enumerate(data_filepaths):
             B_perturbed = B + B_gauss * B_err
 
             eigenvalues, _ = np.linalg.eig(np.linalg.inv(B_perturbed) @ A_perturbed)
-
+            
+            eta = simbeta_value / Nt_value
             if all([np.isreal(e) and e > 0 for e in eigenvalues]):
                 eigenvalues = -np.log(eigenvalues) / (tau * eta)
                 eigenvalue_samples.append(np.sort(eigenvalues))
@@ -120,7 +123,6 @@ for index, data_filepath in enumerate(data_filepaths):
 
 # Calcolo delle medie per ogni valore di g
 g_values_unique = np.unique(g_values)
-mean_gaps = {g: np.mean(gap_samples[g], axis=0) for g in g_values_unique}
 
 # Creiamo una figura
 fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
@@ -144,5 +146,5 @@ ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plo
 ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
 
 plt.tight_layout(pad=plot_params['pad'])
-plt.savefig('./figure/figure_6.pdf', format='pdf')
+plt.savefig('./figure/figure_3.pdf', format='pdf')
 plt.close(fig)
