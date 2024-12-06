@@ -184,7 +184,7 @@ int montecarlo(int Nt, double eta, long int sample, double g){
 		return EXIT_FAILURE;
 	}
 
-	fprintf(fp, "Nt = %d, simbeta = %.10f, g = %.10f, sample = %ld, measevery = %d, num_deltat = %d\n", Nt, simbeta, g, sample, measevery, num_deltat);
+	fprintf(fp, "Nt = %d, simbeta = %.10f, g = %.10f, sample = %ld, measevery = %d, num_deltat = %d, n_corr_max = %d\n", Nt, simbeta, g, sample, measevery, num_deltat, n_corr_max);
 
 	acc = 0;
 	for (int iter = 0; iter < sample; iter++){
@@ -207,7 +207,7 @@ int montecarlo(int Nt, double eta, long int sample, double g){
 				}
 			}
 
-			for (r = 0; r < num_deltat; r++){
+			for (r = 0; r <= num_deltat; r++){
 				for (int n = 1; n <= n_corr_max; n++){
 					for (int m = 1; m <= n_corr_max; m++){
 						if ((n+m) % 2 == 0 && m >= n){

@@ -160,7 +160,7 @@ void computejack(double *restrict datajack,
 int count_columns(char *datafile) {
 	FILE *fp;
 	fp = fopen(datafile, "r");
-    char line[1024];
+    char line[10024];
     int columns = 0;
 
 	fgets(line, sizeof(line), fp);
@@ -198,13 +198,13 @@ void analysis(int Nt, double eta){
 	printf("sample = %ld, measeery = %ld\n", sample, measevery);
     sample /= measevery;
 
-	binsize = sample / 100;
 	
 	// definition of eta
 	eta = simbeta / (double)Nt;
 	
 	// initialize numberofbins and sampleeff
 	sample -= skip_lines;
+    binsize = sample / 100;
 	numberofbins = sample / binsize;
 	sampleeff = numberofbins * binsize;
 	
