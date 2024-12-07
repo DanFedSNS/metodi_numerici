@@ -23,10 +23,11 @@ plt.rc('font', family='serif')
 color_palette = plt.get_cmap('tab10')
 
 # Percorso ai file
-data_directory = './analysis/fig3/'
+data_directory = './analysis/medie/fig456_bis/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-times = np.linspace(0, 100, 11)
+times = np.linspace(5, 100, 20)
+tau_zero = 4
 num_gaps = 4
 num_mc = 1000
 
@@ -79,10 +80,8 @@ for index, data_filepath in enumerate(data_filepaths):
     ])
 
     for ix, t in enumerate(times):
-        if ix < 2:
-            continue
 
-        tau = t - 10
+        tau = t - tau_zero
         
         A = np.array([
             [first_column[4 + 6*ix], 0, first_column[5 + 6*ix], 0],
@@ -127,8 +126,10 @@ g_values_unique = np.unique(g_values)
 # Creiamo una figura
 fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
+jdx = 8
 for col in range(num_gaps-1):
-    ax.errorbar(times[2:11], [gap[col] for gap in gap_samples[g_values_unique[0]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[0]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='s', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+    print(g_values_unique[jdx])
+    ax.errorbar(times, [gap[col] for gap in gap_samples[g_values_unique[jdx]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[jdx]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='s', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 
 for spine in ax.spines.values():
     spine.set_linewidth(plot_params['line_width_axes'])
@@ -144,6 +145,8 @@ ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_g
 ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
+# ax.set_yscale('log')
+# ax.set_ylim([2.025, 2.075])
 
 plt.tight_layout(pad=plot_params['pad'])
 plt.savefig('./figure/figure_3.pdf', format='pdf')

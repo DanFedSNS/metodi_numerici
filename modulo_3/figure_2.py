@@ -24,7 +24,7 @@ colors = plt.get_cmap('tab10')
 
 # Cartella dei dati
 data_folder = './analysis/fig2/'
-file_pattern = os.path.join(data_folder, 'wf_Nt*_simbeta*_g*.dat')
+file_pattern = os.path.join(data_folder, 'Nt*_simbeta*_g*.dat')
 files = glob.glob(file_pattern)
 
 # Creiamo una figura
@@ -40,13 +40,14 @@ for idx, file_path in enumerate(sorted(files)):
     
     # Caricare i dati
     data = np.loadtxt(file_path, skiprows=1)
-    positions = data[:, 0]
+    positions = data[:, 0]  
+    print(len(positions))
     occurrences = data[:, 1]
     occurrences /= sum(occurrences)
     
     # Plottare la curva
-    ax.plot(positions, occurrences, label=f"$\\beta = {simbeta:.3f}$", 
-            color=colors(idx % 10), 
+    ax.plot(positions, occurrences, label=f"$\\beta = {simbeta:.3f}$",  
+            color=colors(idx % 10),
             markerfacecolor='white', 
             markeredgewidth=params['line_width_axes'], 
             zorder=2)

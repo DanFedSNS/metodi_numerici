@@ -22,9 +22,6 @@ params = load_params('params.txt')
 plt.rc('font', family='serif')
 colors = plt.get_cmap('tab10')
 
-# Creiamo una figura
-fig, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
-
 # Percorso ai file
 data_dir = './analysis/fig1/'
 filepaths = sorted(glob.glob(os.path.join(data_dir, '*')))  # Legge tutti i file nella directory
@@ -69,34 +66,42 @@ errors2 = np.array(errors2)
 curve3 = np.array(curve3)
 errors3 = np.array(errors3)
 
+def sol_anal(x):
+    return 0.5*(1 + np.e**(-x))/(1-np.e**(-x))
+
 beta_dense = np.linspace(betas.min(), betas.max(), 1000)
-y_anal = 0.5*(1 + np.e**(-beta_dense))/(1-np.e**(-beta_dense))
+y_anal = sol_anal(beta_dense)
 
-# Eseguiamo il plot
-# ax.errorbar(betas, curve1, yerr=errors1, fmt='o', color=colors(0),
-#             label="Curve 1", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
-ax.errorbar(betas, curve2, yerr=errors2, fmt='o', color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
-# ax.errorbar(betas, curve3, yerr=errors3, fmt='o', color=colors(2),
-#             label="Curve 3", markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
-ax.plot(beta_dense, y_anal, color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2, alpha=0.5)
+# Creiamo una figura
+fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 1.2*params['fig_height']), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
 
-# Personalizzazione dei subplot
-for spine in ax.spines.values():
-    spine.set_linewidth(params['line_width_axes'])
+ax[0].plot(beta_dense, y_anal, color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2, alpha=0.5)
+ax[0].plot(betas, curve2, 's', color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
 
-ax.tick_params(axis='x', labelsize=params['font_size_ticks'], 
-               width=params['line_width_axes'], direction='in')
-ax.tick_params(axis='y', labelsize=params['font_size_ticks'], 
-               width=params['line_width_axes'], direction='in')
-ax.margins(x=0.00, y=0.00)
-ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
-ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
+res = (curve2 - sol_anal(betas))/errors2
+ax[1].plot(betas, res, 's', color='black', markerfacecolor='white')
+
+
+ax[1].axhline(0, color='black', linewidth=0.8, linestyle='--')
+ax[1].set_ylabel('Residui', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].grid(True)
+
+for ax_ in ax:
+    ax_.grid(True)
+    ax_.tick_params(axis='x', labelsize=params.get('font_size_ticks', 10), direction='in')
+    ax_.tick_params(axis='y', labelsize=params.get('font_size_ticks', 10), direction='in')
+    for spine in ax_.spines.values():
+        spine.set_linewidth(params.get('line_width_axes', 1))
+    ax_.margins(x=0.00, y=0.00)
+    ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
+    ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
 
 # Etichette degli assi
-ax.set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_ylabel("$\\leftangle H \\rightangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_xscale('log')
-ax.set_yscale('log')
+ax[0].set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_ylabel("$\\leftangle H \\rightangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_xscale('log')
+ax[0].set_yscale('log')
+ax[1].set_xscale('log')
 
 # Salvataggio della figura
 plt.tight_layout(pad=params['pad'])
