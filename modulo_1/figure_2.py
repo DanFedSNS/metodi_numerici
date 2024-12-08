@@ -1,6 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import sys
+
+# Array of different L values to consider
+L_array = np.linspace(70, 150, 5, dtype=int)
+#L_array = np.linspace(90, 100, 2, dtype=int)
+model = "ising2d_hex_cluster"
 
 def load_params(filepath):
     params = {}
@@ -13,64 +19,67 @@ def load_params(filepath):
                 params[key] = float(value) if '.' in value else int(value)
     return params
 
-def extract_data(filepath):
-    with open(filepath, 'r') as file:
-        header = file.readline().strip()
-        beta = float(header.split('=')[1]) 
-        
-        data = np.genfromtxt(file, max_rows=3, dtype=float)
-    return beta, data
-
-# Carica i parametri globali.
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 params = load_params('params.txt')
 
-# Configurazione del plot.
+#plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
-colors = plt.get_cmap('tab10')
 
-# Directory contenente i file.
-data_dir = './fig12/'  # Cambia con il percorso corretto.
+colors = plt.get_cmap('tab10') 
 
-# Lista dei file nella directory.
-files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.txt')]
+# Creiamo una figura con 4 subplot orizzontali
+fig, ax = plt.subplots(2, 2, figsize=(2*params['fig_width']+0.25, 1.5*params['fig_height']))
 
-# Creazione del plot.
-fig, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
+ax = ax.flatten()
+for i, L in enumerate(L_array):
+    filepath = f'./data/analysis_{model}/L{L}.dat'
+    data = np.genfromtxt(filepath, delimiter=" ", dtype=float, filling_values=np.nan)
 
-for filepath in files:
-    # Estrazione dei dati.
-    beta, data = extract_data(filepath)
-    
-    # Indici riga e valori corrispondenti.
-    x_values = [1, 2, 3]
-    y_values = data[:, 0]  # Supponendo che i valori siano nella prima colonna.
-    y_errors = data[:, 1]  # Supponendo che gli errori siano nella seconda colonna.
-    
-    # Aggiunge i dati al grafico.
-    ax.errorbar(x_values, y_values, yerr=y_errors, label=f"$\\beta={beta:.2f}$",
-                marker='o', linestyle='-', capsize=3)
+    beta = data[:, 0]  
+    specific_heat = data[:, 3]  # Specific heat
+    susceptibility = data[:, 7]  # Susceptibility
+    magn_abs_avg = data[:, 5]  # Average absolute magnetization
+    energy_avg = data[:, 1]  # Average energy
+ 
+    ax[0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+        markeredgewidth = params['line_width_axes'], zorder = 2)
+    ax[1].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+        markeredgewidth = params['line_width_axes'], zorder = 2)
+    ax[2].plot(beta, magn_abs_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+        markeredgewidth = params['line_width_axes'], zorder = 2)
+    ax[3].plot(beta, energy_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+        markeredgewidth = params['line_width_axes'], zorder = 2)
 
-# Configurazione degli assi.
-ax.set_xlabel("Indice riga", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_ylabel("Valore", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.legend(loc='best', fontsize=params['font_size_legend'])
 
-# Miglioramenti estetici.
-for spine in ax.spines.values():
-    spine.set_linewidth(params['line_width_axes'])
-ax.tick_params(axis='x', labelsize=params['font_size_ticks'], 
-               width=params['line_width_axes'], direction='in')
-ax.tick_params(axis='y', labelsize=params['font_size_ticks'], 
-               width=params['line_width_axes'], direction='in')
-ax.margins(x=0.00, y=0.00)
-ax.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
-ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
+for ax_ in ax.flat:
+    for spine in ax_.spines.values():
+        spine.set_linewidth(params['line_width_axes'])
+    ax_.tick_params(axis='x', labelsize=params['font_size_ticks'], 
+                    width=params['line_width_axes'], direction='in')
+    ax_.tick_params(axis='y', labelsize=params['font_size_ticks'], 
+                    width=params['line_width_axes'], direction='in')
+    ax_.margins(x=0.00, y=0.00)
+    ax_.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
+    ax_.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
+    #ax_.set_xticks(ticks=[0.27, 0.275, 0.28])
+
+
+ax[0].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_ylabel("$C$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].legend(loc='best', fontsize=params['font_size_legend'])
+
+ax[1].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].set_ylabel("$\chi'$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[1].legend(loc='best', fontsize=params['font_size_legend'])
+
+ax[2].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[2].set_ylabel("$\\langle |m|\\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[2].legend(loc='best', fontsize=params['font_size_legend'])
+
+ax[3].set_xlabel("$\\beta $", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[3].set_ylabel("$\\langle E \\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[3].legend(loc='best', fontsize=params['font_size_legend'])
 
 plt.tight_layout(pad=params['pad'])
-
-# Salva la figura.
-output_path = './figure/figure_1.pdf'
-plt.savefig(output_path, format='pdf')
+plt.savefig('./figure/figure_2.pdf', format='pdf')
 plt.close(fig)
-
-print(f"Figura salvata in {output_path}")
