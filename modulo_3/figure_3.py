@@ -23,11 +23,12 @@ plt.rc('font', family='serif')
 color_palette = plt.get_cmap('tab10')
 
 # Percorso ai file
-data_directory = './analysis/fig456/'
+data_directory = './analysis/medie/fig456_bis/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-times = np.linspace(10, 25, 16)
-times = np.concatenate((times, [50, 75, 100, 150, 200, 400]))
+#times = np.linspace(10, 25, 16)
+#times = np.concatenate((times, [50, 75, 100, 150, 200, 400]))
+times = np.linspace(5, 100, 20)
 tau_zero = 4
 num_gaps = 4
 num_mc = 1000
