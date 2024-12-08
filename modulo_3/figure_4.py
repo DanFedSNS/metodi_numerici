@@ -34,10 +34,12 @@ beta_values = []
 g_values = []
 mean_x = []
 mean_x_squared = []
+mean_x_4 = []
 mean_H = []
 error_x = []
 error_x_squared = []
 error_H = []
+error_x_4 = []
 
 # Lettura e salvataggio dei dati
 for index, data_filepath in enumerate(data_filepaths):
@@ -61,8 +63,10 @@ for index, data_filepath in enumerate(data_filepaths):
     error_x.append(numerical_data[0, 1])
     mean_x_squared.append(numerical_data[1, 0])
     error_x_squared.append(numerical_data[1, 1])
-    mean_H.append(numerical_data[70, 0])
-    error_H.append(numerical_data[70, 1])
+    mean_H.append(numerical_data[-1, 0])
+    error_H.append(numerical_data[-1, 1])
+    mean_x_4.append(numerical_data[3, 0])
+    error_x_4.append(numerical_data[3, 1])
 
 # Convertiamo i vettori in array numpy per il plotting
 beta_values = np.array(beta_values)
@@ -73,14 +77,22 @@ mean_x_squared = np.array(mean_x_squared)
 error_x_squared = np.array(error_x_squared)
 entropy_H = np.array(mean_H)
 error_H = np.array(error_H)
+mean_x_4 = np.array(mean_x_4)
+error_x_4 = np.array(error_x_4)
 
 # Eseguiamo il plot
 # ax.plot(g_values, mean_x, yerr=error_x, fmt='o', color=color_palette(0),
 #             label="Mean X", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
-ax.plot(g_values, mean_x_squared, 's', color=color_palette(1),
-            label="Mean X^2", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
-ax.plot(g_values, mean_H, 's', color=color_palette(2),
+ax.plot(g_values, 0.5 * mean_x_squared, 's', color=color_palette(0),
+            label="Mean $^2$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+ax.plot(g_values, mean_H, 's', color=color_palette(1),
             label="Mean H", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+ax.plot(g_values, mean_x_4*g_values, 's', color=color_palette(2),
+            label="$\\langle X^4 \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+ax.plot(g_values, mean_H - mean_x_4*g_values - 0.5*mean_x_squared, 's', color=color_palette(3),
+            label="$difr$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+ax.plot(g_values,2*(mean_x_4*g_values + 0.5*mean_x_squared), 's', color=color_palette(5),
+            label="$doppio$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 
 # Personalizzazione dei subplot
 for spine in ax.spines.values():

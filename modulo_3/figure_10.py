@@ -24,7 +24,7 @@ plt.rc('font', family='serif')
 
 colori = plt.get_cmap('tab10')
 
-data_directory = './analysis/fig9/'
+data_directory = './analysis/fig10/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
 fig2, ax2 = plt.subplots(figsize=(params['fig_width'], 0.75*params['fig_height']))
@@ -42,9 +42,8 @@ for index, data_filepath in enumerate(data_filepaths):
         numerical_data = np.loadtxt(data_file)
     
     corr_x_2 = numerical_data
-    
-    ax2.plot(beta, corr_x_2,  's', color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
-
+    eta = beta/Nt_value
+    ax2.plot(eta, corr_x_2,  's', color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
 
 for spine in ax2.spines.values():
     spine.set_linewidth(params['line_width_axes'])
@@ -58,10 +57,12 @@ ax2.margins(x=0.00, y=0.00)
 ax2.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_minor'])
 ax2.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
 
-ax2.set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax2.set_ylabel("$\\langle x(\\tau_0)x(0)\\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
+ax2.set_xlabel("$\\eta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax2.set_ylabel("$\\langle x^2\\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
+# ax2.set_yscale('log')
+# ax2.set_xscale('log')
 
 # Salva la figura
 plt.tight_layout(pad=params['pad'])
-plt.savefig('./figure/figure_9.pdf', format='pdf')
+plt.savefig('./figure/figure_10.pdf', format='pdf')
 plt.close(fig2)

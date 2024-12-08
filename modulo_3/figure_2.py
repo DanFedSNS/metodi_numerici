@@ -26,11 +26,22 @@ colors = plt.get_cmap('tab10')
 data_folder = './analysis/fig2/'
 file_pattern = os.path.join(data_folder, 'Nt*_simbeta*_g*.dat')
 files = glob.glob(file_pattern)
+print(files)
+def extract_beta(file_path):
+    base_name = os.path.basename(file_path)
+    parts = base_name.split('_')
+    for part in parts:
+        if part.startswith('simbeta'):
+            return float(part.replace('simbeta', '').replace('.dat', ''))
+    raise ValueError(f"Impossibile trovare 'simbeta' nel file: {file_path}")
 
+# Ordina i file in base al valore di beta
+files = sorted(files, key=extract_beta, reverse=True)
+print(files)
 # Creiamo una figura
 fig, ax = plt.subplots(figsize=(params['fig_width'], 0.75*params['fig_height']))
 
-for idx, file_path in enumerate(sorted(files)):
+for idx, file_path in enumerate(files):
     with open(file_path, 'r') as file:
         for line in file:
             if line.startswith('Nt'):
@@ -47,8 +58,8 @@ for idx, file_path in enumerate(sorted(files)):
     occurrences = occurrences/(sum(occurrences)*(positions[1]-positions[0])) 
     
     # Plottare la curva
-    ax.plot(positions, occurrences, label=f"$\\beta = {simbeta:.3f}$",  
-            color=colors(idx % 10),
+    ax.plot(positions, occurrences, label=f"$\\beta = {simbeta:.1f}$",  
+            color=colors(idx % 10 + 1),
             markerfacecolor='white', 
             markeredgewidth=params['line_width_axes'], 
             zorder=0)
@@ -57,7 +68,7 @@ def ground_state(x):
     return (np.pi)**-0.5 * np.exp(-np.abs(x)**2)
 
 pos_dense = np.linspace(-3, 3, 1000)
-ax.plot(pos_dense, ground_state(pos_dense), color='black', linestyle='--', zorder=1, label='Ground state')
+ax.plot(pos_dense, ground_state(pos_dense), color='black', linestyle='--', zorder=1)
 
 for spine in ax.spines.values():
     spine.set_linewidth(params['line_width_axes'])
@@ -72,7 +83,7 @@ ax.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_m
 
 # Etichette degli assi
 ax.set_xlabel("$x$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax.set_ylabel("$|\\psi^2|$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax.set_ylabel("$|\\psi|^2$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 
 # Aggiungere la legenda
 ax.legend(fontsize=params['font_size_legend'])

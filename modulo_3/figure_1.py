@@ -75,14 +75,14 @@ y_anal = sol_anal(beta_dense)
 # Creiamo una figura
 fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 1*params['fig_height']), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
 
-ax[0].plot(beta_dense, y_anal, color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2, alpha=0.5)
-ax[0].plot(betas, curve2, 's', color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
+ax[0].plot(beta_dense, np.log(y_anal), color='blue', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2, alpha=0.5)
+ax[0].plot(betas, np.log(curve2), 's', color='blue', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
 
 res = (curve2 - sol_anal(betas))/errors2
-ax[1].plot(betas, res, 's', color='black', markerfacecolor='white')
+ax[1].plot(betas, res, 's', color='blue', markerfacecolor='white')
 
 
-ax[1].axhline(0, color='black', linewidth=0.8, linestyle='--')
+ax[1].axhline(0, color='blue', linewidth=0.8, linestyle='--')
 ax[1].set_ylabel('Residui', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[1].grid(True)
 
@@ -98,10 +98,11 @@ for ax_ in ax:
 
 # Etichette degli assi
 ax[0].set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax[0].set_ylabel("$\\leftangle H \\rightangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax[0].set_ylabel("ln($\\leftangle H \\rightangle$)", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax[0].set_xscale('log')
-ax[0].set_yscale('log')
 ax[1].set_xscale('log')
+ax[1].set_ylim([-2,2])
+
 
 # Salvataggio della figura
 plt.tight_layout(pad=params['pad'])

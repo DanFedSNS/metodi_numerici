@@ -23,18 +23,16 @@ plt.rc('font', family='serif')
 color_palette = plt.get_cmap('tab10')
 
 # Percorso ai file
-data_directory = './analysis/medie/fig456_bis/'
+data_directory = './analysis/fig456/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-#times = np.linspace(10, 25, 16)
-#times = np.concatenate((times, [50, 75, 100, 150, 200, 400]))
-times = np.linspace(5, 100, 20)
 tau_zero = 4
 num_gaps = 4
-num_mc = 1000
+num_mc = 100
 
 # Variabili per raccogliere i risultati
 g_values = []
+Nt_values = []
 gap_samples = {}
 gap_std = {}
 
@@ -51,7 +49,7 @@ for index, data_filepath in enumerate(data_filepaths):
                 Nt_value = float(Nt_line.split('=')[1].strip())
                 simbeta_line = line.split(',')[1]
                 simbeta_value = float(simbeta_line.split('=')[1].strip())
-
+                Nt_values.append(Nt_value)
                 g_line = line.split(',')[2] 
                 g_value = float(g_line.split('=')[1].strip())
                 if g_value not in gap_samples:
@@ -59,7 +57,10 @@ for index, data_filepath in enumerate(data_filepaths):
                     gap_std[g_value] = []
                 g_values.append(g_value)
                 break
-        
+
+        #times = np.linspace(10, Nt_value/4, 22, dtype=int)
+        #times = np.linspace(5, 100, 20, dtype=int)
+        times = np.linspace(Nt_value/20, Nt_value/4, 10, dtype=int)
         numerical_data = np.loadtxt(data_file)
     
     first_column = numerical_data[:, 0]
@@ -79,9 +80,9 @@ for index, data_filepath in enumerate(data_filepaths):
 
     B_err = np.array([
         [second_column[-7], 0, second_column[-6], 0],
-        [0, second_column[-5] + 2 * x2_err, 0, second_column[-4] + (x2_err/x2 + x4_err/x4) * x2*x4],
+        [0, second_column[-5] + 2 * x2 * x2_err, 0, second_column[-4] + x2_err*x4 + x4_err*x2],
         [second_column[-6], 0, second_column[-3], 0],
-        [0, second_column[-4] + (x2_err/x2 + x4_err/x4) * x2*x4, 0, second_column[-2] + 2 * x4_err]
+        [0, second_column[-4] + x2_err*x4 + x4_err*x2, 0, second_column[-2] + 2 * x4*x4_err]
     ])
 
     for ix, t in enumerate(times):
@@ -97,9 +98,9 @@ for index, data_filepath in enumerate(data_filepaths):
 
         A_err = np.array([
             [second_column[4 + 6*ix], 0, second_column[5 + 6*ix], 0],
-            [0, second_column[6 + 6*ix] + 2 * x2_err, 0, second_column[7 + 6*ix] + (x2_err/x2 + x4_err/x4) * x2*x4],
+            [0, second_column[6 + 6*ix] + 2 * x2*x2_err, 0, second_column[7 + 6*ix] + x2_err*x4 + x4_err*x2 ],
             [second_column[5 + 6*ix], 0, second_column[8 + 6*ix], 0],
-            [0, second_column[7 + 6*ix] + (x2_err/x2 + x4_err/x4) * x2*x4, 0, second_column[9 + 6*ix] + 2 * x4_err]
+            [0, second_column[7 + 6*ix] + x2_err*x4 + x4_err*x2, 0, second_column[9 + 6*ix] + 2 * x4 * x4_err]
         ])
 
         eigenvalue_samples = []
@@ -128,31 +129,44 @@ for index, data_filepath in enumerate(data_filepaths):
 # Calcolo delle medie per ogni valore di g
 g_values_unique = np.unique(g_values)
 
-# Creiamo una figura
-fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
+for jdx in range(len(g_values_unique)):
+    # if jdx != 0:
+    #     continue
+    # Creiamo una figura
+    fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
-jdx = 1
-for col in range(num_gaps-1):
-    print(g_values_unique[jdx])
-    ax.errorbar(times, [gap[col] for gap in gap_samples[g_values_unique[jdx]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[jdx]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='s', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+    for col in range(num_gaps-1):
+        valid_indices = [i for i, (gap, gap_err) in enumerate(zip(gap_samples[g_values_unique[jdx]], gap_std[g_values_unique[jdx]]))
+            if not (np.isnan(gap[col]) or np.isnan(gap_err[col]))]
+        times_filtered = [times[i] for i in valid_indices]
+        gaps_filtered = [gap_samples[g_values_unique[jdx]][i][col] for i in valid_indices]
+        gap_errs_filtered = [gap_std[g_values_unique[jdx]][i][col] for i in valid_indices]
 
-for spine in ax.spines.values():
-    spine.set_linewidth(plot_params['line_width_axes'])
+        # Grafico con i dati filtrati
+        ax.errorbar(times_filtered, gaps_filtered, yerr=gap_errs_filtered,
+                    label=f"$\\lambda_{col}$", color=color_palette(col),
+                    linestyle='none', marker='.', markerfacecolor='white',
+                    markeredgewidth=plot_params['line_width_axes'], zorder=2)
+        # ax.errorbar(times, [gap[col] for gap in gap_samples[g_values_unique[jdx]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[jdx]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='.', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 
-ax.tick_params(axis='x', labelsize=plot_params['font_size_ticks'], 
-               width=plot_params['line_width_axes'], direction='in')
-ax.tick_params(axis='y', labelsize=plot_params['font_size_ticks'], 
-               width=plot_params['line_width_axes'], direction='in')
-ax.margins(x=0.00, y=0.00)
-ax.grid(True, which='minor', linestyle=':', linewidth=plot_params['line_width_grid_minor'])
-ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_grid_major'])
+    for spine in ax.spines.values():
+        spine.set_linewidth(plot_params['line_width_axes'])
 
-ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
-ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
-ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
-# ax.set_yscale('log')
-# ax.set_ylim([2.025, 2.075])
+    ax.set_title('g = ' + str(g_values_unique[jdx]))
+    ax.tick_params(axis='x', labelsize=plot_params['font_size_ticks'], 
+                width=plot_params['line_width_axes'], direction='in')
+    ax.tick_params(axis='y', labelsize=plot_params['font_size_ticks'], 
+                width=plot_params['line_width_axes'], direction='in')
+    ax.margins(x=0.00, y=0.00)
+    ax.grid(True, which='minor', linestyle=':', linewidth=plot_params['line_width_grid_minor'])
+    ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_grid_major'])
 
-plt.tight_layout(pad=plot_params['pad'])
-plt.savefig('./figure/figure_3.pdf', format='pdf')
-plt.close(fig)
+    ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+    ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+    ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
+    # ax.set_yscale('log')
+    ax.set_ylim([0, 5])
+
+    plt.tight_layout(pad=plot_params['pad'])
+    plt.savefig(f'./analysis/figure_3_{jdx}.pdf', format='pdf')
+    plt.close(fig)

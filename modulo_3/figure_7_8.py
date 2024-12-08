@@ -29,8 +29,8 @@ fig, ax = plt.subplots(figsize=(params['fig_width'], params['fig_height']))
 def exp_decay(x, A, tau):
     return A * np.exp(-x / tau)
 
-def power_law(L, alpha, c, d):
-    return c * L**alpha + d
+def power_law(L, alpha, c):
+    return c * L**alpha 
 
 data_directory = './analysis/fig78/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
@@ -80,7 +80,7 @@ for index, data_filepath in enumerate(data_filepaths):
     ax.plot(x_plot[::num], y_plot[::num], label=label, color=colori(color_index), marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
     # ax.set_xlim(x_plot.min(), x_plot.max())
     # ax.set_ylim(y_plot.min(), y_plot.max()) 
-    ax.plot(x_dense, exp_decay(x_dense, *popt), color=colori(color_index), label=None, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
+    # ax.plot(x_dense, exp_decay(x_dense, *popt), color=colori(color_index), label=None, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
     color_index += 1
         
 
@@ -99,21 +99,22 @@ ax.set_xlabel("Numero di aggiornamenti", fontsize=params['font_size_axis'], labe
 ax.set_yscale("log")
 
 plt.tight_layout(pad=params['pad'])
-plt.savefig('./figure/figure_7.pdf', format='pdf')
+#plt.savefig('./figure/figure_7.pdf', format='pdf')
 plt.close(fig)
 
 styles = ['o', 's']
 
 fig2, ax2 = plt.subplots(figsize=(params['fig_width'], 0.75*params['fig_height']))
 
+tau_values =  np.array(tau_values)*10
 # Plot dei tempi caratteristici al variare di L
-ax2.plot(Nt_values, tau_values, 's', color='black', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
+ax2.plot(Nt_values, tau_values, 's', color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
 
-popt_, _ = curve_fit(power_law, Nt_values, tau_values, p0=[2.1, 1, 1])
+popt_, _ = curve_fit(power_law, Nt_values, tau_values, p0=[2.1, 1])
 
-Nt_fit = np.linspace(min(Nt_values), max(Nt_values), 100)
+Nt_fit = np.linspace(1, 800, 1000)
 
-ax2.plot(Nt_fit, power_law(Nt_fit, *popt_), color='blue', marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
+# ax2.plot(Nt_fit, power_law(Nt_fit, *popt_), color='blue', marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
 print(popt_)
 
 for spine in ax2.spines.values():
@@ -129,9 +130,10 @@ ax2.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_m
 ax2.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
 
 #ax2.legend(loc="upper left", fontsize=params['font_size_legend'])
-ax2.set_xlabel("Nt", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-#ax2.set_ylim([0, 100])
-ax2.set_ylabel("Tempo Caratteristico", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
+ax2.set_xlabel("$N_T$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
+ax2.set_xlim([9, 600])
+ax2.set_ylim([100, 6e5])
+ax2.set_ylabel("$\\tau$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
 #ax2.set_xticks(ticks=[0.43, 0.44, 0.45])
 ax2.set_yscale("log")
 ax2.set_xscale("log")
