@@ -73,7 +73,7 @@ beta_dense = np.linspace(betas.min(), betas.max(), 1000)
 y_anal = sol_anal(beta_dense)
 
 # Creiamo una figura
-fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 1.2*params['fig_height']), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
+fig, ax = plt.subplots(2, 1, figsize=(params['fig_width'], 1*params['fig_height']), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
 
 ax[0].plot(beta_dense, y_anal, color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2, alpha=0.5)
 ax[0].plot(betas, curve2, 's', color='black', markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)

@@ -120,13 +120,32 @@ for index, data_filepath in enumerate(data_filepaths):
 
 # Calcolo delle medie per ogni valore di g
 g_values_unique = np.unique(g_values)
-mean_gaps = {g: np.mean(gap_samples[g], axis=0) for g in g_values_unique}
 
+mean_gaps = {}
+std_gaps = {}
+
+for g in g_values_unique:
+    gap_array = np.array(gap_samples[g]) 
+    gap_std_array = np.array(gap_std[g])  
+    
+    # Calcola la media e deviazione standard per ciascun gap
+    mean_gaps[g] = np.average(gap_array, weights=gap_std_array, axis=0) 
+    std_gaps[g] = np.sqrt(1/(np.sum(1/(np.array(gap_std_array)**2), axis=0))) 
+
+print(g_values_unique)
 # Creiamo una figura
 fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
-for col in range(num_gaps-1):
-    ax.errorbar(times[2:11], [gap[col] for gap in gap_samples[g_values_unique[0]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[0]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='s', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+for col in range(num_gaps):  # Loop sui gap
+    mean_values = [mean_gaps[g][col] for g in g_values_unique]  # Media per il gap corrente
+    std_values = [std_gaps[g][col] for g in g_values_unique]  # Std per il gap corrente
+    
+    ax.errorbar(
+        g_values_unique, mean_values, yerr=std_values,
+        label=f"$\\lambda_{col}$", color=color_palette(col),
+        linestyle='none', marker='.', markerfacecolor='white',
+        markeredgewidth=plot_params['line_width_axes'], zorder=2
+    )
 
 for spine in ax.spines.values():
     spine.set_linewidth(plot_params['line_width_axes'])
@@ -142,7 +161,7 @@ ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_g
 ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
-
+ax.set_xscale('log')
 plt.tight_layout(pad=plot_params['pad'])
 plt.savefig('./figure/figure_6.pdf', format='pdf')
 plt.close(fig)
