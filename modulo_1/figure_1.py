@@ -5,7 +5,7 @@ import sys
 
 # Parametri
 L_array = [20]
-beta_unificato = [0.21, 0.36, 0.56, 0.79]  # Unico vettore di beta per tutti i modelli
+beta_unificato = [0.21, 0.29, 0.47, 0.71]  # Unico vettore di beta per tutti i modelli
 tau = int(5e4)
 modelli = ["ising2d_sq_cluster", "ising2d_tri_cluster", "ising2d_hex_cluster"]
 
@@ -47,7 +47,7 @@ for j, beta in enumerate(beta_unificato):
             L = L_array[i]
 
             # Costruzione del percorso del file
-            filepath = f'./data/{modello}/L{L}_beta{(beta):.5f}.dat'
+            filepath = f'C:/Users/marco/Downloads/Misura_lunga/Figura 1/{modello}/L{L}_beta{(beta):.5f}.dat'
 
             # Caricamento dei dati
             data = np.loadtxt(filepath, skiprows=1, delimiter=",")

@@ -35,6 +35,7 @@ g_values = []
 Nt_values = []
 gap_samples = {}
 gap_std = {}
+ix_for_B = 3
 
 # Lettura e calcolo dei dati
 for index, data_filepath in enumerate(data_filepaths):
@@ -60,7 +61,8 @@ for index, data_filepath in enumerate(data_filepaths):
 
         #times = np.linspace(10, Nt_value/4, 22, dtype=int)
         #times = np.linspace(5, 100, 20, dtype=int)
-        times = np.linspace(Nt_value/20, Nt_value/4, 10, dtype=int)
+        #times = np.linspace(Nt_value/20, Nt_value/4, 10, dtype=int)
+        times = np.linspace(1,70,70)
         numerical_data = np.loadtxt(data_file)
     
     first_column = numerical_data[:, 0]
@@ -71,7 +73,7 @@ for index, data_filepath in enumerate(data_filepaths):
     x4 = first_column[3]
     x4_err = second_column[3]
 
-    B = np.array([
+    """B = np.array([
         [first_column[-7], 0, first_column[-6], 0],
         [0, first_column[-5] - x2**2, 0, first_column[-4] - x2 * x4],
         [first_column[-6], 0, first_column[-3], 0],
@@ -85,11 +87,43 @@ for index, data_filepath in enumerate(data_filepaths):
         [0, second_column[-4] + x2_err*x4 + x4_err*x2, 0, second_column[-2] + 2 * x4*x4_err]
     ])
 
-    for ix, t in enumerate(times):
+    B = np.array([
+        [first_column[4 + 9*ix_for_B], 0, first_column[5 + 9*ix_for_B], 0, first_column[6 + 9*ix_for_B]],
+        [0, first_column[7 + 9*ix_for_B] - x2**2, 0, first_column[8 + 9*ix_for_B] - x2 * x4, 0],
+        [first_column[5 + 9*ix_for_B], 0, first_column[9 + 9*ix_for_B], 0, first_column[10 + 9 * ix_for_B]],
+        [0, first_column[8 + 9*ix_for_B] - x2 * x4, 0, first_column[11 + 9*ix_for_B] - x4**2, 0],
+        [first_column[6 + 9 * ix_for_B], 0, first_column[10 + 9 * ix_for_B], 0, first_column[12 + 9 * ix_for_B]]
+    ])
 
+    B_err = np.array([
+        [second_column[4 + 9*ix_for_B], 0, second_column[5 + 9*ix_for_B], 0, second_column[6 + 9*ix_for_B]],
+        [0, second_column[7 + 9*ix_for_B] + 2 * x2*x2_err, 0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2, 0],
+        [second_column[5 + 9*ix_for_B], 0, second_column[9 + 9*ix_for_B], 0, second_column[10 + 9 * ix_for_B]],
+        [0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix_for_B] + 2 * x4 * x4_err, 0],
+        [second_column[6 + 9 * ix_for_B], 0, second_column[10 + 9 * ix_for_B], 0, second_column[12 + 9 * ix_for_B]]
+    ])
+
+    """
+    B = np.array([
+        [first_column[4 + 9*ix_for_B], 0, first_column[5 + 9*ix_for_B], 0],
+        [0, first_column[7 + 9*ix_for_B] - x2**2, 0, first_column[8 + 9*ix_for_B] - x2 * x4],
+        [first_column[5 + 9*ix_for_B], 0, first_column[9 + 9*ix_for_B], 0],
+        [0, first_column[8 + 9*ix_for_B] - x2 * x4, 0, first_column[11 + 9*ix_for_B] - x4**2]
+    ])
+    
+    B_err = np.array([
+        [second_column[4 + 9*ix_for_B], 0, second_column[5 + 9*ix_for_B], 0],
+        [0, second_column[7 + 9*ix_for_B] + 2 * x2*x2_err, 0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2],
+        [second_column[5 + 9*ix_for_B], 0, second_column[9 + 9*ix_for_B], 0],
+        [0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix_for_B] + 2 * x4 * x4_err]
+    ])
+
+    for ix, t in enumerate(times):
+        if ix <= ix_for_B:
+            continue
         tau = t - tau_zero
         
-        A = np.array([
+        """A = np.array([
             [first_column[4 + 6*ix], 0, first_column[5 + 6*ix], 0],
             [0, first_column[6 + 6*ix] - x2**2, 0, first_column[7 + 6*ix] - x2 * x4],
             [first_column[5 + 6*ix], 0, first_column[8 + 6*ix], 0],
@@ -101,6 +135,36 @@ for index, data_filepath in enumerate(data_filepaths):
             [0, second_column[6 + 6*ix] + 2 * x2*x2_err, 0, second_column[7 + 6*ix] + x2_err*x4 + x4_err*x2 ],
             [second_column[5 + 6*ix], 0, second_column[8 + 6*ix], 0],
             [0, second_column[7 + 6*ix] + x2_err*x4 + x4_err*x2, 0, second_column[9 + 6*ix] + 2 * x4 * x4_err]
+        ])
+        
+        A = np.array([
+            [first_column[4 + 9*ix], 0, first_column[5 + 9*ix], 0, first_column[6 + 9*ix]],
+            [0, first_column[7 + 9*ix] - x2**2, 0, first_column[8 + 9*ix] - x2 * x4, 0],
+            [first_column[5 + 9*ix], 0, first_column[9 + 9*ix], 0, first_column[10 + 9 * ix]],
+            [0, first_column[8 + 9*ix] - x2 * x4, 0, first_column[11 + 9*ix] - x4**2, 0],
+            [first_column[6 + 9 * ix], 0, first_column[10 + 9 * ix], 0, first_column[12 + 9 * ix]]
+        ])
+
+        A_err = np.array([
+            [second_column[4 + 9*ix], 0, second_column[5 + 9*ix], 0, second_column[6 + 9*ix]],
+            [0, second_column[7 + 9*ix] + 2 * x2*x2_err, 0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2, 0],
+            [second_column[5 + 9*ix], 0, second_column[9 + 9*ix], 0, second_column[10 + 9 * ix]],
+            [0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix] + 2 * x4 * x4_err, 0],
+            [second_column[6 + 9 * ix], 0, second_column[10 + 9 * ix], 0, second_column[12 + 9 * ix]]
+        ])
+        """
+        A = np.array([
+            [first_column[4 + 9*ix], 0, first_column[5 + 9*ix], 0],
+            [0, first_column[7 + 9*ix] - x2**2, 0, first_column[8 + 9*ix] - x2 * x4],
+            [first_column[5 + 9*ix], 0, first_column[9 + 9*ix], 0],
+            [0, first_column[8 + 9*ix] - x2 * x4, 0, first_column[11 + 9*ix] - x4**2]
+        ])
+
+        A_err = np.array([
+            [second_column[4 + 9*ix], 0, second_column[5 + 9*ix], 0],
+            [0, second_column[7 + 9*ix] + 2 * x2*x2_err, 0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2],
+            [second_column[5 + 9*ix], 0, second_column[9 + 9*ix], 0],
+            [0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix] + 2 * x4 * x4_err]
         ])
 
         eigenvalue_samples = []
@@ -130,12 +194,12 @@ for index, data_filepath in enumerate(data_filepaths):
 g_values_unique = np.unique(g_values)
 
 for jdx in range(len(g_values_unique)):
-    if jdx != 0:
-        continue
+    #if jdx != 0:
+    #    continue
     # Creiamo una figura
     fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
-    for col in range(num_gaps-1):
+    for col in range(num_gaps):
         valid_indices = [i for i, (gap, gap_err) in enumerate(zip(gap_samples[g_values_unique[jdx]], gap_std[g_values_unique[jdx]]))
             if not (np.isnan(gap[col]) or np.isnan(gap_err[col]))]
         times_filtered = [times[i] for i in valid_indices]
@@ -165,7 +229,7 @@ for jdx in range(len(g_values_unique)):
     ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
     # ax.set_yscale('log')
-    ax.set_ylim([0.95, 1.05])
+    ax.set_ylim([0.8, 8])
 
     plt.tight_layout(pad=plot_params['pad'])
     plt.savefig(f'./analysis/figure_3_{jdx}.pdf', format='pdf')
