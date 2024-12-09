@@ -133,7 +133,7 @@ ax2.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_
 ax2.set_xlabel("$N_T$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax2.set_xlim([9, 600])
 ax2.set_ylim([100, 6e5])
-ax2.set_ylabel("$\\tau$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
+ax2.set_ylabel("$\\tau_{corr}$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
 #ax2.set_xticks(ticks=[0.43, 0.44, 0.45])
 ax2.set_yscale("log")
 ax2.set_xscale("log")

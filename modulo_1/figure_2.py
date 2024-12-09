@@ -6,7 +6,7 @@ import sys
 # Array of different L values to consider
 L_array = np.linspace(70, 150, 5, dtype=int)
 #L_array = np.linspace(90, 100, 2, dtype=int)
-model = "ising2d_hex_cluster"
+model = "ising2d_tri_cluster"
 
 def load_params(filepath):
     params = {}

@@ -41,11 +41,15 @@ for index, data_filepath in enumerate(data_filepaths):
         
         numerical_data = np.loadtxt(data_file)
     
-    corr_x_2 = numerical_data
+    corr_x_2 = numerical_data[0,0]
     
     ax2.plot(beta, corr_x_2,  's', color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
 
+beta_dense = np.linspace(1, 6, 200)
+tau = 1/5
+anal = 1/2 * np.exp(-tau) + np.exp(-beta_dense)*(np.cosh(tau))
 
+ax2.plot(beta_dense, anal, color='blue', marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
 for spine in ax2.spines.values():
     spine.set_linewidth(params['line_width_axes'])
 
@@ -60,6 +64,7 @@ ax2.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_
 
 ax2.set_xlabel("$\\beta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 ax2.set_ylabel("$\\langle x(\\tau_0)x(0)\\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
+#ax2.set_xscale('log')
 
 # Salva la figura
 plt.tight_layout(pad=params['pad'])

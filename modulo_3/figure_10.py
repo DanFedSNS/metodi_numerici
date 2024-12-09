@@ -41,9 +41,9 @@ for index, data_filepath in enumerate(data_filepaths):
         
         numerical_data = np.loadtxt(data_file)
     
-    corr_x_2 = numerical_data
+    corr_x_2 = -(numerical_data[0, 0] - 0.5)
     eta = beta/Nt_value
-    ax2.plot(eta, corr_x_2,  's', color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
+    ax2.plot(eta**2, corr_x_2,  's', color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
 
 for spine in ax2.spines.values():
     spine.set_linewidth(params['line_width_axes'])
@@ -58,9 +58,9 @@ ax2.grid(True, which='minor', linestyle=':', linewidth=params['line_width_grid_m
 ax2.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_major'])
 
 ax2.set_xlabel("$\\eta$", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax2.set_ylabel("$\\langle x^2\\rangle$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
-# ax2.set_yscale('log')
-# ax2.set_xscale('log')
+ax2.set_ylabel("$\\langle x^2\\rangle_{cont}-\\langle x^2\\rangle_{\\eta}$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "black")
+ax2.set_yscale('log')
+ax2.set_xscale('log')
 
 # Salva la figura
 plt.tight_layout(pad=params['pad'])

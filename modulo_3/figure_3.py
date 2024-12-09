@@ -130,8 +130,8 @@ for index, data_filepath in enumerate(data_filepaths):
 g_values_unique = np.unique(g_values)
 
 for jdx in range(len(g_values_unique)):
-    # if jdx != 0:
-    #     continue
+    if jdx != 0:
+        continue
     # Creiamo una figura
     fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
@@ -165,7 +165,7 @@ for jdx in range(len(g_values_unique)):
     ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
     # ax.set_yscale('log')
-    ax.set_ylim([0, 5])
+    ax.set_ylim([0.95, 1.05])
 
     plt.tight_layout(pad=plot_params['pad'])
     plt.savefig(f'./analysis/figure_3_{jdx}.pdf', format='pdf')
