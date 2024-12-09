@@ -26,10 +26,15 @@ plt.rc('font', family='serif')
 
 colors = plt.get_cmap('tab10') 
 # Dizionario con i valori di beta_c per i tre modelli
-beta_c_values = {
+beta_c_values_anal = {
     "ising2d_hex_cluster": np.log(2 + np.sqrt(3)) / 2,
     "ising2d_tri_cluster": np.log(np.sqrt(3)) / 2,
     "ising2d_sq_cluster": np.log(1 + np.sqrt(2)) / 2
+}
+beta_c_values = {
+    "ising2d_hex_cluster": 0.65847,
+    "ising2d_tri_cluster": 0.27468,
+    "ising2d_sq_cluster": 0.44069
 }
 
 # Creiamo una figura con 3 subplot verticali
@@ -46,7 +51,7 @@ for ax, model in zip(axes, models):
         beta = (beta - beta_c) * L
         susceptibility = data[:, 7] / L ** 1.75  # Susceptibility
 
-        ax.plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none',
+        ax.plot(beta[::2], susceptibility[::2], color=colors(i), label=f'L={L}', marker='s', linestyle='none',
                 markerfacecolor='white', markeredgewidth=params['line_width_axes'], zorder=2)
 
     # Impostazioni estetiche per ogni subplot

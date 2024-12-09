@@ -76,7 +76,7 @@ for algo_index, algo in enumerate(algos):
         y_plot = y_fit[::num[algo_index]]
 
         if L in L_graph:
-            ax[algo_index].plot(x_plot, y_plot, label=label, color=colori(color_index), marker='o', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
+            ax[algo_index].plot(x_plot, y_plot, label=label, color=colori(color_index), marker='s', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
             ax[algo_index].set_xlim(x_plot.min(), x_plot.max())
             ax[algo_index].set_ylim(y_plot.min(), y_plot.max()) 
             ax[algo_index].plot(x_dense, exp_decay(x_dense, *popt), color=colori(color_index), label=None, marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
@@ -107,16 +107,12 @@ plt.tight_layout(pad=params['pad'])
 plt.savefig('./figure/figure_4.pdf', format='pdf')
 plt.close(fig)
 
-styles = ['o', 's']
+styles = ['s', 's']
 
 fig2, ax = plt.subplots(figsize=(params['fig_width'], 0.75*params['fig_height']))
 
 # Creare un secondo asse Y
 ax2 = ax.twinx()
-
-# Assegnare colori agli assi
-ax.spines['left'].set_color("blue") 
-ax2.spines['right'].set_color("red")  
 
 # Plot dei tempi caratteristici al variare di L
 ax.plot(L_array, tau_metro, styles[0], label="Metro", color='blue', linestyle='none', markerfacecolor='white', markeredgewidth = params['line_width_axes'], zorder = 2)
@@ -148,6 +144,10 @@ for spine in ax.spines.values():
 for spine in ax2.spines.values():
     spine.set_linewidth(params['line_width_axes'])
 
+# Assegnare colori agli assi
+ax.spines['left'].set_color("blue") 
+ax2.spines['right'].set_color("red")  
+
 ax.tick_params(axis='x', labelsize=params['font_size_ticks'], 
                 width=params['line_width_axes'], direction='in')
 ax.tick_params(axis='y', color="blue", labelsize=params['font_size_ticks'], 
@@ -163,8 +163,8 @@ ax.legend(loc="upper left", fontsize=params['font_size_legend'])
 ax2.legend(loc="lower right", fontsize=params['font_size_legend'])
 ax.set_xlabel("L", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
 #ax.set_ylim([0, 100])
-ax.set_ylabel("Tempo Caratteristico", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "blue")
-ax2.set_ylabel("Tempo Caratteristico", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "red")
+ax.set_ylabel("$\\tau$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "blue")
+ax2.set_ylabel("$\\tau$", fontsize=params['font_size_axis'], labelpad=params['label_pad'], color = "red")
 #ax[0].set_xticks(ticks=[0.43, 0.44, 0.45])
 
 # Salva la figura

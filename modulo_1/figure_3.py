@@ -10,7 +10,7 @@ L_array = np.linspace(10, 200, 20, dtype=int)
 algos = ["ising2d_tri_metro", "ising2d_tri_cluster"]
 
 # Stili per i modelli
-styles = ['o', 's']
+styles = ['s', 's']
 
 def load_params(filepath):
     params = {}
@@ -76,9 +76,9 @@ ax1.grid(True, which='major', linestyle='--', linewidth=params['line_width_grid_
 
 # Etichette e legenda
 ax1.set_xlabel("L", fontsize=params['font_size_axis'], labelpad=params['label_pad'])
-ax1.set_ylabel("$\\sigma_{\\langle m \\rangle} \\cdot 10^3$", fontsize=params['font_size_axis'], 
+ax1.set_ylabel("$\\sigma_{\\langle m \\rangle} [10^{-3}]$", fontsize=params['font_size_axis'], 
                labelpad=params['label_pad'], color="blue")
-ax2.set_ylabel("$\\sigma_{\\langle m \\rangle} \\cdot 10^3$", fontsize=params['font_size_axis'], 
+ax2.set_ylabel("$\\sigma_{\\langle m \\rangle} [10^{-3}]$", fontsize=params['font_size_axis'], 
                labelpad=params['label_pad'], color="red")
 
 ax1.legend(loc='upper left', fontsize=params['font_size_legend'])

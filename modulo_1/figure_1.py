@@ -56,10 +56,10 @@ for j, beta in enumerate(beta_unificato):
             
             # Binning classico: calcolo della frequenza per ogni bin
             magnetization_frequencies, _ = np.histogram(magnetization, bins=bin_edges)
-            magnetization_frequencies = magnetization_frequencies / len(magnetization)
+            #magnetization_frequencies = magnetization_frequencies / len(magnetization)
             # Calcolo del centro di ogni bin per il plotting
             bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-
+            magnetization_frequencies = magnetization_frequencies / np.sum(magnetization_frequencies)
             # Plot della distribuzione di magnetizzazione
             label = f'{modello.split("_")[1]}'
             ax[j].plot(

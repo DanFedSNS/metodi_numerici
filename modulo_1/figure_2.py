@@ -40,14 +40,14 @@ for i, L in enumerate(L_array):
     susceptibility = data[:, 7]  # Susceptibility
     magn_abs_avg = data[:, 5]  # Average absolute magnetization
     energy_avg = data[:, 1]  # Average energy
- 
-    ax[0].plot(beta, specific_heat, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    num = 2
+    ax[0].plot(beta[::num], specific_heat[::num], color=colors(i), label=f'L={L}', marker='s', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[1].plot(beta, susceptibility, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[1].plot(beta[::num], susceptibility[::num], color=colors(i), label=f'L={L}', marker='s', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[2].plot(beta, magn_abs_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[2].plot(beta[::num], magn_abs_avg[::num], color=colors(i), label=f'L={L}', marker='s', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
-    ax[3].plot(beta, energy_avg, color=colors(i), label=f'L={L}', marker='o', linestyle='none', markerfacecolor='white', 
+    ax[3].plot(beta[::num], energy_avg[::num], color=colors(i), label=f'L={L}', marker='s', linestyle='none', markerfacecolor='white', 
         markeredgewidth = params['line_width_axes'], zorder = 2)
 
 

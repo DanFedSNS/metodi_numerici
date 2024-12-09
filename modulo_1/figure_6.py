@@ -78,13 +78,17 @@ for model in modelli:
     nu_err = fit_errors_power_B[model][1] / (popt_B[1]**2)
     gamma_err = np.sqrt((fit_errors_power_C[model][1] / popt_B[1])**2 + 
                         (popt_C[1] * fit_errors_power_B[model][1] / (popt_B[1]**2))**2)
-    chi_2 = np.sum((fit_params[model]['C'] - power_law(L_array, *popt_C))**2 / np.array(fit_params[model]['C_err'])**2)
+    
+    chi_2_C = np.sum((fit_params[model]['C'] - power_law(L_array, *popt_C))**2 / np.array(fit_params[model]['C_err'])**2)
+    chi_2_B = np.sum((fit_params[model]['B'] - power_law(L_array, *popt_B))**2 / np.array(fit_params[model]['B_err'])**2)
     beta_critico = popt_B[2]
     err_beta_critico = fit_errors_power_B[model][2]
+
     print(f"Temperatura critica per {model}: {beta_critico:.5f} ± {err_beta_critico:.5f}")
     print(f"Esponente nu per {model}: {nu:.3f} ± {nu_err:.3f}")
     print(f"Esponente gamma per {model}: {gamma:.3f} ± {gamma_err:.3f}")
-    print(f"Chi quadro normalizzati per {model}: {chi_2/10:.3f}")
+    print(f"Chi quadro beta_P normalizzati per {model}: {chi_2_B/10:.3f}")
+    print(f"Chi quadro chi_P normalizzati per {model}: {chi_2_C/10:.3f}")
 
 fig, axes = plt.subplots(4, 1, figsize=(params.get('fig_width', 10), 2 * params.get('fig_height', 5)),
                          gridspec_kw={'height_ratios': [3, 1, 3, 1]}, sharex=True)
@@ -98,9 +102,9 @@ for i, model in enumerate(modelli):
     fit_B = power_law(L_dense, *fit_params_power_B.get(model, [0, 0, 0]))
     residuals_B = (np.array(fit_params[model]['B']) - power_law(L_array, *fit_params_power_B[model])) / np.array(fit_params[model]['B_err'])
 
-    axes[0].plot(L_array, fit_params[model]['B'], 'o', color=color, label=label, markerfacecolor='white')
+    axes[0].plot(L_array, fit_params[model]['B'], 's', color=color, label=label, markerfacecolor='white')
     axes[0].plot(L_dense, fit_B, color=color, linewidth=params.get('line_width_axes', 1), alpha=0.5, zorder=1)
-    axes[1].plot(L_array, residuals_B, 'o', color=color, markerfacecolor='white')
+    axes[1].plot(L_array, residuals_B, 's', color=color, markerfacecolor='white')
 
 # Fit e curve per C
 for i, model in enumerate(modelli):
@@ -111,9 +115,9 @@ for i, model in enumerate(modelli):
     fit_C = power_law(L_dense, *fit_params_power_C.get(model, [0, 0, 0]))
     residuals_C = (np.array(fit_params[model]['C']) - power_law(L_array, *fit_params_power_C[model])) / np.array(fit_params[model]['C_err'])
 
-    axes[2].plot(L_array, fit_params[model]['C'], 'o', color=color, label=label, markerfacecolor='white')
+    axes[2].plot(L_array, fit_params[model]['C'],'s', color=color, label=label, markerfacecolor='white')
     axes[2].plot(L_dense, fit_C, color=color, linewidth=params.get('line_width_axes', 1), alpha=0.5, zorder=1)
-    axes[3].plot(L_array, residuals_C, 'o', color=color, markerfacecolor='white')
+    axes[3].plot(L_array, residuals_C, 's', color=color, markerfacecolor='white')
 
 # Personalizzazione grafici principali
 axes[0].set_ylabel('$\\beta_p$', fontsize=params['font_size_axis'], labelpad=params['label_pad'])
