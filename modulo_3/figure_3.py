@@ -106,7 +106,7 @@ for index, data_filepath in enumerate(data_filepaths):
         [second_column[6 + 9 * ix_for_B], 0, second_column[10 + 9 * ix_for_B], 0, second_column[12 + 9 * ix_for_B]]
     ])
 
-    """
+    
     B = np.array([
         [first_column[4 + 9*ix_for_B], 0, first_column[5 + 9*ix_for_B], 0],
         [0, first_column[7 + 9*ix_for_B] - x2**2, 0, first_column[8 + 9*ix_for_B] - x2 * x4],
@@ -119,6 +119,18 @@ for index, data_filepath in enumerate(data_filepaths):
         [0, second_column[7 + 9*ix_for_B] + 2 * x2*x2_err, 0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2],
         [second_column[5 + 9*ix_for_B], 0, second_column[9 + 9*ix_for_B], 0],
         [0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix_for_B] + 2 * x4 * x4_err]
+    ])"""
+
+    B = np.array([
+        [first_column[4 + 9*ix_for_B], 0, first_column[5 + 9*ix_for_B]],
+        [0, first_column[7 + 9*ix_for_B] - x2**2, 0],
+        [first_column[5 + 9*ix_for_B], 0, first_column[9 + 9*ix_for_B]]
+    ])
+    
+    B_err = np.array([
+        [second_column[4 + 9*ix_for_B], 0, second_column[5 + 9*ix_for_B]],
+        [0, second_column[7 + 9*ix_for_B] + 2 * x2*x2_err, 0],
+        [second_column[5 + 9*ix_for_B], 0, second_column[9 + 9*ix_for_B]]
     ])
 
     for ix, t in enumerate(times):
@@ -155,7 +167,7 @@ for index, data_filepath in enumerate(data_filepaths):
             [0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix] + 2 * x4 * x4_err, 0],
             [second_column[6 + 9 * ix], 0, second_column[10 + 9 * ix], 0, second_column[12 + 9 * ix]]
         ])
-        """
+        
         A = np.array([
             [first_column[4 + 9*ix], 0, first_column[5 + 9*ix], 0],
             [0, first_column[7 + 9*ix] - x2**2, 0, first_column[8 + 9*ix] - x2 * x4],
@@ -168,6 +180,18 @@ for index, data_filepath in enumerate(data_filepaths):
             [0, second_column[7 + 9*ix] + 2 * x2*x2_err, 0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2],
             [second_column[5 + 9*ix], 0, second_column[9 + 9*ix], 0],
             [0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix] + 2 * x4 * x4_err]
+        ])"""
+
+        A = np.array([
+            [first_column[4 + 9*ix], 0, first_column[5 + 9*ix]],
+            [0, first_column[7 + 9*ix] - x2**2, 0],
+            [first_column[5 + 9*ix], 0, first_column[9 + 9*ix]]
+        ])
+
+        A_err = np.array([
+            [second_column[4 + 9*ix], 0, second_column[5 + 9*ix]],
+            [0, second_column[7 + 9*ix] + 2 * x2*x2_err, 0],
+            [second_column[5 + 9*ix], 0, second_column[9 + 9*ix]]
         ])
 
         eigenvalue_samples = []

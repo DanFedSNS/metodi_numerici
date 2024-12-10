@@ -84,7 +84,7 @@ error_x_4 = np.array(error_x_4)
 # ax.plot(g_values, mean_x, yerr=error_x, fmt='o', color=color_palette(0),
 #             label="Mean X", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 ax.plot(g_values, 0.5 * mean_x_squared, 's', color=color_palette(0),
-            label="$\\langle x^2 \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+            label="$\\frac{1}{2} \\langle x^2 \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 ax.plot(g_values, mean_H, 's', color=color_palette(1),
             label="$\\langle H \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 ax.plot(g_values, mean_x_4*g_values, 's', color=color_palette(2),
