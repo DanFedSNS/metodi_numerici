@@ -47,12 +47,14 @@ for index, data_filepath in enumerate(data_filepaths):
 
 beta_dense = np.linspace(1, 6, 200)
 tau = 1/5
-#anal = 1/2 * np.exp(-tau) + np.exp(-beta_dense)*(np.cosh(tau))
+anal_approx = 1/2 * np.exp(-tau) + np.exp(-beta_dense)*(np.cosh(tau))
 anal = 1/2 * (np.exp(tau - beta_dense) + np.exp(-tau)) / (1 - np.exp(-beta_dense))
 val_esatto = 1/2 * np.exp(-tau)
 
-ax2.plot(beta_dense, anal, color='blue', marker='none', linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
-ax2.plot(beta_dense, [val_esatto for _ in beta_dense], color='red', marker='none', linestyle = "--", linewidth=params['line_width_axes'], alpha=0.5, zorder = 0)
+ax2.plot(beta_dense, anal, color='blue', marker='none', linewidth=params['line_width_axes'], zorder = 0)
+ax2.plot(beta_dense, anal_approx, color='black', marker='none', linewidth=params['line_width_axes'],  zorder = 0)
+ax2.plot(beta_dense, [val_esatto for _ in beta_dense], color='red', marker='none', linewidth=params['line_width_axes'], zorder = 0)
+
 for spine in ax2.spines.values():
     spine.set_linewidth(params['line_width_axes'])
 
