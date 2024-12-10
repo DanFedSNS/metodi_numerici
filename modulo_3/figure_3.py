@@ -26,7 +26,7 @@ color_palette = plt.get_cmap('tab10')
 data_directory = './analysis/fig456/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-tau_zero = 1
+tau_zero = 4
 num_gaps = 4
 num_mc = 100
 
@@ -229,7 +229,7 @@ for jdx in range(len(g_values_unique)):
     ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_grid_major'])
 
     ax.set_xlabel("$\\tau$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
-    ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+    ax.set_ylabel("$\\Delta E$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
     #ax.set_yscale('log')
     ax.set_ylim([0.5, 3.5])

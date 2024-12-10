@@ -88,11 +88,9 @@ ax.plot(g_values, 0.5 * mean_x_squared, 's', color=color_palette(0),
 ax.plot(g_values, mean_H, 's', color=color_palette(1),
             label="$\\langle H \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 ax.plot(g_values, mean_x_4*g_values, 's', color=color_palette(2),
-            label="$\\langle x^4 \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+            label="$g \\langle x^4 \\rangle$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 #ax.plot(g_values, mean_H - mean_x_4*g_values - 0.5*mean_x_squared, 's', color=color_palette(3),
             #label="$difr$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
-ax.plot(g_values,2*(mean_x_4*g_values + 0.5*mean_x_squared), 's', color=color_palette(5),
-            label="$2(\\frac{1}{2}\\langle x^2 \\rangle + g\langle x^4 \\rangle)$", markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 
 # Personalizzazione dei subplot
 for spine in ax.spines.values():
@@ -108,7 +106,7 @@ ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_g
 
 # Etichette degli assi
 ax.set_xlabel("$g$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
-ax.set_ylabel("$C$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+ax.set_ylabel("$\\langle O \\rangle$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.set_xscale('log')
 ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
 

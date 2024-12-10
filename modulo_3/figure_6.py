@@ -150,10 +150,10 @@ for col in range(num_gaps - 1):  # Loop sui gap
     mean_values = [mean_gaps[g][col] if np.isfinite(mean_gaps[g][col]) else -10 for g in g_values_unique]  # Media per il gap corrente
     std_values = [std_gaps[g][col] if np.isfinite(std_gaps[g][col]) else 0.01 for g in g_values_unique]  # Std per il gap corrente
     
-    ax.errorbar(
-        g_values_unique, mean_values, yerr=std_values,
+    ax.plot(
+        g_values_unique, mean_values,
         label=f"$\\Delta E_{col + 1}$", color=color_palette(col),
-        linestyle='none', marker='.', markerfacecolor='white',
+        linestyle='none', marker='s', markerfacecolor='white',
         markeredgewidth=plot_params['line_width_axes'], zorder=2
     )
 
@@ -163,9 +163,9 @@ pert1 = 1 + pert(g_dense, 1) - pert(g_dense, 0)
 pert2 = 2 + pert(g_dense, 2) - pert(g_dense, 0)
 pert3 = 3 + pert(g_dense, 3) - pert(g_dense, 0)
 
-ax.plot(g_dense, pert1, linestyle = "--")
-ax.plot(g_dense, pert2, linestyle = "--")
-ax.plot(g_dense, pert3, linestyle = "--")
+ax.plot(g_dense, pert1, linestyle = "--", zorder = 1)
+ax.plot(g_dense, pert2, linestyle = "--", zorder = 1)
+ax.plot(g_dense, pert3, linestyle = "--", zorder = 1)
 
 for spine in ax.spines.values():
     spine.set_linewidth(plot_params['line_width_axes'])
