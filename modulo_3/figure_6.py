@@ -14,6 +14,9 @@ def load_params(filepath):
                 parameters[key] = float(value) if '.' in value else int(value)
     return parameters
 
+def pert(g, n):
+    return 3/2 * g * (n**2 + n + 1/2)
+
 # Carichiamo i parametri
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 plot_params = load_params('params.txt')
@@ -26,17 +29,19 @@ color_palette = plt.get_cmap('tab10')
 data_directory = './analysis/fig456/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-Nt = 200
-times = np.linspace(0, 100, 11)
-simbeta = 7.143
+Nt = 422
+times = np.linspace(1, 70, 70)
+simbeta = 6.541
+tau_zero = 4
 num_gaps = 4
-num_mc = 1000
+num_mc = 100
 eta = simbeta / Nt
 
 # Variabili per raccogliere i risultati
 g_values = []
 gap_samples = {}
 gap_std = {}
+ix_for_B = tau_zero - 1
 
 # Lettura e calcolo dei dati
 for index, data_filepath in enumerate(data_filepaths):
@@ -63,38 +68,39 @@ for index, data_filepath in enumerate(data_filepaths):
     x4_err = second_column[3]
 
     B = np.array([
-        [first_column[-7], 0, first_column[-6], 0],
-        [0, first_column[-5] - x2**2, 0, first_column[-4] - x2 * x4],
-        [first_column[-6], 0, first_column[-3], 0],
-        [0, first_column[-4] - x2 * x4, 0, first_column[-2] - x4**2]
+        [first_column[4 + 9*ix_for_B], 0, first_column[5 + 9*ix_for_B], 0],
+        [0, first_column[7 + 9*ix_for_B] - x2**2, 0, first_column[8 + 9*ix_for_B] - x2 * x4],
+        [first_column[5 + 9*ix_for_B], 0, first_column[9 + 9*ix_for_B], 0],
+        [0, first_column[8 + 9*ix_for_B] - x2 * x4, 0, first_column[11 + 9*ix_for_B] - x4**2]
     ])
-
+    
     B_err = np.array([
-        [second_column[-7], 0, second_column[-6], 0],
-        [0, second_column[-5] + 2 * x2_err, 0, second_column[-4] + (x2_err/x2 + x4_err/x4) * x2*x4],
-        [second_column[-6], 0, second_column[-3], 0],
-        [0, second_column[-4] + (x2_err/x2 + x4_err/x4) * x2*x4, 0, second_column[-2] + 2 * x4_err]
+        [second_column[4 + 9*ix_for_B], 0, second_column[5 + 9*ix_for_B], 0],
+        [0, second_column[7 + 9*ix_for_B] + 2 * x2*x2_err, 0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2],
+        [second_column[5 + 9*ix_for_B], 0, second_column[9 + 9*ix_for_B], 0],
+        [0, second_column[8 + 9*ix_for_B] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix_for_B] + 2 * x4 * x4_err]
     ])
 
     for ix, t in enumerate(times):
-        if ix < 2:
+        if ix <= ix_for_B:
             continue
 
-        tau = t - 10
+        tau = t - tau_zero
         
         A = np.array([
-            [first_column[4 + 6*ix], 0, first_column[5 + 6*ix], 0],
-            [0, first_column[6 + 6*ix] - x2**2, 0, first_column[7 + 6*ix] - x2 * x4],
-            [first_column[5 + 6*ix], 0, first_column[8 + 6*ix], 0],
-            [0, first_column[7 + 6*ix] - x2 * x4, 0, first_column[9 + 6*ix] - x4**2]
+            [first_column[4 + 9*ix], 0, first_column[5 + 9*ix], 0],
+            [0, first_column[7 + 9*ix] - x2**2, 0, first_column[8 + 9*ix] - x2 * x4],
+            [first_column[5 + 9*ix], 0, first_column[9 + 9*ix], 0],
+            [0, first_column[8 + 9*ix] - x2 * x4, 0, first_column[11 + 9*ix] - x4**2]
         ])
 
         A_err = np.array([
-            [second_column[4 + 6*ix], 0, second_column[5 + 6*ix], 0],
-            [0, second_column[6 + 6*ix] + 2 * x2_err, 0, second_column[7 + 6*ix] + (x2_err/x2 + x4_err/x4) * x2*x4],
-            [second_column[5 + 6*ix], 0, second_column[8 + 6*ix], 0],
-            [0, second_column[7 + 6*ix] + (x2_err/x2 + x4_err/x4) * x2*x4, 0, second_column[9 + 6*ix] + 2 * x4_err]
+            [second_column[4 + 9*ix], 0, second_column[5 + 9*ix], 0],
+            [0, second_column[7 + 9*ix] + 2 * x2*x2_err, 0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2],
+            [second_column[5 + 9*ix], 0, second_column[9 + 9*ix], 0],
+            [0, second_column[8 + 9*ix] + x2_err*x4 + x4_err*x2, 0, second_column[11 + 9*ix] + 2 * x4 * x4_err]
         ])
+
 
         eigenvalue_samples = []
 
@@ -110,7 +116,7 @@ for index, data_filepath in enumerate(data_filepaths):
 
             eigenvalues, _ = np.linalg.eig(np.linalg.inv(B_perturbed) @ A_perturbed)
 
-            if all([np.isreal(e) and e > 0 for e in eigenvalues]):
+            if any([np.isreal(e) and e > 0 for e in eigenvalues]):
                 eigenvalues = -np.log(eigenvalues) / (tau * eta)
                 eigenvalue_samples.append(np.sort(eigenvalues))
 
@@ -129,16 +135,20 @@ for g in g_values_unique:
     gap_std_array = np.array(gap_std[g])  
     
     # Calcola la media e deviazione standard per ciascun gap
-    mean_gaps[g] = np.average(gap_array, weights=gap_std_array, axis=0) 
-    std_gaps[g] = np.sqrt(1/(np.sum(1/(np.array(gap_std_array)**2), axis=0))) 
+    #mask = np.isnan(gap_array) == False
+    #if g == 0:
+    #    print(gap_array[mask])
 
-print(g_values_unique)
+    mean_gaps[g] = np.nansum(gap_array * 1/(gap_std_array**2), axis = 0) / np.nansum(1/(gap_std_array**2), axis = 0)
+    #np.average(gap_array[mask], weights=1 / gap_std_array[mask]**2, axis=0) 
+    std_gaps[g] = np.sqrt(1 / np.nansum(1/(gap_std_array**2), axis=0))
+
 # Creiamo una figura
 fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
 for col in range(num_gaps):  # Loop sui gap
-    mean_values = [mean_gaps[g][col] for g in g_values_unique]  # Media per il gap corrente
-    std_values = [std_gaps[g][col] for g in g_values_unique]  # Std per il gap corrente
+    mean_values = [mean_gaps[g][col] if np.isfinite(mean_gaps[g][col]) else -10 for g in g_values_unique]  # Media per il gap corrente
+    std_values = [std_gaps[g][col] if np.isfinite(std_gaps[g][col]) else 0.01 for g in g_values_unique]  # Std per il gap corrente
     
     ax.errorbar(
         g_values_unique, mean_values, yerr=std_values,
@@ -146,6 +156,16 @@ for col in range(num_gaps):  # Loop sui gap
         linestyle='none', marker='.', markerfacecolor='white',
         markeredgewidth=plot_params['line_width_axes'], zorder=2
     )
+
+
+g_dense = np.logspace(-2, -1, 100)
+pert1 = 1 + pert(g_dense, 1) - pert(g_dense, 0)
+pert2 = 2 + pert(g_dense, 2) - pert(g_dense, 0)
+pert3 = 3 + pert(g_dense, 3) - pert(g_dense, 0)
+
+ax.plot(g_dense, pert1, linestyle = "--")
+ax.plot(g_dense, pert2, linestyle = "--")
+ax.plot(g_dense, pert3, linestyle = "--")
 
 for spine in ax.spines.values():
     spine.set_linewidth(plot_params['line_width_axes'])
@@ -162,6 +182,7 @@ ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params[
 ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
 ax.set_xscale('log')
+ax.set_ylim([0.5, 8])
 plt.tight_layout(pad=plot_params['pad'])
 plt.savefig('./figure/figure_6.pdf', format='pdf')
 plt.close(fig)
