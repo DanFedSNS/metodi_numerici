@@ -59,7 +59,8 @@ for j, beta in enumerate(beta_unificato):
             #magnetization_frequencies = magnetization_frequencies / len(magnetization)
             # Calcolo del centro di ogni bin per il plotting
             bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-            magnetization_frequencies = magnetization_frequencies / np.sum(magnetization_frequencies)
+            bin_size = bin_edges[1] - bin_edges[0]
+            magnetization_frequencies = magnetization_frequencies / np.sum(magnetization_frequencies) / bin_size
             # Plot della distribuzione di magnetizzazione
             label = f'{modello.split("_")[1]}'
             ax[j].plot(
@@ -87,8 +88,8 @@ for j, beta in enumerate(beta_unificato):
     ax[j].tick_params(axis='y', labelsize=params['font_size_ticks'], 
                width=params['line_width_axes'], direction='in')
     ax[j].set_xticks(ticks=[0, 0.5, 1])
-    ax[j].set_yticks(ticks=[0, 0.05, 0.1])
-    ax[j].set_ylim([0, 0.1])
+    #ax[j].set_yticks(ticks=[0, 0.05, 0.1])
+    ax[j].set_ylim([0, 5])
     ax[j].margins(x=0.00, y=0.00)
 
 # Migliora la spaziatura tra i subplot
