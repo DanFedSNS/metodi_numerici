@@ -58,7 +58,10 @@ for index, data_filepath in enumerate(data_filepaths):
                     gap_std[g_value] = []
                 g_values.append(g_value)
                 break
-
+        
+        if g_value != 0:
+            continue
+        
         #times = np.linspace(10, Nt_value/4, 22, dtype=int)
         #times = np.linspace(5, 100, 20, dtype=int)
         #times = np.linspace(Nt_value/20, Nt_value/4, 10, dtype=int)
@@ -188,35 +191,35 @@ for index, data_filepath in enumerate(data_filepaths):
 
         eigenvalue_samples = np.array(eigenvalue_samples)
         gap_samples[g_value].append(np.mean(eigenvalue_samples, axis=0))
-        gap_std[g_value].append(np.std(eigenvalue_samples, axis=0))
+        gap_std[g_value].append(np.std(eigenvalue_samples, axis=0) * np.sqrt(6))
 
 # Calcolo delle medie per ogni valore di g
 g_values_unique = np.unique(g_values)
 
 for jdx in range(len(g_values_unique)):
-    #if jdx != 0:
-    #    continue
+    if jdx != 0:
+        continue
     # Creiamo una figura
     fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
-    for col in range(num_gaps):
+    for col in range(num_gaps-1):
         valid_indices = [i for i, (gap, gap_err) in enumerate(zip(gap_samples[g_values_unique[jdx]], gap_std[g_values_unique[jdx]]))
             if not (np.isscalar(gap) or np.isnan(gap[col]) or np.isnan(gap_err[col]))]
-        times_filtered = [times[i] for i in valid_indices]
+        times_filtered = [times[i] * eta for i in valid_indices]
         gaps_filtered = [gap_samples[g_values_unique[jdx]][i][col] for i in valid_indices]
         gap_errs_filtered = [gap_std[g_values_unique[jdx]][i][col] for i in valid_indices]
 
         # Grafico con i dati filtrati
-        ax.errorbar(times_filtered, gaps_filtered, yerr=gap_errs_filtered,
-                    label=f"$\\lambda_{col}$", color=color_palette(col),
-                    linestyle='none', marker='.', markerfacecolor='white',
+        ax.errorbar(times_filtered[::3], gaps_filtered[::3], yerr=gap_errs_filtered[::3],
+                    label=f"$\\Delta E_{col}$", color=color_palette(col),
+                    linestyle='none', marker='x', markerfacecolor='white',
                     markeredgewidth=plot_params['line_width_axes'], zorder=2)
         # ax.errorbar(times, [gap[col] for gap in gap_samples[g_values_unique[jdx]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[jdx]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='.', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
 
     for spine in ax.spines.values():
         spine.set_linewidth(plot_params['line_width_axes'])
 
-    ax.set_title('g = ' + str(g_values_unique[jdx]))
+    #ax.set_title('g = ' + str(g_values_unique[jdx]))
     ax.tick_params(axis='x', labelsize=plot_params['font_size_ticks'], 
                 width=plot_params['line_width_axes'], direction='in')
     ax.tick_params(axis='y', labelsize=plot_params['font_size_ticks'], 
@@ -225,11 +228,11 @@ for jdx in range(len(g_values_unique)):
     ax.grid(True, which='minor', linestyle=':', linewidth=plot_params['line_width_grid_minor'])
     ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_grid_major'])
 
-    ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+    ax.set_xlabel("$\\tau$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
     #ax.set_yscale('log')
-    ax.set_ylim([0.1, 8])
+    ax.set_ylim([0.5, 3.5])
 
     plt.tight_layout(pad=plot_params['pad'])
     plt.savefig(f'./analysis/figure_3_{jdx}.pdf', format='pdf')

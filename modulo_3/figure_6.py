@@ -141,18 +141,18 @@ for g in g_values_unique:
 
     mean_gaps[g] = np.nansum(gap_array * 1/(gap_std_array**2), axis = 0) / np.nansum(1/(gap_std_array**2), axis = 0)
     #np.average(gap_array[mask], weights=1 / gap_std_array[mask]**2, axis=0) 
-    std_gaps[g] = np.sqrt(1 / np.nansum(1/(gap_std_array**2), axis=0))
+    std_gaps[g] = np.sqrt(6) * np.sqrt(1 / np.nansum(1/(gap_std_array**2), axis=0))
 
 # Creiamo una figura
 fig, ax = plt.subplots(figsize=(plot_params['fig_width'], plot_params['fig_height']))
 
-for col in range(num_gaps):  # Loop sui gap
+for col in range(num_gaps - 1):  # Loop sui gap
     mean_values = [mean_gaps[g][col] if np.isfinite(mean_gaps[g][col]) else -10 for g in g_values_unique]  # Media per il gap corrente
     std_values = [std_gaps[g][col] if np.isfinite(std_gaps[g][col]) else 0.01 for g in g_values_unique]  # Std per il gap corrente
     
     ax.errorbar(
         g_values_unique, mean_values, yerr=std_values,
-        label=f"$\\lambda_{col}$", color=color_palette(col),
+        label=f"$\\Delta E_{col + 1}$", color=color_palette(col),
         linestyle='none', marker='.', markerfacecolor='white',
         markeredgewidth=plot_params['line_width_axes'], zorder=2
     )
@@ -178,11 +178,11 @@ ax.margins(x=0.00, y=0.00)
 ax.grid(True, which='minor', linestyle=':', linewidth=plot_params['line_width_grid_minor'])
 ax.grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_grid_major'])
 
-ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
-ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+ax.set_xlabel("g", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+ax.set_ylabel("$\\Delta E$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
 ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
 ax.set_xscale('log')
-ax.set_ylim([0.5, 8])
+ax.set_ylim([0.5, 7.5])
 plt.tight_layout(pad=plot_params['pad'])
 plt.savefig('./figure/figure_6.pdf', format='pdf')
 plt.close(fig)
