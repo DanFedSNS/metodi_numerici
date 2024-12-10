@@ -26,7 +26,7 @@ color_palette = plt.get_cmap('tab10')
 data_directory = './analysis/fig456/'
 data_filepaths = sorted(glob.glob(os.path.join(data_directory, '*')))  # Legge tutti i file nella directory
 
-tau_zero = 4
+tau_zero = 1
 num_gaps = 4
 num_mc = 100
 
@@ -35,7 +35,7 @@ g_values = []
 Nt_values = []
 gap_samples = {}
 gap_std = {}
-ix_for_B = 3
+ix_for_B = tau_zero - 1
 
 # Lettura e calcolo dei dati
 for index, data_filepath in enumerate(data_filepaths):
@@ -182,7 +182,7 @@ for index, data_filepath in enumerate(data_filepaths):
             eigenvalues, _ = np.linalg.eig(np.linalg.inv(B_perturbed) @ A_perturbed)
             
             eta = simbeta_value / Nt_value
-            if all([np.isreal(e) and e > 0 for e in eigenvalues]):
+            if any([np.isreal(e) and e > 0 for e in eigenvalues]):
                 eigenvalues = -np.log(eigenvalues) / (tau * eta)
                 eigenvalue_samples.append(np.sort(eigenvalues))
 
@@ -201,7 +201,7 @@ for jdx in range(len(g_values_unique)):
 
     for col in range(num_gaps):
         valid_indices = [i for i, (gap, gap_err) in enumerate(zip(gap_samples[g_values_unique[jdx]], gap_std[g_values_unique[jdx]]))
-            if not (np.isnan(gap[col]) or np.isnan(gap_err[col]))]
+            if not (np.isscalar(gap) or np.isnan(gap[col]) or np.isnan(gap_err[col]))]
         times_filtered = [times[i] for i in valid_indices]
         gaps_filtered = [gap_samples[g_values_unique[jdx]][i][col] for i in valid_indices]
         gap_errs_filtered = [gap_std[g_values_unique[jdx]][i][col] for i in valid_indices]
@@ -228,8 +228,8 @@ for jdx in range(len(g_values_unique)):
     ax.set_xlabel("t", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.set_ylabel("$\\lambda$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
     ax.legend(loc='best', fontsize=plot_params['font_size_legend'])
-    # ax.set_yscale('log')
-    ax.set_ylim([0.8, 8])
+    #ax.set_yscale('log')
+    ax.set_ylim([0.1, 8])
 
     plt.tight_layout(pad=plot_params['pad'])
     plt.savefig(f'./analysis/figure_3_{jdx}.pdf', format='pdf')
