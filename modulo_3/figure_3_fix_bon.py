@@ -3,13 +3,35 @@ import matplotlib.pyplot as plt
 import os
 import glob
 
+ix_skip = 3
+times = np.linspace(1,70,70)
+
+def load_params(filepath):
+    parameters = {}
+    with open(filepath, 'r') as file:
+        for line in file:
+            key, value = line.strip().split('=')
+            if key in ['fig_width', 'fig_height', 'dpi']:
+                parameters[key] = float(value)
+            else:
+                parameters[key] = float(value) if '.' in value else int(value)
+    return parameters
+
+# Carichiamo i parametri
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+plot_params = load_params('params.txt')
+
+# Configurazione generale di Matplotlib
+plt.rc('font', family='serif')
+color_palette = plt.get_cmap('tab10')
+
+
 def computejack(datajack, filepath, numberofbins, binsize, eta, sampleeff, num_vars, skip_lines, num_gaps, dj_eig):
     # Allocate memory for totals, subtotals, and temporary row data
     totals = np.zeros(num_vars)
     subtotals = np.zeros(num_vars)
     data_row = np.zeros(num_vars)
-    times = np.linspace(1,70,70)
-    ix_skip = 3
+    
 
     # Read the file
     with open(filepath, 'r') as fp:
@@ -81,11 +103,11 @@ def computejack(datajack, filepath, numberofbins, binsize, eta, sampleeff, num_v
                 
                 if any([np.isreal(e) and e > 0 for e in eigenvalues]):
                     eigenvalues = -np.log(eigenvalues) / (tau * eta)
-                    eigenvalue_samples.append(np.sort(eigenvalues))
+                    eigenvalues = np.sort(eigenvalues)
+                    eigenvalue_samples.append(eigenvalues)
 
-            for kk in range(num_gaps):
-                dj_eig[i, kk] = np.nanmean([row[kk] for row in eigenvalue_samples])
-
+                for kk in range(num_gaps):
+                    dj_eig[t][i, kk] = eigenvalues[kk]   #dj_eig[i, kk] = np.nanmean([row[kk] for row in eigenvalue_samples])
             
 def count_lines(filepath):
     with open(filepath, 'r') as file:
@@ -132,7 +154,6 @@ def process_file_header(filepath, skip_lines):
 
         return eta, binsize, numberofbins, sampleeff
     
-
 if __name__ == "__main__":
     num_gaps = 4
 
@@ -144,11 +165,57 @@ if __name__ == "__main__":
 
     num_vars = 4 + 71 * 9
     datajack = np.zeros((numberofbins, num_vars + num_gaps))
-    dj_eig = np.zeros((numberofbins, num_gaps))
+    dj_eig = {tau: np.zeros((numberofbins, num_gaps)) for tau in np.linspace(1,70,70)}
 
     computejack(datajack, filepath, numberofbins, binsize, eta, sampleeff, num_vars, skip_lines, num_gaps, dj_eig)
 
-    ris, err = compute_statistics(dj_eig, numberofbins, num_gaps)
+    ris = np.zeros((70, num_gaps))
+    err = np.zeros((70, num_gaps))
+    for i in range(ix_skip+1, 70):
+        ris[i, :], err[i, :] = compute_statistics(dj_eig[i], numberofbins, num_gaps)
+    
+    
+    
+    fig, ax = plt.subplots(2, 1, figsize=(plot_params['fig_width'], 1*plot_params['fig_height']), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
 
-    print("Averages:", ris)
-    print("Errors:", err)
+    for col in range(num_gaps):
+        """valid_indices = [i for i, (gap, gap_err) in enumerate(zip(gap_samples[g_values_unique[jdx]], gap_std[g_values_unique[jdx]]))
+            if not (np.isscalar(gap) or np.isnan(gap[col]) or np.isnan(gap_err[col]))]
+        times_filtered = [times[i] * eta for i in valid_indices]
+        gaps_filtered = [gap_samples[g_values_unique[jdx]][i][col] for i in valid_indices]
+        gap_errs_filtered = [gap_std[g_values_unique[jdx]][i][col] for i in valid_indices]"""
+
+        # Grafico con i dati filtrati
+        ax[0].errorbar(times[ix_skip+1::3], ris[ix_skip+1::3, col], yerr = err[ix_skip+1::3, col],
+                    label=f"$\\Delta E_{col}$", color=color_palette(col),
+                    linestyle='none', marker='x', markerfacecolor='white',
+                    markeredgewidth=plot_params['line_width_axes'], zorder=2)
+        
+        residui = (ris[:, col] - (col+1)) / err[:, col]
+        ax[1].errorbar(times[ix_skip+1::3], residui[ix_skip+1::3], yerr = err[ix_skip+1::3, col],
+                    label=f"$\\Delta E_{col}$", color=color_palette(col),
+                    linestyle='none', marker='x', markerfacecolor='white',
+                    markeredgewidth=plot_params['line_width_axes'], zorder=2)
+        # ax.errorbar(times, [gap[col] for gap in gap_samples[g_values_unique[jdx]]], yerr=[gap_err[col] for gap_err in gap_std[g_values_unique[jdx]]], label = f"$\\lambda_{col}$", color=color_palette(col), linestyle='none', marker='.', markerfacecolor='white', markeredgewidth=plot_params['line_width_axes'], zorder=2)
+
+    for spine in ax[0].spines.values():
+        spine.set_linewidth(plot_params['line_width_axes'])
+
+    #ax[0].set_title('g = ' + str(g_values_unique[jdx]))
+    ax[0].tick_params(axis='x', labelsize=plot_params['font_size_ticks'], 
+                width=plot_params['line_width_axes'], direction='in')
+    ax[0].tick_params(axis='y', labelsize=plot_params['font_size_ticks'], 
+                width=plot_params['line_width_axes'], direction='in')
+    ax[0].margins(x=0.00, y=0.00)
+    ax[0].grid(True, which='minor', linestyle=':', linewidth=plot_params['line_width_grid_minor'])
+    ax[0].grid(True, which='major', linestyle='--', linewidth=plot_params['line_width_grid_major'])
+
+    ax[0].set_xlabel("$\\tau$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+    ax[0].set_ylabel("$\\Delta E$", fontsize=plot_params['font_size_axis'], labelpad=plot_params['label_pad'])
+    ax[0].legend(loc='best', fontsize=plot_params['font_size_legend'])
+    #ax[0].set_yscale('log')
+    ax[0].set_ylim([0.5, 4.5])
+
+    plt.tight_layout(pad=plot_params['pad'])
+    plt.savefig(f'./analysis/figure_3_fix.pdf', format='pdf')
+    plt.close(fig)
